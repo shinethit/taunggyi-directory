@@ -19,6 +19,8 @@
         /* Theme Colors */
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
+        .viber-bg { background-color: #7360f2; }
+        .telegram-bg { background-color: #229ED9; }
         
         /* Animation */
         .slide-up { animation: slideUp 0.3s ease-out forwards; }
@@ -37,7 +39,6 @@
             <img src="CDST_Logo.png" alt="Logo" 
                  class="w-16 h-16 rounded-xl border-2 border-[#FFD700] shadow-lg object-cover bg-[#37006a]"
                  onerror="this.style.display='none'">
-            
             <div class="text-left">
                 <h1 class="text-xl font-bold tracking-wider text-white font-['Pyidaungsu']">Cherry Directory</h1>
                 <p class="text-[10px] text-gray-300 tracking-widest uppercase">Since 2026 • by Shine Thit</p>
@@ -92,7 +93,6 @@
                 </button>
                 <span class="ml-3 font-bold text-[#4B0082] truncate" id="detailHeader">Details</span>
             </div>
-
             <div id="detailContent" class="p-5 max-w-2xl mx-auto pb-24 slide-up">
                 </div>
         </section>
@@ -118,88 +118,70 @@
 
     <script>
         // =================================================================
-        // ⚠️ GID များကို ဤနေရာတွင် အမှန်ပြင်ထည့်ပါ ⚠️
+        // ⚠️ GID များ ပြန်ထည့်ပါ ⚠️
         // =================================================================
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
-        const GID_HOME = '0';      // Sheet 1 (Events)
-        const GID_DIR = '1267218282';       // Sheet 2 (Directory) - GID ပြင်ပါ
-        const GID_CONTACT = '626044868';   // Sheet 3 (Contact) - GID ပြင်ပါ
+        const GID_HOME = '0';      
+        const GID_DIR = '1267218282';       // <--- Directory GID ထည့်ပါ
+        const GID_CONTACT = '626044868';   // <--- Contact GID ထည့်ပါ
         // =================================================================
 
-        const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
-        
-        // Data Store
-        let eventsData = [];
-        let dirData = [];
+        // Link to your Google Form for Reviews (Optional - Shine Thit ထည့်ချင်ရင် ဒီမှာ Form Link ထည့်ပါ)
+        const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog"; 
 
-        // --- 1. Analytics Logic (Simulated + Real) ---
+        const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+        let eventsData = [], dirData = [];
+
         function initAnalytics() {
-            // Simulated Online Users (Random between 15 and 50)
             const online = Math.floor(Math.random() * (50 - 15 + 1)) + 15;
             document.getElementById('onlineCounter').innerText = online;
-            
-            // Total Views (Using Free CountAPI)
-            // Note: This creates a unique key for your app based on domain
             const namespace = 'cherry-directory-' + SHEET_ID.substr(0,5); 
             fetch(`https://api.countapi.xyz/hit/${namespace}/visits`)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('viewCounter').innerText = data.value || '1,204';
-                })
-                .catch(() => {
-                    document.getElementById('viewCounter').innerText = '1,204'; // Fallback
-                });
+                .then(res => res.json()).then(data => { document.getElementById('viewCounter').innerText = data.value || '1,204'; })
+                .catch(() => { document.getElementById('viewCounter').innerText = '1,204'; });
         }
 
-        // --- 2. Load Data ---
         async function loadAllData() {
             initAnalytics();
-
-            // Load Events (Sheet 1)
-            // Columns: Title(0)|Desc(1)|From(2)|To(3)|Time(4)|Place(5)|Img(6)
+            // Events
             fetchData(GID_HOME, (rows) => {
                 eventsData = rows.map(r => ({
-                    title: r.c[0]?.v || 'No Title',
-                    desc: r.c[1]?.v || '',
-                    fromDate: r.c[2]?.v,
-                    toDate: r.c[3]?.v,
-                    time: r.c[4]?.v,
-                    place: r.c[5]?.v,
-                    img: r.c[6]?.v
+                    title: r.c[0]?.v, desc: r.c[1]?.v, fromDate: r.c[2]?.v, toDate: r.c[3]?.v,
+                    time: r.c[4]?.v, place: r.c[5]?.v, img: r.c[6]?.v
                 }));
                 renderEvents();
             });
 
-            // Load Directory (Sheet 2)
-            // Cols: Name(0)|Cat(1)|Type(2)|Detail(3)|Desc(4)|Addr(5)|Ward(6)|City(7)|Ph1(8)|Ph2(9)|Ph3(10)|Email(11)|Img(12)|Rating(13)|Note(14)
+            // Directory (Updated Columns)
             fetchData(GID_DIR, (rows) => {
                 dirData = rows.map(r => ({
-                    name: r.c[0]?.v || 'Unknown',
-                    cat: r.c[1]?.v || 'General',
-                    type: r.c[2]?.v,
-                    detail: r.c[3]?.v,
-                    desc: r.c[4]?.v,
-                    addr: r.c[5]?.v,
-                    ward: r.c[6]?.v,
-                    city: r.c[7]?.v,
-                    phones: [r.c[8]?.v, r.c[9]?.v, r.c[10]?.v].filter(Boolean),
-                    email: r.c[11]?.v,
-                    img: r.c[12]?.v,
-                    rating: r.c[13]?.v,
-                    note: r.c[14]?.v
+                    name: r.c[0]?.v || 'Unknown', cat: r.c[1]?.v || 'General', type: r.c[2]?.v,
+                    detail: r.c[3]?.v, desc: r.c[4]?.v, addr: r.c[5]?.v, ward: r.c[6]?.v, city: r.c[7]?.v,
+                    phones: [r.c[8]?.v, r.c[9]?.v, r.c[10]?.v].filter(Boolean), // Ph1, Ph2, Ph3
+                    viber: r.c[11]?.v,
+                    telegram: r.c[12]?.v,
+                    email: r.c[13]?.v,
+                    img: r.c[14]?.v,
+                    rating: r.c[15]?.v,
+                    note: r.c[16]?.v
                 }));
                 renderDirectory(dirData);
             });
 
-            // Load Contact (Sheet 3)
-            // Cols: Description(0)|Number(1)|Email(2)
+            // Contact
             fetchData(GID_CONTACT, (rows) => {
                 const list = document.getElementById('contactInfo');
                 list.innerHTML = rows.map(r => `
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-3">
-                        <p class="text-gray-700 font-bold mb-2">${r.c[0]?.v || 'Admin'}</p>
-                        ${r.c[1]?.v ? `<a href="tel:${r.c[1].v}" class="flex items-center text-[#4B0082] mb-1"><i class="fa fa-phone w-6"></i> ${r.c[1].v}</a>` : ''}
-                        ${r.c[2]?.v ? `<a href="mailto:${r.c[2].v}" class="flex items-center text-blue-600"><i class="fa fa-envelope w-6"></i> ${r.c[2].v}</a>` : ''}
+                    <div class="bg-gray-50 p-5 rounded-2xl border border-gray-200 mb-4 shadow-sm">
+                        <h3 class="text-[#4B0082] font-bold text-lg mb-3 flex items-center">
+                            <i class="fa fa-user-circle mr-2"></i> ${r.c[0]?.v || 'Admin'}
+                        </h3>
+                        <div class="space-y-3">
+                            ${r.c[1]?.v ? `<a href="tel:${r.c[1].v}" class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100 hover:border-[#D4AF37]"><span class="font-mono font-bold">${r.c[1].v}</span> <i class="fa fa-phone text-green-500"></i></a>` : ''}
+                            ${r.c[2]?.v ? `<a href="tel:${r.c[2].v}" class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100 hover:border-[#D4AF37]"><span class="font-mono font-bold">${r.c[2].v}</span> <i class="fa fa-phone text-green-500"></i></a>` : ''}
+                            ${r.c[3]?.v ? `<a href="viber://chat?number=${r.c[3].v}" class="flex items-center justify-between viber-bg text-white p-3 rounded-xl"><span class="font-bold">Viber</span> <i class="fab fa-viber text-xl"></i></a>` : ''}
+                            ${r.c[4]?.v ? `<a href="https://t.me/${r.c[4].v.replace('@','')}" target="_blank" class="flex items-center justify-between telegram-bg text-white p-3 rounded-xl"><span class="font-bold">Telegram</span> <i class="fab fa-telegram text-xl"></i></a>` : ''}
+                        </div>
                     </div>
                 `).join('');
             });
@@ -211,15 +193,26 @@
                 const text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 callback(json.table.rows);
-            } catch (e) { console.error("Data Load Error", e); }
+            } catch (e) { console.error(e); }
         }
 
-        // --- 3. Render Lists ---
+        // Helper: Generate Star HTML
+        function getStars(rating) {
+            if(!rating) return '';
+            let html = '<div class="flex text-orange-400 text-sm">';
+            for(let i=1; i<=5; i++) {
+                if(i <= rating) html += '<i class="fa fa-star"></i>';
+                else if(i - 0.5 <= rating) html += '<i class="fa fa-star-half-alt"></i>';
+                else html += '<i class="far fa-star text-gray-300"></i>';
+            }
+            html += ` <span class="text-gray-400 text-xs ml-1">(${rating})</span></div>`;
+            return html;
+        }
 
+        // Render Functions
         function renderEvents() {
             const list = document.getElementById('announcementList');
-            if(!eventsData.length) { list.innerHTML = '<p class="text-center text-gray-400">No events found.</p>'; return; }
-            
+            if(!eventsData.length) { list.innerHTML = '<p class="text-center text-gray-400">No events.</p>'; return; }
             list.innerHTML = eventsData.map((item, index) => `
                 <div onclick="openDetail('event', ${index})" class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3 cursor-pointer">
                     ${item.img ? `<img src="${item.img}" class="w-24 h-24 object-cover">` : ''}
@@ -227,8 +220,7 @@
                         <h3 class="font-bold text-[#4B0082] line-clamp-1">${item.title}</h3>
                         <p class="text-xs text-gray-500 mt-1 line-clamp-1">${item.desc}</p>
                         <div class="text-[#D4AF37] text-xs font-bold mt-2 flex items-center">
-                            <i class="fa fa-clock mr-1"></i> ${item.fromDate || 'Coming Soon'}
-                            <span class="ml-auto text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">View Info</span>
+                            <i class="fa fa-clock mr-1"></i> ${item.fromDate || 'Soon'}
                         </div>
                     </div>
                 </div>
@@ -238,7 +230,6 @@
         function renderDirectory(data) {
             const list = document.getElementById('directoryList');
             if(!data.length) { list.innerHTML = '<p class="col-span-2 text-center text-gray-400">No data.</p>'; return; }
-            
             list.innerHTML = data.map((item, index) => {
                 const realIndex = dirData.indexOf(item);
                 return `
@@ -246,7 +237,10 @@
                     <div class="flex items-start gap-3">
                         ${item.img ? `<img src="${item.img}" class="w-16 h-16 rounded-lg object-cover bg-gray-100">` : `<div class="w-16 h-16 rounded-lg bg-[#f8f5ff] flex items-center justify-center text-[#D4AF37]"><i class="fa fa-store text-2xl"></i></div>`}
                         <div class="flex-1 overflow-hidden">
-                            <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate">${item.cat}</span>
+                            <div class="flex justify-between">
+                                <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate">${item.cat}</span>
+                                ${getStars(item.rating)}
+                            </div>
                             <h3 class="font-bold text-[#4B0082] text-md truncate">${item.name}</h3>
                             <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-marker-alt mr-1 text-[#D4AF37]"></i>${item.city || item.ward || 'Taunggyi'}</p>
                         </div>
@@ -254,8 +248,6 @@
                 </div>
             `}).join('');
         }
-
-        // --- 4. Detailed View Logic (The Fix) ---
 
         function openDetail(type, index) {
             const modal = document.getElementById('detailPage');
@@ -265,111 +257,108 @@
 
             if(type === 'event') {
                 const i = eventsData[index];
-                header.innerText = "Event Details";
+                header.innerText = "Event Info";
                 html = `
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-4">
                         ${i.img ? `<img src="${i.img}" class="w-full max-h-80 object-cover">` : ''}
                         <div class="p-5">
-                            <h2 class="text-2xl font-bold text-[#4B0082] mb-2">${i.title}</h2>
+                            <h2 class="text-2xl font-bold text-[#4B0082] mb-2">${i.title || 'Event'}</h2>
                             <div class="flex flex-wrap gap-2 mb-4">
                                 ${i.fromDate ? `<span class="bg-[#f8f5ff] text-[#4B0082] px-3 py-1 rounded text-xs font-bold border border-[#D4AF37]"><i class="fa fa-calendar-check mr-1"></i> Start: ${i.fromDate}</span>` : ''}
-                                ${i.toDate ? `<span class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-xs"><i class="fa fa-calendar-times mr-1"></i> End: ${i.toDate}</span>` : ''}
                             </div>
-                            ${i.time ? `<p class="text-sm text-gray-600 mb-2"><i class="fa fa-clock text-[#D4AF37] w-5"></i> ${i.time}</p>` : ''}
-                            ${i.place ? `<p class="text-sm text-gray-600 mb-4"><i class="fa fa-map-pin text-[#D4AF37] w-5"></i> ${i.place}</p>` : ''}
-                            <hr class="my-4">
-                            <h3 class="font-bold text-gray-800 mb-2">Description</h3>
                             <p class="text-gray-600 leading-relaxed whitespace-pre-line">${i.desc}</p>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             } 
             else if (type === 'dir') {
                 const i = dirData[index];
                 header.innerText = i.name;
                 html = `
                     <div class="space-y-4">
-                        <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center">
+                        <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center relative">
                             ${i.img ? `<img src="${i.img}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4 border-gray-100 shadow-sm">` : `<div class="w-24 h-24 rounded-full bg-[#f8f5ff] mx-auto mb-4 flex items-center justify-center text-[#4B0082] text-4xl"><i class="fa fa-store"></i></div>`}
                             <h2 class="text-2xl font-bold text-[#4B0082]">${i.name}</h2>
                             <p class="text-[#D4AF37] font-bold text-sm mt-1 uppercase">${i.cat}</p>
-                            ${i.type ? `<p class="text-gray-400 text-xs mt-1">${i.type}</p>` : ''}
-                            ${i.rating ? `<div class="mt-2 text-orange-400"><i class="fa fa-star"></i> ${i.rating} / 5.0</div>` : ''}
+                            <div class="flex justify-center mt-2">${getStars(i.rating)}</div>
+                            
+                            <a href="${REVIEW_FORM_LINK}" target="_blank" class="inline-block mt-3 text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full hover:bg-gray-200">
+                                <i class="fa fa-pen mr-1"></i> Write a Review
+                            </a>
                         </div>
 
-                        ${i.phones.length > 0 ? `
-                        <div class="bg-white p-4 rounded-2xl shadow-sm">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider">Contact Numbers</h3>
-                            <div class="space-y-2">
-                                ${i.phones.map(p => `
-                                    <a href="tel:${p}" class="flex items-center justify-between bg-[#f8f5ff] p-3 rounded-xl hover:bg-[#D4AF37] hover:text-white transition group">
+                        <div class="grid grid-cols-1 gap-2">
+                            ${i.phones.map((p, idx) => `
+                                <a href="tel:${p}" class="bg-[#4B0082] text-white p-3 rounded-2xl shadow-md flex items-center justify-between hover:bg-[#37006a] transition">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3 font-bold">${idx+1}</div>
                                         <span class="font-bold font-mono text-lg">${p}</span>
-                                        <i class="fa fa-phone bg-white text-[#4B0082] w-8 h-8 rounded-full flex items-center justify-center shadow-sm"></i>
-                                    </a>
-                                `).join('')}
+                                    </div>
+                                    <i class="fa fa-phone bg-[#D4AF37] text-[#37006a] w-8 h-8 rounded-full flex items-center justify-center"></i>
+                                </a>
+                            `).join('')}
+                            
+                            <div class="flex gap-2 mt-1">
+                                ${i.viber ? `
+                                <a href="viber://chat?number=${i.viber}" class="flex-1 viber-bg text-white p-3 rounded-2xl flex items-center justify-center gap-2 shadow-md">
+                                    <i class="fab fa-viber text-2xl"></i> <span class="font-bold">Viber</span>
+                                </a>` : ''}
+                                
+                                ${i.telegram ? `
+                                <a href="https://t.me/${i.telegram.replace('@','')}" target="_blank" class="flex-1 telegram-bg text-white p-3 rounded-2xl flex items-center justify-center gap-2 shadow-md">
+                                    <i class="fab fa-telegram text-2xl"></i> <span class="font-bold">Telegram</span>
+                                </a>` : ''}
                             </div>
+                        </div>
+
+                        ${i.note ? `
+                        <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-200 shadow-sm relative overflow-hidden">
+                            <div class="absolute -right-2 -top-2 text-yellow-100 text-6xl"><i class="fa fa-sticky-note"></i></div>
+                            <h3 class="font-bold text-yellow-800 mb-1 relative z-10">Note</h3>
+                            <p class="text-sm text-yellow-900 relative z-10 leading-relaxed">${i.note}</p>
                         </div>` : ''}
 
-                        <div class="bg-white p-5 rounded-2xl shadow-sm space-y-4">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm space-y-4 border border-gray-100">
                             ${i.desc ? `<div><h3 class="font-bold text-[#4B0082] mb-1">About</h3><p class="text-sm text-gray-600">${i.desc}</p></div>` : ''}
-                            ${i.detail ? `<div><h3 class="font-bold text-[#4B0082] mb-1">Details</h3><p class="text-sm text-gray-600">${i.detail}</p></div>` : ''}
                             
                             <div class="border-t border-gray-100 pt-3">
                                 <h3 class="font-bold text-[#4B0082] mb-2">Location</h3>
                                 <p class="text-sm text-gray-600 flex"><i class="fa fa-map-marker-alt text-[#D4AF37] w-6 flex-shrink-0"></i> 
-                                    <span>${i.addr || ''} <br> ${i.ward || ''} <br> ${i.city || ''}</span>
+                                    <span>${i.addr || ''}, ${i.ward || ''} <br> ${i.city || ''}</span>
                                 </p>
                             </div>
-
-                            ${i.email ? `
-                            <div class="border-t border-gray-100 pt-3">
-                                <h3 class="font-bold text-[#4B0082] mb-1">Email</h3>
-                                <a href="mailto:${i.email}" class="text-blue-600 text-sm">${i.email}</a>
-                            </div>` : ''}
                         </div>
-
-                        ${i.note ? `<div class="bg-yellow-50 p-4 rounded-xl text-xs text-yellow-800 border border-yellow-200"><i class="fa fa-info-circle mr-1"></i> ${i.note}</div>` : ''}
-                    </div>
-                `;
+                    </div>`;
             }
 
             content.innerHTML = html;
             modal.style.display = 'block';
-            document.body.style.overflow = 'hidden'; // Stop scrolling
-            document.getElementById('bottomNav').style.transform = 'translateY(150%)'; // Hide Nav
+            document.body.style.overflow = 'hidden';
+            document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
 
         function closeDetail() {
             document.getElementById('detailPage').style.display = 'none';
-            document.body.style.overflow = 'auto'; // Restore scrolling
-            document.getElementById('bottomNav').style.transform = 'translateY(0)'; // Show Nav
+            document.body.style.overflow = 'auto';
+            document.getElementById('bottomNav').style.transform = 'translateY(0)';
         }
 
-        // --- Navigation Logic ---
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => {
                 if(p.id !== 'detailPage') p.classList.remove('active-page');
                 if(p.id !== 'detailPage') setTimeout(() => { if(!p.classList.contains('active-page')) p.style.display = 'none'; }, 200);
             });
-
             const activePage = document.getElementById(pageId + 'Page');
             activePage.style.display = 'block';
             setTimeout(() => activePage.classList.add('active-page'), 10);
             
-            // Nav Styling
             document.querySelectorAll('.nav-item').forEach(btn => {
                 btn.classList.remove('text-[#FFD700]', 'scale-110');
                 if(btn.id !== 'nav-directory') btn.classList.add('text-gray-400');
                 else btn.querySelector('div').classList.remove('ring-4', 'ring-[#FFD700]/30');
             });
-
             const activeBtn = document.getElementById('nav-' + pageId);
-            if (pageId === 'directory') {
-                activeBtn.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30');
-            } else {
-                activeBtn.classList.remove('text-gray-400');
-                activeBtn.classList.add('text-[#FFD700]', 'scale-110');
-            }
+            if (pageId === 'directory') activeBtn.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30');
+            else activeBtn.classList.add('text-[#FFD700]', 'scale-110');
             window.scrollTo(0, 0);
         }
 
@@ -377,9 +366,7 @@
             const term = document.getElementById('searchInput').value.toLowerCase();
             const filtered = dirData.filter(d => d.name.toLowerCase().includes(term) || d.cat.toLowerCase().includes(term));
             const list = document.getElementById('directoryList');
-            
             if(!filtered.length) { list.innerHTML = '<p class="col-span-2 text-center text-gray-400">Not found.</p>'; return; }
-            
             list.innerHTML = filtered.map(item => {
                 const realIndex = dirData.indexOf(item);
                 return `
@@ -387,7 +374,10 @@
                     <div class="flex items-start gap-3">
                         ${item.img ? `<img src="${item.img}" class="w-16 h-16 rounded-lg object-cover bg-gray-100">` : `<div class="w-16 h-16 rounded-lg bg-[#f8f5ff] flex items-center justify-center text-[#D4AF37]"><i class="fa fa-store text-2xl"></i></div>`}
                         <div class="flex-1 overflow-hidden">
-                            <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate">${item.cat}</span>
+                            <div class="flex justify-between">
+                                <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate">${item.cat}</span>
+                                ${getStars(item.rating)}
+                            </div>
                             <h3 class="font-bold text-[#4B0082] text-md truncate">${item.name}</h3>
                             <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-marker-alt mr-1 text-[#D4AF37]"></i>${item.city || item.ward || 'Taunggyi'}</p>
                         </div>
