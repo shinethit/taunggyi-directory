@@ -1,21 +1,38 @@
-const CACHE_NAME = 'cherry-v5';
-const ASSETS = [
-  '/',
-  '/index.html',
-  '/CDST_Logo.png',
+const CACHE_NAME = 'cherry-directory-v6';
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './CDST_Logo.png',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
+// ဖုန်းထဲမှာ App ဒီဇိုင်းကို သိမ်းဆည်းခြင်း
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
+  );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))));
+// Cache အဟောင်းများကို ရှင်းလင်းခြင်း
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(keys.map((key) => {
+        if (key !== CACHE_NAME) return caches.delete(key);
+      }));
+    })
+  );
 });
 
-self.addEventListener('fetch', (e) => {
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+// အင်တာနက်မရှိချိန်တွင် Cache ထဲမှ ထုတ်ပေးခြင်း
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
 });
