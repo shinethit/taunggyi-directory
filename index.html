@@ -8,79 +8,132 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
-        body { font-family: 'Pyidaungsu', sans-serif; background-color: #f3f4f6; }
-        .school-card:hover { transform: translateY(-5px); transition: 0.3s; }
+        body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 70px; }
+        .page { display: none; }
+        .active-page { display: block; }
+        .nav-active { color: #2563eb; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-100">
 
-    <header class="bg-blue-600 text-white p-6 shadow-lg text-center">
-        <h1 class="text-2xl font-bold">Taunggyi Directory</h1>
-        <p class="text-sm opacity-90">Created by Shine Thit</p>
+    <header class="bg-blue-600 text-white p-5 shadow-md sticky top-0 z-50">
+        <h1 id="pageTitle" class="text-xl font-bold text-center">Home</h1>
     </header>
 
     <div class="max-w-4xl mx-auto p-4">
-        <div class="relative my-6">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                <i class="fa fa-search text-gray-400"></i>
-            </span>
-            <input type="text" id="searchInput" onkeyup="filterSchools()" 
-                   placeholder="ကျောင်းအမည်ဖြင့် ရှာဖွေရန်..." 
-                   class="w-full p-4 pl-10 rounded-xl border-none shadow-md focus:ring-2 focus:ring-blue-400 outline-none">
-        </div>
+        
+        <section id="homePage" class="page active-page">
+            <h2 class="font-bold text-lg mb-4 text-blue-700"><i class="fa fa-bullhorn mr-2"></i>သတင်းနှင့် ကြေညာချက်များ</h2>
+            <div id="announcementList" class="space-y-4">
+                </div>
+        </section>
 
-        <div class="flex overflow-x-auto pb-4 gap-2 no-scrollbar">
-            <button onclick="filterCategory('All')" class="bg-blue-500 text-white px-4 py-2 rounded-full whitespace-nowrap shadow">အားလုံး</button>
-            <button onclick="filterCategory('ရေအေးကွင်း')" class="bg-white px-4 py-2 rounded-full whitespace-nowrap shadow">ရေအေးကွင်း</button>
-            <button onclick="filterCategory('သစ်တော')" class="bg-white px-4 py-2 rounded-full whitespace-nowrap shadow">သစ်တော</button>
-            <button onclick="filterCategory('ဘုရားဖြူ')" class="bg-white px-4 py-2 rounded-full whitespace-nowrap shadow">ဘုရားဖြူ</button>
-            <button onclick="filterCategory('သင်တန်း')" class="bg-white px-4 py-2 rounded-full whitespace-nowrap shadow">သင်တန်းများ</button>
-        </div>
+        <section id="directoryPage" class="page">
+            <input type="text" id="searchInput" onkeyup="filterDirectory()" 
+                   placeholder="လုပ်ငန်းအမည်ဖြင့် ရှာရန်..." 
+                   class="w-full p-4 rounded-2xl shadow-sm border-none mb-4 outline-none focus:ring-2 focus:ring-blue-400">
+            <div id="directoryList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </div>
+        </section>
 
-        <div id="schoolList" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <section id="contactPage" class="page">
+            <div class="bg-white p-6 rounded-3xl shadow-sm">
+                <h2 class="font-bold text-xl mb-4 text-blue-700 border-b pb-2">Creator Info</h2>
+                <div id="contactInfo" class="space-y-3">
+                    </div>
             </div>
+        </section>
+
     </div>
 
-    <script>
-        const schools = [
-            { name: "Brainworks Total", area: "ရေအေးကွင်း", type: "IS/PS" },
-            { name: "KINGS International School", area: "ရေအေးကွင်း", type: "IS" },
-            { name: "ILBC", area: "ရေအေးကွင်း", type: "IS/PS" },
-            { name: "RISE Learning Provision", area: "ရေအေးကွင်း", type: "PS" },
-            { name: "Shining Star (မသွယ်) PS", area: "သစ်တော", type: "PS" },
-            { name: "မဟော်သဓာ", area: "ဘုရားဖြူ", type: "PS" },
-            { name: "Lighthouse Pre School", area: "ရေအေးကွင်း", type: "Pre-School" },
-            { name: "S.A.G - English", area: "ရေအေးကွင်း", type: "သင်တန်း" },
-            { name: "Myan Yu Karate Club", area: "ရေအေးကွင်း", type: "သင်တန်း" },
-            { name: "New Light Private School", area: "စျေးပိုင်းရပ်", type: "PS" }
-            // Shine Thit အနေနဲ့ ဒီနေရာမှာ ကျန်တဲ့ကျောင်းတွေကို အပေါ်က ပုံစံအတိုင်း ထပ်ဖြည့်သွားလို့ရပါတယ်
-        ];
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-3 shadow-inner z-50">
+        <button onclick="showPage('home', 'Home')" class="nav-item flex flex-col items-center text-gray-400" id="nav-home">
+            <i class="fa fa-home text-xl"></i>
+            <span class="text-xs">Home</span>
+        </button>
+        <button onclick="showPage('directory', 'Directory')" class="nav-item flex flex-col items-center text-gray-400" id="nav-directory">
+            <i class="fa fa-list text-xl"></i>
+            <span class="text-xs">Directory</span>
+        </button>
+        <button onclick="showPage('contact', 'Contact Us')" class="nav-item flex flex-col items-center text-gray-400" id="nav-contact">
+            <i class="fa fa-info-circle text-xl"></i>
+            <span class="text-xs">Contact</span>
+        </button>
+    </nav>
 
-        function displaySchools(data) {
-            const list = document.getElementById('schoolList');
-            list.innerHTML = data.map(school => `
-                <div class="school-card bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-500">
-                    <h3 class="font-bold text-lg text-blue-700">${school.name}</h3>
-                    <p class="text-gray-600 text-sm mt-1"><i class="fa fa-map-marker-alt mr-2 text-red-400"></i>${school.area}</p>
-                    <span class="inline-block bg-blue-100 text-blue-600 px-3 py-1 rounded text-xs mt-3 font-semibold">${school.type}</span>
+    <script>
+        const SHEET_ID = 'သင့်_GOOGLE_SHEET_ID_ဒီမှာထည့်ပါ';
+        // Sheet တစ်ခုချင်းစီရဲ့ GID နံပါတ်တွေကို Sheet URL ထဲကနေ ကြည့်ထည့်ပါ (ပထမဆုံး Sheet က gid=0 ပါ)
+        const URL_HOME = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=0`;
+        const URL_DIR = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=စာမျက်နှာ၂_ID`;
+        const URL_CONTACT = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=စာမျက်နှာ၃_ID`;
+
+        let dirData = [];
+
+        async function loadAllData() {
+            // Load Announcements
+            fetchData(URL_HOME, (rows) => {
+                document.getElementById('announcementList').innerHTML = rows.map(r => `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-orange-400">
+                        ${r.c[3]?.v ? `<img src="${r.c[3].v}" class="w-full h-40 object-cover rounded-xl mb-3">` : ''}
+                        <h3 class="font-bold text-blue-800">${r.c[0]?.v || ''}</h3>
+                        <p class="text-gray-600 text-sm mt-1">${r.c[1]?.v || ''}</p>
+                        <p class="text-xs text-orange-500 mt-2 font-bold">${r.c[2]?.v || ''}</p>
+                    </div>
+                `).join('');
+            });
+
+            // Load Directory
+            fetchData(URL_DIR, (rows) => {
+                dirData = rows.map(r => ({
+                    name: r.c[0]?.v, cat: r.c[1]?.v, addr: r.c[3]?.v, phones: [r.c[6]?.v, r.c[7]?.v].filter(Boolean), img: r.c[10]?.v
+                }));
+                renderDirectory(dirData);
+            });
+
+            // Load Contact
+            fetchData(URL_CONTACT, (rows) => {
+                document.getElementById('contactInfo').innerHTML = rows.map(r => `
+                    <p class="flex justify-between"><strong>${r.c[0]?.v}:</strong> <span>${r.c[1]?.v}</span></p>
+                `).join('');
+            });
+        }
+
+        async function fetchData(url, callback) {
+            const res = await fetch(url);
+            const text = await res.text();
+            const json = JSON.parse(text.substr(47).slice(0, -2));
+            callback(json.table.rows);
+        }
+
+        function renderDirectory(data) {
+            document.getElementById('directoryList').innerHTML = data.map(i => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm">
+                    <h3 class="font-bold">${i.name}</h3>
+                    <p class="text-xs text-gray-400">${i.addr}</p>
+                    <div class="mt-3 flex gap-2">
+                        ${i.phones.map(p => `<a href="tel:${p}" class="bg-green-500 text-white px-3 py-1 rounded-lg text-xs">Call ${p}</a>`).join('')}
+                    </div>
                 </div>
             `).join('');
         }
 
-        function filterSchools() {
+        function showPage(pageId, title) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(pageId + 'Page').classList.add('active-page');
+            document.getElementById('pageTitle').innerText = title;
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
+            document.getElementById('nav-' + pageId).classList.add('nav-active');
+        }
+
+        function filterDirectory() {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = schools.filter(s => s.name.toLowerCase().includes(term));
-            displaySchools(filtered);
+            renderDirectory(dirData.filter(d => d.name.toLowerCase().includes(term)));
         }
 
-        function filterCategory(cat) {
-            if(cat === 'All') return displaySchools(schools);
-            const filtered = schools.filter(s => s.area.includes(cat) || s.type.includes(cat));
-            displaySchools(filtered);
-        }
-
-        // Initial display
-        displaySchools(schools);
+        loadAllData();
+        showPage('home', 'Home'); // Default page
     </script>
 </body>
 </html>
