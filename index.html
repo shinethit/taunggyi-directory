@@ -69,9 +69,7 @@
                 <p class="text-xs text-gray-600 mb-3">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
                 <a id="regBtn" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow cursor-pointer">စာရင်းသွင်းရန်</a>
             </div>
-
             <div id="adminProfileArea"></div>
-
             <div id="adminNotesArea" class="space-y-3"></div>
         </section>
 
@@ -95,7 +93,6 @@
         const GID_HOME = '0';
         const GID_DIR = '1267218282';
         const GID_CONTACT = '626044868';
-
         const REG_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog";
         const REVIEW_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
         document.getElementById('regBtn').href = REG_URL;
@@ -103,6 +100,19 @@
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         let eventsData = [], dirData = [];
         let activeDirCat = 'All', activeEventCat = 'All';
+
+        // --- GOOGLE DRIVE LINK CONVERTER ---
+        function fixDriveLink(url) {
+            if (!url) return 'CDST_Logo.png';
+            if (url.includes('drive.google.com')) {
+                const parts = url.split('/d/');
+                if (parts.length > 1) {
+                    const id = parts[1].split('/')[0];
+                    return `https://lh3.googleusercontent.com/u/0/d/${id}`;
+                }
+            }
+            return url;
+        }
 
         function updateTime() {
             const now = new Date();
@@ -159,16 +169,11 @@
                 const text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 const allRows = json.table.rows;
-
-                // 1. Handle Profile Card (Only for Rows with Columns A-F data)
                 const profileRow = allRows.find(r => r.c[0]?.v && r.c[0].v !== "Description");
                 if (profileRow) {
                     document.getElementById('adminProfileArea').innerHTML = `
                     <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-[#4B0082] mb-6">
-                        <div class="mb-4 text-center border-b pb-4">
-                            <i class="fa fa-user-shield text-3xl text-[#4B0082] mb-2"></i>
-                            <h3 class="font-bold text-lg text-[#4B0082]">Admin Profile</h3>
-                        </div>
+                        <div class="mb-4 text-center border-b pb-4"><i class="fa fa-user-shield text-3xl text-[#4B0082] mb-2"></i><h3 class="font-bold text-lg text-[#4B0082]">Admin Profile</h3></div>
                         <div class="space-y-4">
                             <div class="flex justify-between items-start border-b border-gray-50 pb-2"><span class="text-[10px] text-gray-400">DESCRIPTION</span><span class="text-xs font-bold text-[#4B0082] text-right ml-4">${profileRow.c[0]?.v || '-'}</span></div>
                             ${renderAdminBtn('Phone 1', profileRow.c[1]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}
@@ -179,18 +184,12 @@
                         </div>
                     </div>`;
                 }
-
-                // 2. Handle Admin Notes (Independent list from Column G, all non-empty notes)
                 const notes = allRows.slice(1).map(r => r.c[6]?.v).filter(Boolean);
                 document.getElementById('adminNotesArea').innerHTML = notes.map(note => `
                     <div class="bg-yellow-400 border-l-8 border-[#B8860B] p-5 rounded-r-2xl shadow-lg slide-up">
-                        <h4 class="font-bold text-sm text-[#37006a] uppercase flex items-center gap-2 mb-2 tracking-widest">
-                            <i class="fa fa-bullhorn animate-bounce"></i> ANNOUNCEMENT
-                        </h4>
+                        <h4 class="font-bold text-sm text-[#37006a] uppercase flex items-center gap-2 mb-2 tracking-widest"><i class="fa fa-bullhorn animate-bounce"></i> ANNOUNCEMENT</h4>
                         <p class="text-lg text-[#37006a] font-bold leading-relaxed break-words">${note}</p>
-                    </div>
-                `).join('');
-
+                    </div>`).join('');
             } catch (e) { document.getElementById('contactInfo').innerHTML = '<p class="text-center text-red-400">Admin Load Error</p>'; }
         }
 
@@ -221,7 +220,7 @@
             list.innerHTML = Object.keys(groups).map(cat => `
                 <div class="mb-4"><h3 class="font-bold text-[#D4AF37] text-[10px] uppercase tracking-widest mb-2 border-l-4 border-[#D4AF37] pl-2">${cat}</h3>
                 <div class="space-y-3">${groups[cat].map(i => `
-                    <div onclick="openDetail('event', ${eventsData.indexOf(i)})" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 transition-transform"><img src="${i.images[0] || i.logo || 'CDST_Logo.png'}" class="w-20 h-20 rounded-lg object-cover bg-gray-100" onerror="this.src='CDST_Logo.png'"><div class="flex-1 flex flex-col justify-center"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.title}</h4><p class="text-[10px] text-gray-500 mt-1 line-clamp-2">${i.desc || ''}</p></div></div>`).join('')}</div></div>`).join('');
+                    <div onclick="openDetail('event', ${eventsData.indexOf(i)})" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 transition-transform"><img src="${i.images[0] ? fixDriveLink(i.images[0]) : fixDriveLink(i.logo)}" class="w-20 h-20 rounded-lg object-cover bg-gray-100" onerror="this.src='CDST_Logo.png'"><div class="flex-1 flex flex-col justify-center"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.title}</h4><p class="text-[10px] text-gray-500 mt-1 line-clamp-2">${i.desc || ''}</p></div></div>`).join('')}</div></div>`).join('');
         }
 
         function renderDirectory() {
@@ -232,7 +231,7 @@
             const groups = data.reduce((a, i) => { a[i.cat] = a[i.cat] || []; a[i.cat].push(i); return a; }, {});
             list.innerHTML = Object.keys(groups).map(c => `
                 <div class="mb-5"><h3 class="font-bold text-[#4B0082] text-xs bg-gray-100 px-3 py-1 rounded-lg inline-block mb-3">${c}</h3><div class="grid grid-cols-1 gap-3">${groups[c].map(i => `
-                    <div onclick="openDetail('dir', ${dirData.indexOf(i)})" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex gap-3 items-start cursor-pointer active:scale-95 transition-transform"><img src="${i.img || 'CDST_Logo.png'}" class="w-14 h-14 rounded-lg object-cover bg-gray-50 border" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><div class="flex justify-between items-start mb-1"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.name}</h4><span class="text-[8px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 flex-shrink-0">${i.type || ''}</span></div>
+                    <div onclick="openDetail('dir', ${dirData.indexOf(i)})" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex gap-3 items-start cursor-pointer active:scale-95 transition-transform"><img src="${fixDriveLink(i.img)}" class="w-14 h-14 rounded-lg object-cover bg-gray-50 border" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><div class="flex justify-between items-start mb-1"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.name}</h4><span class="text-[8px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 flex-shrink-0">${i.type || ''}</span></div>
                     <div class="mb-1">${getStars(i.rating)}</div><p class="text-[10px] text-gray-500 leading-snug break-words line-clamp-1">${i.desc || '-'}</p><div class="flex items-center mt-2 text-[10px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || 'Taunggyi'}</div></div></div>`).join('')}</div></div>`).join('');
         }
 
@@ -246,10 +245,10 @@
 
             if(type === 'event') {
                 const i = eventsData[index]; document.getElementById('detailHeader').innerText = "Event Details";
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.logo || 'CDST_Logo.png'}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm space-y-1">${rR('Description', i.desc)}${rR('From', i.fromDate)}${rR('To', i.toDate)}${rR('Time', i.time)}${rR('Place', i.place)}${rR('Organizer', i.org)}</div>${i.images.length > 0 ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-3 border-b pb-2 text-sm uppercase">Gallery</h3><div class="gallery-scroll">${i.images.map(img => `<div class="gallery-item"><img src="${img}" class="w-full h-48 object-cover rounded-xl border border-gray-200" onclick="window.open(this.src)"></div>`).join('')}</div></div>` : ''}</div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm space-y-1">${rR('Description', i.desc)}${rR('From', i.fromDate)}${rR('To', i.toDate)}${rR('Time', i.time)}${rR('Place', i.place)}${rR('Organizer', i.org)}</div>${i.images.length > 0 ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-3 border-b pb-2 text-sm uppercase">Gallery</h3><div class="gallery-scroll">${i.images.map(img => `<div class="gallery-item"><img src="${fixDriveLink(img)}" class="w-full h-48 object-cover rounded-xl border border-gray-200" onclick="window.open(this.src)"></div>`).join('')}</div></div>` : ''}</div>`;
             } else {
                 const i = dirData[index]; document.getElementById('detailHeader').innerText = i.name;
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.img || 'CDST_Logo.png'}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full shadow-sm hover:bg-gray-200"><i class="fa fa-pen mr-1"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Description', i.desc)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2 text-sm uppercase">Location</h3>${rR('Address', i.addr)}${rR('Ward', i.ward)}${rR('City', i.city)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2 text-sm uppercase">Contact Numbers</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}${rP('Phone 3', i.ph3)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2 text-sm uppercase">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${rC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}${rC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><p class="text-xs text-gray-600 leading-relaxed break-words">${i.note}</p></div>` : ''}</div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.img)}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full shadow-sm hover:bg-gray-200"><i class="fa fa-pen mr-1"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Description', i.desc)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2 text-sm uppercase">Location</h3>${rR('Address', i.addr)}${rR('Ward', i.ward)}${rR('City', i.city)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2 text-sm uppercase">Contact Numbers</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}${rP('Phone 3', i.ph3)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2 text-sm uppercase">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${rC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}${rC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><p class="text-xs text-gray-600 leading-relaxed break-words">${i.note}</p></div>` : ''}</div>`;
             }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
@@ -257,7 +256,7 @@
         function closeDetail() { document.getElementById('detailPage').style.display = 'none'; document.body.style.overflow = 'auto'; document.getElementById('bottomNav').style.transform = 'translateY(0)'; }
 
         function showPage(p) {
-            document.querySelectorAll('.page').forEach(page => { page.classList.remove('active-page'); setTimeout(() => { if(!page.classList.contains('active-page')) page.style.display = 'none'; }, 200); });
+            document.querySelectorAll('.page').forEach(page => { page.classList.remove('active-page'); setTimeout(() => { if(!page.classList.contains('active-page')) page.style.display = 'none'; }, 100); });
             const active = document.getElementById(p + 'Page'); active.style.display = 'block'; setTimeout(() => active.classList.add('active-page'), 10);
             const navs = {'home': 'nav-home', 'directory': 'nav-directory', 'contact': 'nav-contact'};
             Object.values(navs).forEach(id => { const btn = document.getElementById(id); btn.classList.remove('text-[#FFD700]', 'scale-110'); if(id !== 'nav-directory') btn.classList.add('text-gray-400'); else btn.querySelector('div').classList.remove('ring-4', 'ring-[#FFD700]/30'); });
