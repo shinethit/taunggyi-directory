@@ -13,8 +13,9 @@
             padding-bottom: 110px; 
             background-color: #f8f5ff;
         }
-        .page { display: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
-        .active-page { display: block; opacity: 1; }
+        .page { display: none; }
+        .active-page { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         /* Theme Colors */
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
@@ -25,27 +26,31 @@
 
     <header class="purple-gradient text-white pt-8 pb-8 px-4 shadow-2xl text-center rounded-b-[40px] border-b-4 border-[#D4AF37] relative z-0 overflow-hidden">
         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-
         <div class="relative z-10">
             <div class="flex justify-center mb-5">
                 <img src="CDST_Logo.png" alt="CDST Logo" 
-                     class="w-36 h-36 rounded-2xl border-4 border-[#FFD700] shadow-2xl object-cover bg-[#37006a]">
+                     class="w-36 h-36 rounded-2xl border-4 border-[#FFD700] shadow-2xl object-cover bg-[#37006a]"
+                     onerror="this.style.display='none'">
             </div>
-            
-            <h1 id="pageTitle" class="text-3xl font-bold tracking-wider text-[#FFD700] drop-shadow-md font-['Pyidaungsu']">Home</h1>
+            <h1 class="text-3xl font-bold tracking-wider text-[#FFD700] drop-shadow-md font-['Pyidaungsu']">Home</h1>
             <p class="text-sm text-gray-200 mt-2 tracking-widest uppercase font-semibold">Cherry Directory since 2026</p>
         </div>
     </header>
 
     <div class="max-w-4xl mx-auto p-4 mt-2 mb-20">
         
+        <div id="debugMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong class="font-bold">သတိပေးချက်!</strong>
+            <span class="block sm:inline" id="debugText">Something went wrong.</span>
+        </div>
+
         <section id="homePage" class="page active-page space-y-4">
             <div class="flex items-center mb-2 px-2">
                 <i class="fa fa-bullhorn text-[#4B0082] mr-2 text-xl"></i>
                 <h2 class="font-bold text-lg text-[#4B0082]">သတင်းနှင့် ပွဲတော်ရက်များ</h2>
             </div>
             <div id="announcementList" class="space-y-4 pb-4">
-                <div class="text-center text-gray-400 py-10 animate-pulse">Loading updates...</div>
+                <div class="text-center text-gray-400 py-10">Loading updates...</div>
             </div>
         </section>
 
@@ -59,7 +64,8 @@
                 </div>
             </div>
             <div id="directoryList" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                </div>
+                <div class="text-center text-gray-400 py-10 col-span-2">Loading directory...</div>
+            </div>
         </section>
 
         <section id="contactPage" class="page">
@@ -72,134 +78,147 @@
                     <p class="text-gray-500 text-sm">Creator & Manager</p>
                 </div>
                 <div id="contactInfo" class="space-y-3 bg-gray-50 p-4 rounded-xl">
-                    </div>
+                    Loading contact info...
+                </div>
             </div>
         </section>
 
     </div>
 
     <nav class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[9999] rounded-2xl border border-[#D4AF37]/50">
-        <button onclick="showPage('home', 'Home')" class="nav-item flex flex-col items-center p-2 w-16 transition-all duration-300 text-[#FFD700]" id="nav-home">
+        <button onclick="showPage('home')" class="nav-item flex flex-col items-center p-2 w-16 text-[#FFD700]" id="nav-home">
             <i class="fa fa-home text-xl mb-1"></i>
             <span class="text-[10px] font-bold">Home</span>
         </button>
-
-        <button onclick="showPage('directory', 'Directory')" class="nav-item flex flex-col items-center p-2 w-16 transition-all duration-300 relative" id="nav-directory">
-             <div class="bg-[#D4AF37] text-[#37006a] w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-[0_4px_10px_rgba(212,175,55,0.5)] border-4 border-[#f8f5ff] transform transition-transform duration-300 hover:scale-110">
+        <button onclick="showPage('directory')" class="nav-item flex flex-col items-center p-2 w-16 relative" id="nav-directory">
+             <div class="bg-[#D4AF37] text-[#37006a] w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow border-4 border-[#f8f5ff]">
                 <i class="fa fa-search text-xl font-bold"></i>
             </div>
             <span class="text-[10px] font-bold mt-1">Search</span>
         </button>
-
-        <button onclick="showPage('contact', 'Contact')" class="nav-item flex flex-col items-center p-2 w-16 transition-all duration-300 hover:text-gray-200" id="nav-contact">
+        <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact">
             <i class="fa fa-info-circle text-xl mb-1"></i>
             <span class="text-[10px] font-bold">Contact</span>
         </button>
     </nav>
 
     <script>
-        // ==========================================
-        // ၁။ Sheet ID (ဒါကို ကျွန်တော် ဖြည့်ပေးလိုက်ပါပြီ)
-        // ==========================================
+        // =================================================================
+        // ⚠️ အရေးကြီးသည် - GID များကို သေချာစစ်ဆေးပြီး ထည့်ပါ ⚠️
+        // =================================================================
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         
-        // ==========================================
-        // ၂။ GID (Tab နံပါတ်များ) - ⚠️ ဒါကို Shine Thit ပြင်ပေးရပါမယ် ⚠️
-        // Google Sheet ရဲ့ Tab တစ်ခုချင်းစီကို နှိပ်ပြီး URL အဆုံးက gid= နံပါတ်ကို ကူးထည့်ပါ
-        // ==========================================
+        // Tab 1: Announcement (Sheet1 ဖြစ်လေ့ရှိသည် - gid=0)
+        const GID_HOME = '၀'; 
         
-        const GID_HOME = '0'; // ပထမဆုံး Tab (Announcements) ဖြစ်လေ့ရှိပါတယ်
+        // Tab 2: Directory (ဒီနေရာမှာ နံပါတ်ပြောင်းကို ပြောင်းရပါမယ်)
+        // ဥပမာ - const GID_DIR = '12345678';
+        const GID_DIR = '1267218282'; // <--- ဒီမှာ GID အမှန်ထည့်ပါ
         
-        // Directory Tab ကိုနှိပ်၊ URL အနောက်က gid= နံပါတ်ကို ဒီမှာထည့်ပါ (ဥပမာ '123456')
-        const GID_DIR = '1267218282'; 
-        
-        // Contact Tab ကိုနှိပ်၊ URL အနောက်က gid= နံပါတ်ကို ဒီမှာထည့်ပါ
-        const GID_CONTACT = '626044868'; 
-        // ==========================================
+        // Tab 3: Contact (ဒီနေရာမှာ နံပါတ်ပြောင်းကို ပြောင်းရပါမယ်)
+        const GID_CONTACT = '626044868'; // <--- ဒီမှာ GID အမှန်ထည့်ပါ
+        // =================================================================
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         let dirData = [];
 
         async function loadAllData() {
-            // Load Announcements
-            fetchData(`${BASE_URL}&gid=${GID_HOME}`, (rows) => {
+            // 1. Load Announcements
+            fetchData(GID_HOME, (rows) => {
                 const list = document.getElementById('announcementList');
-                if(!rows || rows.length === 0) { list.innerHTML = '<p class="text-center text-gray-400">No updates yet</p>'; return; }
+                if(!rows.length) { list.innerHTML = '<p class="text-center text-gray-400">No data found.</p>'; return; }
+                
                 list.innerHTML = rows.map(r => `
                     <div class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3">
                         ${r.c[3]?.v ? `<img src="${r.c[3].v}" class="w-24 h-24 object-cover">` : ''}
                         <div class="p-3 flex-1">
-                            <h3 class="font-bold text-[#4B0082] line-clamp-1">${r.c[0]?.v || ''}</h3>
-                            <p class="text-xs text-gray-500 line-clamp-2 mt-1">${r.c[1]?.v || ''}</p>
-                            <div class="text-[#D4AF37] text-xs font-bold mt-2"><i class="fa fa-calendar-alt mr-1"></i> ${r.c[2]?.v || ''}</div>
+                            <h3 class="font-bold text-[#4B0082]">${r.c[0]?.v || '(No Title)'}</h3>
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">${r.c[1]?.v || ''}</p>
+                            <div class="text-[#D4AF37] text-xs font-bold mt-2">${r.c[2]?.v || ''}</div>
                         </div>
                     </div>
                 `).join('');
             });
 
-            // Load Directory
-            fetchData(`${BASE_URL}&gid=${GID_DIR}`, (rows) => {
+            // 2. Load Directory
+            fetchData(GID_DIR, (rows) => {
+                // Data သိမ်းမယ်
                 dirData = rows.map(r => ({
-                    name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, 
-                    addr: r.c[3]?.v, ward: r.c[4]?.v, 
+                    name: r.c[0]?.v || 'အမည်မသိ',
+                    cat: r.c[1]?.v || 'General',
+                    type: r.c[2]?.v, 
+                    addr: r.c[3]?.v || '', 
+                    ward: r.c[4]?.v, 
                     phones: [r.c[6]?.v, r.c[7]?.v, r.c[8]?.v].filter(Boolean), 
                     img: r.c[10]?.v
                 }));
                 renderDirectory(dirData);
-            });
+            }, "Directory");
 
-            // Load Contact
-            fetchData(`${BASE_URL}&gid=${GID_CONTACT}`, (rows) => {
+            // 3. Load Contact
+            fetchData(GID_CONTACT, (rows) => {
                 document.getElementById('contactInfo').innerHTML = rows.map(r => `
                     <div class="flex justify-between py-2 border-b border-gray-100 last:border-0">
-                        <span class="text-[#4B0082] font-bold text-sm">${r.c[0]?.v}:</span>
-                        <span class="text-gray-600 text-sm text-right">${r.c[1]?.v}</span>
+                        <span class="text-[#4B0082] font-bold text-sm">${r.c[0]?.v || ''}:</span>
+                        <span class="text-gray-600 text-sm text-right">${r.c[1]?.v || ''}</span>
                     </div>
                 `).join('');
             });
         }
 
-        async function fetchData(url, callback) {
+        async function fetchData(gid, callback, type="") {
             try {
-                const res = await fetch(url);
+                const res = await fetch(`${BASE_URL}&gid=${gid}`);
                 const text = await res.text();
+                // Check if Google returned an error page instead of JSON
+                if (!text.includes("google.visualization.Query.setResponse")) {
+                    throw new Error(`GID ${gid} မှားယွင်းနေပါသည်`);
+                }
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 callback(json.table.rows);
-            } catch (e) { console.log('Loading...'); }
+            } catch (e) {
+                console.error(e);
+                // GID မှားနေရင် Error ပြမယ်
+                if(type === "Directory" && gid === '0') {
+                    document.getElementById('directoryList').innerHTML = 
+                        `<div class="col-span-2 text-center text-red-500 bg-white p-4 rounded-xl border border-red-300">
+                            <i class="fa fa-exclamation-triangle text-2xl mb-2"></i><br>
+                            Directory GID ထည့်ရန် လိုအပ်နေပါသည်။<br>
+                            <span class="text-xs text-gray-500">Code ထဲတွင် GID_DIR ကို ပြန်ပြင်ပါ။</span>
+                        </div>`;
+                }
+            }
         }
 
         function renderDirectory(data) {
-            if(!data || data.length === 0) {
-                 document.getElementById('directoryList').innerHTML = '<p class="text-center text-red-400 mt-10">Sheet GID မှားနေပါသည် (Code ကိုစစ်ပါ)</p>';
-                 return;
+            const list = document.getElementById('directoryList');
+            if(data.length === 0) {
+                list.innerHTML = '<p class="col-span-2 text-center text-gray-400">No directory data found.</p>';
+                return;
             }
-            document.getElementById('directoryList').innerHTML = data.map(i => `
+            list.innerHTML = data.map(i => `
                 <div class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37]">
                     <div class="flex items-start gap-3">
                         ${i.img ? `<img src="${i.img}" class="w-16 h-16 rounded-lg object-cover bg-gray-100">` : `<div class="w-16 h-16 rounded-lg bg-[#f8f5ff] flex items-center justify-center text-[#D4AF37]"><i class="fa fa-store text-2xl"></i></div>`}
-                        <div class="flex-1">
-                            <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block">${i.cat || 'General'}</span>
-                            <h3 class="font-bold text-[#4B0082] text-md">${i.name}</h3>
-                            <p class="text-xs text-gray-500 mt-1"><i class="fa fa-map-pin mr-1 text-[#D4AF37]"></i>${i.ward || i.addr}</p>
+                        <div class="flex-1 overflow-hidden">
+                            <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate max-w-full">${i.cat}</span>
+                            <h3 class="font-bold text-[#4B0082] text-md truncate">${i.name}</h3>
+                            <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-pin mr-1 text-[#D4AF37]"></i>${i.ward || i.addr}</p>
                         </div>
                     </div>
                     <div class="mt-3 flex gap-2">
-                        ${i.phones.map(p => `<a href="tel:${p}" class="flex-1 bg-[#4B0082] text-white text-center py-2 rounded-lg text-xs font-bold shadow hover:bg-[#5e0a9e]"><i class="fa fa-phone mr-1"></i> Call</a>`).join('')}
+                        ${i.phones.length > 0 ? i.phones.map(p => `<a href="tel:${p}" class="flex-1 bg-[#4B0082] text-white text-center py-2 rounded-lg text-xs font-bold shadow hover:bg-[#5e0a9e]"><i class="fa fa-phone mr-1"></i> Call</a>`).join('') : '<span class="text-xs text-gray-400 w-full text-center py-2">No Phone</span>'}
                     </div>
                 </div>
             `).join('');
         }
 
-        function showPage(pageId, title) {
-            document.querySelectorAll('.page').forEach(p => {
-                p.classList.remove('active-page');
-                setTimeout(() => p.style.display = 'none', 200);
-            });
-            const activePage = document.getElementById(pageId + 'Page');
-            activePage.style.display = 'block';
-            setTimeout(() => activePage.classList.add('active-page'), 10);
-            document.getElementById('pageTitle').innerText = title;
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(pageId + 'Page').classList.add('active-page');
             
+            // Reset Buttons
             document.querySelectorAll('.nav-item').forEach(btn => {
                 if(btn.id !== 'nav-directory') {
                     btn.classList.remove('text-[#FFD700]', 'scale-110');
@@ -209,6 +228,7 @@
                 }
             });
 
+            // Active Button
             const activeBtn = document.getElementById('nav-' + pageId);
             if (pageId === 'directory') {
                 activeBtn.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30');
