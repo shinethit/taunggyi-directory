@@ -4,8 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cherry Directory</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cherry Directory">
+    <link rel="apple-touch-icon" href="CDST_Logo.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="CDST_Logo.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="CDST_Logo.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
         body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 110px; background-color: #f8f5ff; }
@@ -33,7 +42,7 @@
         <div class="flex items-center gap-3 p-3">
             <img src="CDST_Logo.png" alt="Logo" class="w-10 h-10 rounded-lg border border-[#FFD700] shadow-sm object-cover bg-[#37006a]" onerror="this.style.display='none'">
             <div class="text-left leading-tight">
-                <h1 class="text-lg font-bold tracking-wider text-white font-['Pyidaungsu']">Cherry Directory</h1>
+                <h1 class="text-lg font-bold tracking-wider text-white">Cherry Directory</h1>
                 <div class="flex items-center text-[9px] text-gray-300 gap-2">
                     <span><i class="fa fa-eye mr-0.5"></i><span id="viewCounter">...</span> Views</span>
                     <span><i class="fa fa-circle text-green-400 text-[6px] mr-0.5 animate-pulse"></i> Online</span>
@@ -108,7 +117,7 @@
                 let fileId = "";
                 if (url.includes('/d/')) fileId = url.split('/d/')[1].split('/')[0];
                 else if (url.includes('id=')) fileId = url.split('id=')[1].split('&')[0];
-                if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
+                if (fileId) return `https://lh3.googleusercontent.com/d/$${fileId}`;
             }
             return url;
         }
@@ -133,24 +142,17 @@
         }
 
         async function loadAllData() {
-            // Load Cached Data First for Offline Experience
-            const cachedEvents = localStorage.getItem('cache_events');
-            const cachedDir = localStorage.getItem('cache_dir');
-            const cachedAdmin = localStorage.getItem('cache_admin');
+            // Restore Offline Cache
+            const cEvents = localStorage.getItem('cache_events');
+            const cDir = localStorage.getItem('cache_dir');
+            const cAdmin = localStorage.getItem('cache_admin');
 
-            if(cachedEvents) { eventsData = JSON.parse(cachedEvents); setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); }); renderEvents(); }
-            if(cachedDir) { dirData = JSON.parse(cachedDir); setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); renderDirectory(); }
-            if(cachedAdmin) { renderAdminArea(JSON.parse(cachedAdmin)); }
+            if(cEvents) { eventsData = JSON.parse(cEvents); setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); }); renderEvents(); }
+            if(cDir) { dirData = JSON.parse(cDir); setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); renderDirectory(); }
+            if(cAdmin) { renderAdminArea(JSON.parse(cAdmin)); }
 
-            // Analytics
-            const ns = 'cherry-directory-' + SHEET_ID.substr(0,5);
-            fetch(`https://api.countapi.xyz/hit/${ns}/visits`).then(res => res.json()).then(data => { document.getElementById('viewCounter').innerText = data.value || '1.2K'; }).catch(() => { document.getElementById('viewCounter').innerText = '1.2K'; });
-            document.getElementById('onlineCounter').innerText = Math.floor(Math.random() * 20) + 5;
-
-            // Fetch Fresh Data in Background
-            fetchEvents();
-            fetchDirectory();
-            fetchAdmin();
+            // Sync Fresh Data
+            fetchEvents(); fetchDirectory(); fetchAdmin();
         }
 
         async function fetchEvents() {
@@ -158,15 +160,14 @@
                 const res = await fetch(`${BASE_URL}&gid=${GID_HOME}`);
                 const text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
-                // REVERSE Logic to show newest first
+                // Sorted Newest First
                 eventsData = json.table.rows.map(r => ({ cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
-                .filter(i => i.title && i.title !== "Title")
-                .reverse(); 
+                .filter(i => i.title && i.title !== "Title").reverse(); 
                 
                 localStorage.setItem('cache_events', JSON.stringify(eventsData));
                 setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); });
                 renderEvents();
-            } catch (e) { console.error("Event Fetch Error"); }
+            } catch (e) {}
         }
 
         async function fetchDirectory() {
@@ -180,7 +181,7 @@
                 localStorage.setItem('cache_dir', JSON.stringify(dirData));
                 setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); });
                 renderDirectory();
-            } catch (e) { console.error("Dir Fetch Error"); }
+            } catch (e) {}
         }
 
         async function fetchAdmin() {
@@ -190,22 +191,22 @@
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 localStorage.setItem('cache_admin', JSON.stringify(json.table.rows));
                 renderAdminArea(json.table.rows);
-            } catch (e) { console.error("Admin Fetch Error"); }
+            } catch (e) {}
         }
 
         function renderAdminArea(rows) {
-            const profileRow = rows.find(r => r.c[0]?.v && r.c[0].v !== "Description");
-            if (profileRow) {
+            const profile = rows.find(r => r.c[0]?.v && r.c[0].v !== "Description");
+            if (profile) {
                 document.getElementById('adminProfileArea').innerHTML = `
                 <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-[#4B0082] mb-6">
                     <div class="mb-4 text-center border-b pb-4"><i class="fa fa-user-shield text-3xl text-[#4B0082] mb-2"></i><h3 class="font-bold text-lg text-[#4B0082]">Admin Profile</h3></div>
                     <div class="space-y-4">
-                        <div class="flex justify-between items-start border-b border-gray-50 pb-2"><span class="text-[10px] text-gray-400 uppercase">Description</span><span class="text-xs font-bold text-[#4B0082] text-right ml-4">${profileRow.c[0]?.v || '-'}</span></div>
-                        ${renderAdminBtn('Phone 1', profileRow.c[1]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}
-                        ${renderAdminBtn('Phone 2', profileRow.c[2]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}
-                        ${renderAdminBtn('Viber Chat', profileRow.c[3]?.v, 'viber://chat?number=', 'fa-viber', 'viber-bg', true)}
-                        ${renderAdminBtn('Telegram Chat', profileRow.c[4]?.v, 'https://t.me/', 'fa-telegram', 'telegram-bg', false, true)}
-                        ${renderAdminBtn('Email Admin', profileRow.c[5]?.v, 'mailto:', 'fa-envelope', 'bg-red-500')}
+                        <div class="flex justify-between items-start border-b border-gray-50 pb-2"><span class="text-[10px] text-gray-400">DESCRIPTION</span><span class="text-xs font-bold text-[#4B0082] text-right ml-4">${profile.c[0]?.v || '-'}</span></div>
+                        ${renderAdminBtn('Phone 1', profile.c[1]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}
+                        ${renderAdminBtn('Phone 2', profile.c[2]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}
+                        ${renderAdminBtn('Viber Chat', profile.c[3]?.v, 'viber://chat?number=', 'fa-viber', 'viber-bg', true)}
+                        ${renderAdminBtn('Telegram Chat', profile.c[4]?.v, 'https://t.me/', 'fa-telegram', 'telegram-bg', false, true)}
+                        ${renderAdminBtn('Email Admin', profile.c[5]?.v, 'mailto:', 'fa-envelope', 'bg-red-500')}
                     </div>
                 </div>`;
             }
@@ -272,7 +273,7 @@
                 content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Description', i.desc)}${rR('From', i.fromDate)}${rR('To', i.toDate)}${rR('Time', i.time)}${rR('Place', i.place)}${rR('Organizer', i.org)}</div>${i.images.length > 0 ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-3 border-b pb-2 text-sm uppercase">Gallery</h3><div class="gallery-scroll">${i.images.map(img => `<div class="gallery-item"><img src="${fixDriveLink(img)}" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" onclick="window.open(this.src)"></div>`).join('')}</div></div>` : ''}</div>`;
             } else {
                 const i = dirData[index]; document.getElementById('detailHeader').innerText = i.name;
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.img)}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full shadow-sm hover:bg-gray-200"><i class="fa fa-pen mr-1"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Description', i.desc)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Address', i.addr)}${rR('Ward', i.ward)}${rR('City', i.city)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}${rP('Phone 3', i.ph3)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${rC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}${rC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><p class="text-xs text-gray-600 leading-relaxed break-words">${i.note}</p></div>` : ''}</div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.img)}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full shadow-sm"><i class="fa fa-pen mr-1"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Description', i.desc)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Address', i.addr)}${rR('Ward', i.ward)}${rR('City', i.city)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}${rP('Phone 3', i.ph3)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${rC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}${rC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><p class="text-xs text-gray-600 leading-relaxed break-words">${i.note}</p></div>` : ''}</div>`;
             }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
