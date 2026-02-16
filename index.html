@@ -13,6 +13,8 @@
         .active-page { display: block; opacity: 1; }
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
+        .viber-bg { background-color: #7360f2; }
+        .telegram-bg { background-color: #229ED9; }
         .slide-up { animation: slideUp 0.3s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -33,7 +35,7 @@
             <div class="text-left leading-tight">
                 <h1 class="text-lg font-bold tracking-wider text-white font-['Pyidaungsu']">Cherry Directory</h1>
                 <div class="flex items-center text-[9px] text-gray-300 gap-2">
-                    <span><i class="fa fa-eye mr-0.5"></i><span id="viewCounter">...</span> Views</span>
+                    <span><i class="fa fa-eye mr-0.5"></i><span id="viewCounter">...</span></span>
                     <span><i class="fa fa-circle text-green-400 text-[6px] mr-0.5"></i><span id="onlineCounter">...</span> Online</span>
                 </div>
             </div>
@@ -60,7 +62,7 @@
         <section id="contactPage" class="page space-y-4">
             <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2">
                 <h3 class="font-bold text-[#4B0082] text-md mb-1">လုပ်ငန်းရှင်များအတွက်</h3>
-                <p class="text-xs text-gray-600 mb-3">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
+                <p class="text-xs text-gray-600 mb-3">မိမိတို့ လုပ်ငန်းကို ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
                 <a href="#" id="registerLink" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow">လုပ်ငန်းစာရင်းသွင်းရန်</a>
             </div>
             <div id="contactInfo" class="space-y-4"></div>
@@ -84,8 +86,8 @@
     <script>
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const GID_HOME = '0';
-        const GID_DIR = '1267218282'; // ဒီနံပါတ်က Shine Thit ရဲ့ Directory Tab နံပါတ်ဖြစ်ရပါမယ်
-        const GID_CONTACT = '626044868'; // ဒီနံပါတ်က Shine Thit ရဲ့ Contact Tab နံပါတ်ဖြစ်ရပါမယ်
+        const GID_DIR = '1267218282'; 
+        const GID_CONTACT = '626044868'; 
 
         const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog"; 
         const REGISTER_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog";
@@ -120,45 +122,57 @@
             const namespace = 'cherry-directory-' + SHEET_ID.substr(0,5); 
             fetch(`https://api.countapi.xyz/hit/${namespace}/visits`).then(res => res.json()).then(data => { document.getElementById('viewCounter').innerText = data.value || '1.2K'; }).catch(() => { document.getElementById('viewCounter').innerText = '1.2K'; });
 
+            // 1. Fetch Events
             fetchData(GID_HOME, (rows) => {
-                eventsData = rows.map(r => ({ cat: r.c[0]?.v || 'General', title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) })).filter(i => i.title && i.title !== "Title");
+                eventsData = rows.map(r => ({
+                    cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, 
+                    time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, 
+                    images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean)
+                })).filter(i => i.title && i.title !== "Title");
                 setupFilters('eventFilters', eventsData, setEventCategory);
                 renderGroupedEvents();
             });
 
+            // 2. Fetch Directory
             fetchData(GID_DIR, (rows) => {
-                dirData = rows.map(r => ({ name: r.c[0]?.v, cat: r.c[1]?.v || 'Other', type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, city: r.c[6]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v, viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v, img: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v })).filter(i => i.name && i.name !== "Name");
+                dirData = rows.map(r => ({
+                    name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, 
+                    ward: r.c[5]?.v, city: r.c[6]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v, 
+                    viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v, img: r.c[13]?.v, 
+                    rating: r.c[14]?.v, note: r.c[15]?.v
+                })).filter(i => i.name && i.name !== "Name");
                 setupFilters('dirFilters', dirData, setDirCategory);
                 renderGroupedDirectory();
             });
 
+            // 3. Fetch Admin
             fetchData(GID_CONTACT, (rows) => {
-                const dataRows = rows.filter(r => r.c[0]?.v && r.c[0]?.v !== "Description");
-                document.getElementById('contactInfo').innerHTML = dataRows.map(r => `
+                const adminRows = rows.filter(r => r.c[0]?.v && r.c[0]?.v !== "Description");
+                document.getElementById('contactInfo').innerHTML = adminRows.map(r => `
                     <div class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-[#4B0082]">
-                        <h3 class="font-bold text-[#4B0082] mb-4 text-center border-b pb-2">Admin Information</h3>
+                        <h3 class="font-bold text-[#4B0082] mb-4 text-center border-b pb-2">Admin Profile</h3>
                         <div class="space-y-3">
-                            <div class="flex justify-between border-b border-gray-50 pb-2">
+                            <div class="flex justify-between items-start border-b border-gray-50 pb-2">
                                 <span class="text-[10px] text-gray-400">Description</span>
-                                <span class="text-sm font-bold text-[#4B0082]">${r.c[0]?.v || '-'}</span>
+                                <span class="text-sm font-bold text-right ml-4 break-words text-[#4B0082]">${r.c[0]?.v || '-'}</span>
                             </div>
-                            <div class="flex justify-between border-b border-gray-50 pb-2">
+                            <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                                 <span class="text-[10px] text-gray-400">Phone 1</span>
                                 <div class="flex items-center gap-2"><span class="text-xs font-mono font-bold">${r.c[1]?.v || '-'}</span>${r.c[1]?.v ? `<a href="tel:${r.c[1].v}" class="text-green-500"><i class="fa fa-phone-alt"></i></a>` : ''}</div>
                             </div>
-                            <div class="flex justify-between border-b border-gray-50 pb-2">
+                            <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                                 <span class="text-[10px] text-gray-400">Phone 2</span>
                                 <div class="flex items-center gap-2"><span class="text-xs font-mono font-bold">${r.c[2]?.v || '-'}</span>${r.c[2]?.v ? `<a href="tel:${r.c[2].v}" class="text-green-500"><i class="fa fa-phone-alt"></i></a>` : ''}</div>
                             </div>
-                            <div class="flex justify-between border-b border-gray-50 pb-2">
+                            <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                                 <span class="text-[10px] text-gray-400">Viber</span>
                                 <div class="flex items-center gap-2"><span class="text-xs font-bold">${r.c[3]?.v || '-'}</span>${r.c[3]?.v ? `<a href="viber://chat?number=${r.c[3].v}" class="text-[#7360f2]"><i class="fab fa-viber"></i></a>` : ''}</div>
                             </div>
-                            <div class="flex justify-between border-b border-gray-50 pb-2">
+                            <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                                 <span class="text-[10px] text-gray-400">Telegram</span>
                                 <div class="flex items-center gap-2"><span class="text-xs font-bold">${r.c[4]?.v || '-'}</span>${r.c[4]?.v ? `<a href="https://t.me/${r.c[4].v.toString().replace('@','')}" class="text-[#229ED9]"><i class="fab fa-telegram"></i></a>` : ''}</div>
                             </div>
-                            <div class="flex justify-between border-b border-gray-50 pb-2">
+                            <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                                 <span class="text-[10px] text-gray-400">Email</span>
                                 <div class="flex items-center gap-2"><span class="text-[10px] text-gray-600 truncate max-w-[150px]">${r.c[5]?.v || '-'}</span>${r.c[5]?.v ? `<a href="mailto:${r.c[5].v}" class="text-red-500"><i class="fa fa-envelope"></i></a>` : ''}</div>
                             </div>
@@ -173,7 +187,7 @@
         }
 
         function setupFilters(containerId, data, callback) {
-            const cats = ['All', ...new Set(data.map(i => i.cat))];
+            const cats = ['All', ...new Set(data.map(i => i.cat).filter(Boolean))];
             document.getElementById(containerId).innerHTML = cats.map(c => `<button onclick="${callback.name}('${c}')" class="flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold border bg-white border-gray-200 transition-all">${c}</button>`).join('');
         }
 
@@ -204,13 +218,42 @@
         function openDetail(type, index) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
             const renderR = (l, v) => `<div class="border-b border-gray-100 py-3"><p class="text-[10px] text-gray-400 mb-0.5">${l}</p><p class="text-gray-800 font-medium text-xs leading-relaxed break-words">${v || '-'}</p></div>`;
-            const renderP = (l, v) => v ? `<div class="border-b border-gray-100 py-3 flex justify-between items-center"><div><p class="text-[10px] text-gray-400 mb-0.5">${l}</p><p class="text-[#4B0082] font-bold text-xs">${v}</p></div><a href="tel:${v}" class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold"><i class="fa fa-phone"></i> CALL</a></div>` : '';
+            const renderP = (l, v) => v ? `<div class="border-b border-gray-100 py-3 flex justify-between items-center"><div><p class="text-[10px] text-gray-400 mb-0.5">${l}</p><p class="text-[#4B0082] font-bold text-sm font-mono">${v}</p></div><a href="tel:${v}" class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm"><i class="fa fa-phone"></i> CALL</a></div>` : '';
+            const renderC = (l, v, i, c, lp) => `<div class="border-b border-gray-100 py-3 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i class="${i}"></i></div><div><p class="text-[10px] text-gray-400">${l}</p><p class="text-xs font-bold text-gray-700">${v || '-'}</p></div></div>${v ? `<a href="${lp}${v.toString().replace('@','')}" target="_blank" class="${c} text-white px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm">Open</a>` : ''}</div>`;
+
             if(type === 'event') {
-                const i = eventsData[index]; document.getElementById('detailHeader').innerText = "Event Info";
-                content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.logo || i.images[0] || 'CDST_Logo.png'}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderR('Description', i.desc)}${renderR('From', i.fromDate)}${renderR('To', i.toDate)}${renderR('Time', i.time)}${renderR('Place', i.place)}</div></div>`;
+                const i = eventsData[index]; document.getElementById('detailHeader').innerText = "Event Details";
+                content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.logo || 'CDST_Logo.png'}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Information</h3>${renderR('Description', i.desc)}${renderR('Start Date', i.fromDate)}${renderR('End Date', i.toDate)}${renderR('Time', i.time)}${renderR('Place', i.place)}${renderR('Organizer', i.org)}</div>${i.images.length > 0 ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-3 border-b pb-2">Gallery</h3><div class="gallery-scroll">${i.images.map(img => `<div class="gallery-item"><img src="${img}" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" onclick="window.open(this.src)"></div>`).join('')}</div></div>` : ''}</div>`;
             } else {
                 const i = dirData[index]; document.getElementById('detailHeader').innerText = i.name;
-                content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.img || 'CDST_Logo.png'}" class="w-24 h-24 rounded-lg object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><p class="text-xs text-gray-500 mt-2">${i.type || ''}</p></div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderR('Category', i.cat)}${renderR('Description', i.desc)}${renderR('Address', i.addr)}${renderR('Ward', i.ward)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderP('Phone 1', i.ph1)}${renderP('Phone 2', i.ph2)}${renderP('Phone 3', i.ph3)}</div></div>`;
+                content.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center">
+                            <img src="${i.img || 'CDST_Logo.png'}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 border-[#D4AF37] shadow-sm bg-white" onerror="this.src='CDST_Logo.png'">
+                            <h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.name}</h2>
+                            <div class="flex justify-center mt-1">${getStars(i.rating)}</div>
+                            <a href="${REVIEW_FORM_LINK}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full"><i class="fa fa-pen mr-1"></i> Write Review</a>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                            <h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Basic Info</h3>
+                            ${renderR('Category', i.cat)}${renderR('Type', i.type)}${renderR('Description', i.desc)}
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                            <h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Location</h3>
+                            ${renderR('Address', i.addr)}${renderR('Ward', i.ward)}${renderR('City', i.city)}
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                            <h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Contact Numbers</h3>
+                            ${renderP('Phone 1', i.ph1)}${renderP('Phone 2', i.ph2)}${renderP('Phone 3', i.ph3)}
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                            <h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Digital Contact</h3>
+                            ${renderC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}
+                            ${renderC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}
+                            ${renderC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}
+                        </div>
+                        ${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Note</h3><p class="text-xs text-gray-600 leading-relaxed">${i.note}</p></div>` : ''}
+                    </div>`;
             }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
