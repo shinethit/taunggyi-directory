@@ -13,8 +13,6 @@
         .active-page { display: block; opacity: 1; }
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
-        .viber-bg { background-color: #7360f2; }
-        .telegram-bg { background-color: #229ED9; }
         .slide-up { animation: slideUp 0.3s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -33,10 +31,10 @@
         <div class="flex items-center gap-3 p-3">
             <img src="CDST_Logo.png" alt="Logo" class="w-10 h-10 rounded-lg border border-[#FFD700] shadow-sm object-cover bg-[#37006a]" onerror="this.style.display='none'">
             <div class="text-left leading-tight">
-                <h1 class="text-lg font-bold tracking-wider text-white font-['Pyidaungsu']">Cherry Directory</h1>
+                <h1 class="text-lg font-bold tracking-wider text-white">Cherry Directory</h1>
                 <div class="flex items-center text-[9px] text-gray-300 gap-2">
                     <span><i class="fa fa-eye mr-0.5"></i><span id="viewCounter">...</span></span>
-                    <span><i class="fa fa-circle text-green-400 text-[6px] mr-0.5"></i><span id="onlineCounter">...</span> Online</span>
+                    <span><i class="fa fa-circle text-green-400 text-[6px] mr-0.5 animate-pulse"></i> Online</span>
                 </div>
             </div>
         </div>
@@ -62,7 +60,7 @@
         <section id="contactPage" class="page space-y-4">
             <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2">
                 <h3 class="font-bold text-[#4B0082] text-md mb-1">လုပ်ငန်းရှင်များအတွက်</h3>
-                <p class="text-xs text-gray-600 mb-3">မိမိတို့ လုပ်ငန်းကို ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
+                <p class="text-xs text-gray-600 mb-3">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
                 <a href="#" id="registerLink" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow">လုပ်ငန်းစာရင်းသွင်းရန်</a>
             </div>
             <div id="contactInfo" class="space-y-4"></div>
@@ -84,6 +82,7 @@
     </nav>
 
     <script>
+        // GID Settings
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const GID_HOME = '0';
         const GID_DIR = '1267218282'; 
@@ -97,6 +96,7 @@
         let eventsData = [], dirData = [];
         let activeDirCategory = 'All', activeEventCategory = 'All';
 
+        // Timer
         function updateDateTime() {
             const now = new Date();
             let h = now.getHours(); const m = now.getMinutes().toString().padStart(2, '0');
@@ -117,12 +117,10 @@
         }
 
         async function loadAllData() {
-            const online = Math.floor(Math.random() * 35) + 15;
-            document.getElementById('onlineCounter').innerText = online;
             const namespace = 'cherry-directory-' + SHEET_ID.substr(0,5); 
             fetch(`https://api.countapi.xyz/hit/${namespace}/visits`).then(res => res.json()).then(data => { document.getElementById('viewCounter').innerText = data.value || '1.2K'; }).catch(() => { document.getElementById('viewCounter').innerText = '1.2K'; });
 
-            // 1. Fetch Events
+            // Fetch Events
             fetchData(GID_HOME, (rows) => {
                 eventsData = rows.map(r => ({
                     cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, 
@@ -133,7 +131,7 @@
                 renderGroupedEvents();
             });
 
-            // 2. Fetch Directory
+            // Fetch Directory
             fetchData(GID_DIR, (rows) => {
                 dirData = rows.map(r => ({
                     name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, 
@@ -145,7 +143,7 @@
                 renderGroupedDirectory();
             });
 
-            // 3. Fetch Admin
+            // Fetch Admin (Fixed Row-based Layout)
             fetchData(GID_CONTACT, (rows) => {
                 const adminRows = rows.filter(r => r.c[0]?.v && r.c[0]?.v !== "Description");
                 document.getElementById('contactInfo').innerHTML = adminRows.map(r => `
@@ -154,7 +152,7 @@
                         <div class="space-y-3">
                             <div class="flex justify-between items-start border-b border-gray-50 pb-2">
                                 <span class="text-[10px] text-gray-400">Description</span>
-                                <span class="text-sm font-bold text-right ml-4 break-words text-[#4B0082]">${r.c[0]?.v || '-'}</span>
+                                <span class="text-xs font-bold text-right ml-4 break-words text-[#4B0082]">${r.c[0]?.v || '-'}</span>
                             </div>
                             <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                                 <span class="text-[10px] text-gray-400">Phone 1</span>
@@ -183,7 +181,12 @@
         }
 
         async function fetchData(gid, callback) {
-            try { const res = await fetch(`${BASE_URL}&gid=${gid}`); const text = await res.text(); const json = JSON.parse(text.substr(47).slice(0, -2)); callback(json.table.rows); } catch (e) { console.error(e); }
+            try { 
+                const res = await fetch(`${BASE_URL}&gid=${gid}`); 
+                const text = await res.text(); 
+                const json = JSON.parse(text.substr(47).slice(0, -2)); 
+                if (json.table && json.table.rows) callback(json.table.rows);
+            } catch (e) { console.error("Error fetching GID: " + gid, e); }
         }
 
         function setupFilters(containerId, data, callback) {
@@ -223,37 +226,10 @@
 
             if(type === 'event') {
                 const i = eventsData[index]; document.getElementById('detailHeader').innerText = "Event Details";
-                content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.logo || 'CDST_Logo.png'}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Information</h3>${renderR('Description', i.desc)}${renderR('Start Date', i.fromDate)}${renderR('End Date', i.toDate)}${renderR('Time', i.time)}${renderR('Place', i.place)}${renderR('Organizer', i.org)}</div>${i.images.length > 0 ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-3 border-b pb-2">Gallery</h3><div class="gallery-scroll">${i.images.map(img => `<div class="gallery-item"><img src="${img}" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" onclick="window.open(this.src)"></div>`).join('')}</div></div>` : ''}</div>`;
+                content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.logo || i.images[0] || 'CDST_Logo.png'}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderR('Description', i.desc)}${renderR('Start', i.fromDate)}${renderR('End', i.toDate)}${renderR('Time', i.time)}${renderR('Place', i.place)}${renderR('Organizer', i.org)}</div>${i.images.length > 0 ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-3 border-b pb-2">Gallery</h3><div class="gallery-scroll">${i.images.map(img => `<div class="gallery-item"><img src="${img}" class="w-full h-48 object-cover rounded-xl border border-gray-200" onclick="window.open(this.src)"></div>`).join('')}</div></div>` : ''}</div>`;
             } else {
                 const i = dirData[index]; document.getElementById('detailHeader').innerText = i.name;
-                content.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center">
-                            <img src="${i.img || 'CDST_Logo.png'}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 border-[#D4AF37] shadow-sm bg-white" onerror="this.src='CDST_Logo.png'">
-                            <h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.name}</h2>
-                            <div class="flex justify-center mt-1">${getStars(i.rating)}</div>
-                            <a href="${REVIEW_FORM_LINK}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full"><i class="fa fa-pen mr-1"></i> Write Review</a>
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                            <h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Basic Info</h3>
-                            ${renderR('Category', i.cat)}${renderR('Type', i.type)}${renderR('Description', i.desc)}
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                            <h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Location</h3>
-                            ${renderR('Address', i.addr)}${renderR('Ward', i.ward)}${renderR('City', i.city)}
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                            <h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Contact Numbers</h3>
-                            ${renderP('Phone 1', i.ph1)}${renderP('Phone 2', i.ph2)}${renderP('Phone 3', i.ph3)}
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                            <h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Digital Contact</h3>
-                            ${renderC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}
-                            ${renderC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}
-                            ${renderC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}
-                        </div>
-                        ${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Note</h3><p class="text-xs text-gray-600 leading-relaxed">${i.note}</p></div>` : ''}
-                    </div>`;
+                content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.img || 'CDST_Logo.png'}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 border-[#D4AF37] shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_FORM_LINK}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full"><i class="fa fa-pen mr-1"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderR('Category', i.cat)}${renderR('Type', i.type)}${renderR('Description', i.desc)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Location</h3>${renderR('Address', i.addr)}${renderR('Ward', i.ward)}${renderR('City', i.city)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderP('Phone 1', i.ph1)}${renderP('Phone 2', i.ph2)}${renderP('Phone 3', i.ph3)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${renderC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}${renderC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><p class="text-xs text-gray-600 leading-relaxed">${i.note}</p></div>` : ''}</div>`;
             }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
