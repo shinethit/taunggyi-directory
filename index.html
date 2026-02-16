@@ -8,25 +8,17 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
-        body { 
-            font-family: 'Pyidaungsu', sans-serif; 
-            padding-bottom: 110px; 
-            background-color: #f8f5ff;
-        }
+        body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 110px; background-color: #f8f5ff; }
         .page { display: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
         .active-page { display: block; opacity: 1; }
-        
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
         .viber-bg { background-color: #7360f2; }
         .telegram-bg { background-color: #229ED9; }
-        
         .slide-up { animation: slideUp 0.3s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
         .gallery-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scroll-snap-type: x mandatory; }
         .gallery-item { flex: 0 0 80%; scroll-snap-align: center; }
     </style>
@@ -38,11 +30,8 @@
             <span id="fullDate">LOADING DATE...</span>
             <span id="timeClock" class="font-bold text-white">00:00</span>
         </div>
-
         <div class="flex items-center gap-3 p-3">
-            <img src="CDST_Logo.png" alt="Logo" 
-                 class="w-10 h-10 rounded-lg border border-[#FFD700] shadow-sm object-cover bg-[#37006a]"
-                 onerror="this.style.display='none'">
+            <img src="CDST_Logo.png" alt="Logo" class="w-10 h-10 rounded-lg border border-[#FFD700] shadow-sm object-cover bg-[#37006a]" onerror="this.style.display='none'">
             <div class="text-left leading-tight">
                 <h1 class="text-lg font-bold tracking-wider text-white font-['Pyidaungsu']">Cherry Directory</h1>
                 <div class="flex items-center text-[9px] text-gray-300 gap-2">
@@ -54,83 +43,51 @@
     </header>
 
     <div class="max-w-4xl mx-auto p-4 mt-1 mb-20 relative">
-        
         <section id="homePage" class="page active-page space-y-3">
             <div class="flex overflow-x-auto gap-2 pb-2 no-scrollbar" id="eventFilters"></div>
-            <div id="announcementList" class="space-y-6 pb-4">
-                <div class="text-center text-gray-400 py-10 animate-pulse">Loading events...</div>
-            </div>
+            <div id="announcementList" class="space-y-6 pb-4"></div>
         </section>
 
         <section id="directoryPage" class="page">
             <div class="sticky top-0 z-30 bg-[#f8f5ff]/95 backdrop-blur-sm py-2 space-y-2">
                 <div class="relative">
-                    <input type="text" id="searchInput" onkeyup="handleSearch()" 
-                           placeholder="ဆိုင်အမည်၊ ရပ်ကွက် ရှာရန်..." 
-                           class="w-full p-2.5 pl-9 rounded-xl shadow-sm border border-[#D4AF37] outline-none focus:ring-2 focus:ring-[#4B0082] text-sm">
+                    <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="ဆိုင်အမည်၊ ရပ်ကွက် ရှာရန်..." class="w-full p-2.5 pl-9 rounded-xl shadow-sm border border-[#D4AF37] outline-none text-sm">
                     <i class="fa fa-search absolute left-3 top-3 text-[#D4AF37]"></i>
                 </div>
                 <div class="flex overflow-x-auto gap-2 pb-1 no-scrollbar" id="dirFilters"></div>
             </div>
-            <div id="directoryList" class="space-y-6 mt-2 pb-4">
-                <div class="text-center text-gray-400 py-10">Loading directory...</div>
-            </div>
+            <div id="directoryList" class="space-y-6 mt-2 pb-4"></div>
         </section>
 
-        <section id="contactPage" class="page">
-            
-            <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-6 relative overflow-hidden">
-                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
-                    <i class="fa fa-file-pen text-8xl text-[#4B0082]"></i>
-                </div>
+        <section id="contactPage" class="page space-y-4">
+            <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 relative overflow-hidden">
                 <h3 class="font-bold text-[#4B0082] text-md mb-1 relative z-10">လုပ်ငန်းရှင်များအတွက်</h3>
                 <p class="text-xs text-gray-600 mb-3 relative z-10">မိမိတို့ လုပ်ငန်းကို ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
-                <a href="#" id="registerLink" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow hover:opacity-90 relative z-10">
-                    <i class="fa fa-plus-circle mr-1"></i> စာရင်းသွင်းရန်
-                </a>
+                <a href="#" id="registerLink" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow hover:opacity-90 relative z-10">လုပ်ငန်းစာရင်းသွင်းရန်</a>
             </div>
-
-            <div class="space-y-4" id="contactInfo">
-                <div class="text-center text-gray-400">Loading admin info...</div>
-            </div>
+            <div id="contactInfo" class="space-y-4"></div>
         </section>
 
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
             <div class="sticky top-0 bg-white/95 backdrop-blur-md p-3 shadow-sm z-50 flex items-center border-b border-gray-200">
-                <button onclick="closeDetail()" class="w-9 h-9 rounded-full bg-gray-100 text-[#4B0082] flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition-colors">
-                    <i class="fa fa-arrow-left"></i>
-                </button>
+                <button onclick="closeDetail()" class="w-9 h-9 rounded-full bg-gray-100 text-[#4B0082] flex items-center justify-center"><i class="fa fa-arrow-left"></i></button>
                 <span class="ml-3 font-bold text-[#4B0082] truncate text-sm" id="detailHeader">Details</span>
             </div>
             <div id="detailContent" class="p-5 max-w-2xl mx-auto pb-24 slide-up"></div>
         </section>
-
     </div>
 
     <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50 transition-transform duration-300">
-        <button onclick="showPage('home')" class="nav-item flex flex-col items-center p-2 w-16 text-[#FFD700]" id="nav-home">
-            <i class="fa fa-home text-lg mb-0.5"></i><span class="text-[9px] font-bold">Home</span>
-        </button>
-        <button onclick="showPage('directory')" class="nav-item flex flex-col items-center p-2 w-16 relative" id="nav-directory">
-             <div class="bg-[#D4AF37] text-[#37006a] w-10 h-10 rounded-full flex items-center justify-center -mt-6 shadow border-4 border-[#f8f5ff]">
-                <i class="fa fa-search text-lg font-bold"></i>
-            </div>
-            <span class="text-[9px] font-bold mt-1">Search</span>
-        </button>
-        <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact">
-            <i class="fa fa-info-circle text-lg mb-0.5"></i><span class="text-[9px] font-bold">Admin</span>
-        </button>
+        <button onclick="showPage('home')" class="nav-item flex flex-col items-center p-2 w-16 text-[#FFD700]" id="nav-home"><i class="fa fa-home text-lg mb-0.5"></i><span class="text-[9px] font-bold">Home</span></button>
+        <button onclick="showPage('directory')" class="nav-item flex flex-col items-center p-2 w-16 relative" id="nav-directory"><div class="bg-[#D4AF37] text-[#37006a] w-10 h-10 rounded-full flex items-center justify-center -mt-6 shadow border-4 border-[#f8f5ff]"><i class="fa fa-search text-lg font-bold"></i></div><span class="text-[9px] font-bold mt-1">Search</span></button>
+        <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact"><i class="fa fa-info-circle text-lg mb-0.5"></i><span class="text-[9px] font-bold">Admin</span></button>
     </nav>
 
     <script>
-        // =================================================================
-        // ⚠️ GID များ ပြန်ထည့်ပါ ⚠️
-        // =================================================================
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const GID_HOME = '0';      
-        const GID_DIR = '1267218282';       
-        const GID_CONTACT = '626044868';   
-        // =================================================================
+        const GID_DIR = '1267218282';       // <--- ပြောင်းထည့်ပါ
+        const GID_CONTACT = '626044868';   // <--- ပြောင်းထည့်ပါ
 
         const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog"; 
         const REGISTER_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog";
@@ -138,235 +95,118 @@
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         let eventsData = [], dirData = [];
-        let activeDirCategory = 'All'; 
-        let activeEventCategory = 'All';
+        let activeDirCategory = 'All', activeEventCategory = 'All';
 
-        // --- Date & Time ---
         function updateDateTime() {
             const now = new Date();
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12; hours = hours ? hours : 12; 
-            document.getElementById('timeClock').innerText = `${hours}:${minutes} ${ampm}`;
+            let h = now.getHours(); const m = now.getMinutes().toString().padStart(2, '0');
+            const ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+            document.getElementById('timeClock').innerText = `${h}:${m} ${ampm}`;
             const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-            document.getElementById('fullDate').innerText = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} | ${getMmDate(now)}`;
-        }
-        function getMmDate(d) {
             const daysMm = ["တနင်္ဂနွေ","တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ","စနေ"];
-            return daysMm[d.getDay()];
+            document.getElementById('fullDate').innerText = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} | ${daysMm[now.getDay()]}`;
         }
         setInterval(updateDateTime, 1000); updateDateTime();
 
-        // --- Analytics ---
-        function initAnalytics() {
-            const online = Math.floor(Math.random() * (50 - 15 + 1)) + 15;
-            document.getElementById('onlineCounter').innerText = online;
-            const namespace = 'cherry-directory-' + SHEET_ID.substr(0,5); 
-            fetch(`https://api.countapi.xyz/hit/${namespace}/visits`)
-                .then(res => res.json()).then(data => { document.getElementById('viewCounter').innerText = data.value || '1K+'; })
-                .catch(() => { document.getElementById('viewCounter').innerText = '1K+'; });
+        function getStars(rating) {
+            if(!rating) return '<span class="text-[10px] text-gray-300">(No Rating)</span>';
+            let h = '<div class="flex text-orange-400 text-[10px] gap-0.5">';
+            for(let i=1; i<=5; i++) h += (i <= rating) ? '<i class="fa fa-star"></i>' : (i-0.5 <= rating) ? '<i class="fa fa-star-half-alt"></i>' : '<i class="far fa-star text-gray-200"></i>';
+            h += ` <span class="text-gray-400 ml-1">(${rating})</span></div>`;
+            return h;
         }
 
-        // --- Data Loading ---
         async function loadAllData() {
-            initAnalytics();
-            // Events
+            const online = Math.floor(Math.random() * 35) + 15;
+            document.getElementById('onlineCounter').innerText = online;
+            const namespace = 'cherry-directory-' + SHEET_ID.substr(0,5); 
+            fetch(`https://api.countapi.xyz/hit/${namespace}/visits`).then(res => res.json()).then(data => { document.getElementById('viewCounter').innerText = data.value || '1.2K'; }).catch(() => { document.getElementById('viewCounter').innerText = '1.2K'; });
+
             fetchData(GID_HOME, (rows) => {
-                eventsData = rows.map(r => ({
-                    cat: r.c[0]?.v || 'General', title: r.c[1]?.v, desc: r.c[2]?.v, 
-                    fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, 
-                    org: r.c[7]?.v, logo: r.c[8]?.v,
-                    images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean)
-                })).filter(i => i.title); 
-                setupEventFilters();
+                eventsData = rows.map(r => ({ cat: r.c[0]?.v || 'General', title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) })).filter(i => i.title);
+                setupFilters('eventFilters', eventsData, setEventCategory);
                 renderGroupedEvents();
             });
 
-            // Directory
             fetchData(GID_DIR, (rows) => {
-                dirData = rows.map(r => ({
-                    name: r.c[0]?.v, cat: r.c[1]?.v || 'Other', type: r.c[2]?.v,
-                    desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, city: r.c[6]?.v,
-                    ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v,
-                    viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v,
-                    img: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v
-                })).filter(i => i.name); 
-                setupDirectoryFilters();
+                dirData = rows.map(r => ({ name: r.c[0]?.v, cat: r.c[1]?.v || 'Other', type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, city: r.c[6]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v, viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v, img: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v })).filter(i => i.name);
+                setupFilters('dirFilters', dirData, setDirCategory);
                 renderGroupedDirectory();
             });
 
-            // Contact (Updated Mapping with Admin Note)
             fetchData(GID_CONTACT, (rows) => {
-                document.getElementById('contactInfo').innerHTML = rows.map(r => {
-                    const desc = r.c[0]?.v || 'Admin';
-                    const ph1 = r.c[1]?.v;
-                    const ph2 = r.c[2]?.v;
-                    const viber = r.c[3]?.v;
-                    const tg = r.c[4]?.v;
-                    const email = r.c[5]?.v;
-                    const adminNote = r.c[6]?.v; // Column G
-
-                    return `
+                document.getElementById('contactInfo').innerHTML = rows.map(r => `
                     <div class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-[#4B0082]">
-                        <h3 class="text-[#4B0082] font-bold text-lg mb-3 flex items-center">
-                            <i class="fa fa-user-shield mr-2"></i> ${desc}
-                        </h3>
-
-                        ${adminNote ? `
-                        <div class="mb-4 bg-yellow-50 border-l-4 border-[#FFD700] p-3 rounded-r-lg">
-                            <p class="text-sm text-gray-700 font-medium leading-relaxed">
-                                <i class="fa fa-bullhorn text-[#D4AF37] mr-2"></i>${adminNote}
-                            </p>
-                        </div>` : ''}
-                        
+                        <h3 class="font-bold text-[#4B0082] mb-3"><i class="fa fa-user-shield mr-2"></i>${r.c[0]?.v || 'Admin'}</h3>
+                        ${r.c[6]?.v ? `<div class="mb-4 bg-yellow-50 border-l-4 border-[#FFD700] p-3 text-xs text-gray-700 font-medium leading-relaxed"><i class="fa fa-bullhorn text-[#D4AF37] mr-2"></i>${r.c[6].v}</div>` : ''}
                         <div class="grid grid-cols-1 gap-2">
-                            ${ph1 ? `<a href="tel:${ph1}" class="flex items-center justify-between bg-gray-50 p-3 rounded-xl hover:bg-green-50 group transition">
-                                <span class="font-mono text-gray-700 group-hover:text-green-700 font-bold">${ph1}</span>
-                                <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-sm"><i class="fa fa-phone"></i></div>
-                            </a>` : ''}
-                            
-                            ${ph2 ? `<a href="tel:${ph2}" class="flex items-center justify-between bg-gray-50 p-3 rounded-xl hover:bg-green-50 group transition">
-                                <span class="font-mono text-gray-700 group-hover:text-green-700 font-bold">${ph2}</span>
-                                <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-sm"><i class="fa fa-phone"></i></div>
-                            </a>` : ''}
-                            
-                            ${viber ? `<a href="viber://chat?number=${viber}" class="flex items-center justify-between bg-gray-50 p-3 rounded-xl hover:bg-purple-50 group transition">
-                                <span class="font-bold text-gray-700 group-hover:text-[#7360f2]">Viber</span>
-                                <div class="w-8 h-8 rounded-full bg-[#7360f2] text-white flex items-center justify-center shadow-sm"><i class="fab fa-viber"></i></div>
-                            </a>` : ''}
-                            
-                            ${tg ? `<a href="https://t.me/${tg.replace('@','')}" target="_blank" class="flex items-center justify-between bg-gray-50 p-3 rounded-xl hover:bg-blue-50 group transition">
-                                <span class="font-bold text-gray-700 group-hover:text-[#229ED9]">Telegram</span>
-                                <div class="w-8 h-8 rounded-full bg-[#229ED9] text-white flex items-center justify-center shadow-sm"><i class="fab fa-telegram"></i></div>
-                            </a>` : ''}
-                            
-                            ${email ? `<a href="mailto:${email}" class="flex items-center justify-between bg-gray-50 p-3 rounded-xl hover:bg-red-50 group transition">
-                                <span class="text-sm text-gray-700 group-hover:text-red-600 truncate mr-2">${email}</span>
-                                <div class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-sm flex-shrink-0"><i class="fa fa-envelope"></i></div>
-                            </a>` : ''}
+                            ${r.c[1]?.v ? `<a href="tel:${r.c[1].v}" class="flex justify-between bg-gray-50 p-3 rounded-xl hover:bg-green-50"><span class="font-mono text-sm font-bold">${r.c[1].v}</span><i class="fa fa-phone text-green-500"></i></a>` : ''}
+                            ${r.c[2]?.v ? `<a href="tel:${r.c[2].v}" class="flex justify-between bg-gray-50 p-3 rounded-xl hover:bg-green-50"><span class="font-mono text-sm font-bold">${r.c[2].v}</span><i class="fa fa-phone text-green-500"></i></a>` : ''}
+                            ${r.c[3]?.v ? `<a href="viber://chat?number=${r.c[3].v}" class="flex justify-between bg-gray-50 p-3 rounded-xl"><span class="font-bold text-sm">Viber</span><i class="fab fa-viber text-[#7360f2]"></i></a>` : ''}
+                            ${r.c[4]?.v ? `<a href="https://t.me/${r.c[4].v.replace('@','')}" class="flex justify-between bg-gray-50 p-3 rounded-xl"><span class="font-bold text-sm">Telegram</span><i class="fab fa-telegram text-[#229ED9]"></i></a>` : ''}
+                            ${r.c[5]?.v ? `<a href="mailto:${r.c[5].v}" class="flex justify-between bg-gray-50 p-3 rounded-xl"><span class="text-xs truncate mr-2">${r.c[5].v}</span><i class="fa fa-envelope text-red-500"></i></a>` : ''}
                         </div>
-                    </div>`;
-                }).join('');
+                    </div>`).join('');
             });
         }
 
         async function fetchData(gid, callback) {
-            try {
-                const res = await fetch(`${BASE_URL}&gid=${gid}`);
-                const text = await res.text();
-                const json = JSON.parse(text.substr(47).slice(0, -2));
-                callback(json.table.rows);
-            } catch (e) { console.error(e); }
+            try { const res = await fetch(`${BASE_URL}&gid=${gid}`); const text = await res.text(); const json = JSON.parse(text.substr(47).slice(0, -2)); callback(json.table.rows); } catch (e) { console.error(e); }
         }
 
-        // --- Filter Logic ---
-        function setupDirectoryFilters() {
-            const categories = ['All', ...new Set(dirData.map(d => d.cat))];
-            document.getElementById('dirFilters').innerHTML = categories.map(cat => `<button onclick="setDirCategory('${cat}')" class="dir-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${cat === 'All' ? 'bg-[#4B0082] text-white border-[#4B0082]' : 'bg-white text-gray-600 border-gray-200 hover:border-[#D4AF37]'}" id="chip-${cat.replace(/\s/g, '')}">${cat}</button>`).join('');
-        }
-        function setDirCategory(cat) {
-            activeDirCategory = cat;
-            document.querySelectorAll('.dir-chip').forEach(btn => btn.className = "dir-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-white text-gray-600 border-gray-200 hover:border-[#D4AF37]");
-            const active = document.getElementById(`chip-${cat.replace(/\s/g, '')}`);
-            if(active) active.className = "dir-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-[#4B0082] text-white border-[#4B0082]";
-            handleSearch();
-        }
-        function handleSearch() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            renderGroupedDirectory(term, activeDirCategory);
+        function setupFilters(containerId, data, callback) {
+            const cats = ['All', ...new Set(data.map(i => i.cat))];
+            document.getElementById(containerId).innerHTML = cats.map(c => `<button onclick="${callback.name}('${c}')" class="flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold border bg-white border-gray-200 transition-all">${c}</button>`).join('');
         }
 
-        function setupEventFilters() {
-            const categories = ['All', ...new Set(eventsData.map(e => e.cat))];
-            document.getElementById('eventFilters').innerHTML = categories.map(cat => `<button onclick="setEventCategory('${cat}')" class="event-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${cat === 'All' ? 'bg-[#D4AF37] text-white border-[#D4AF37]' : 'bg-white text-gray-600 border-gray-200'}" id="evChip-${cat.replace(/\s/g, '')}">${cat}</button>`).join('');
-        }
-        function setEventCategory(cat) {
-            activeEventCategory = cat;
-            document.querySelectorAll('.event-chip').forEach(btn => btn.className = "event-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-white text-gray-600 border-gray-200");
-            document.getElementById(`evChip-${cat.replace(/\s/g, '')}`).className = "event-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-[#D4AF37] text-white border-[#D4AF37]";
-            renderGroupedEvents(activeEventCategory);
-        }
+        function setDirCategory(cat) { activeDirCategory = cat; handleSearch(); }
+        function setEventCategory(cat) { activeEventCategory = cat; renderGroupedEvents(cat); }
+        function handleSearch() { renderGroupedDirectory(document.getElementById('searchInput').value.toLowerCase(), activeDirCategory); }
 
-        // --- Render Functions ---
-        function renderGroupedEvents(filterCat = 'All') {
+        function renderGroupedEvents(filter = 'All') {
             const list = document.getElementById('announcementList');
-            let filtered = eventsData;
-            if(filterCat !== 'All') filtered = eventsData.filter(e => e.cat === filterCat);
-            if(!filtered.length) { list.innerHTML = '<p class="text-center text-gray-400">No events.</p>'; return; }
-            const groups = filtered.reduce((acc, item) => { acc[item.cat] = acc[item.cat] || []; acc[item.cat].push(item); return acc; }, {});
+            let data = filter === 'All' ? eventsData : eventsData.filter(e => e.cat === filter);
+            const groups = data.reduce((a, i) => { a[i.cat] = a[i.cat] || []; a[i.cat].push(i); return a; }, {});
             list.innerHTML = Object.keys(groups).map(cat => `
-                <div class="mb-4"><h3 class="font-bold text-[#D4AF37] text-sm uppercase tracking-wider mb-2 border-l-4 border-[#D4AF37] pl-2">${cat}</h3><div class="space-y-3">${groups[cat].map(item => {
-                    const index = eventsData.indexOf(item);
-                    const displayImg = item.images.length > 0 ? item.images[0] : (item.logo ? item.logo : 'CDST_Logo.png');
-                    return `<div onclick="openDetail('event', ${index})" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 transition-transform"><img src="${displayImg}" class="w-20 h-20 rounded-lg object-cover bg-gray-100" onerror="this.src='CDST_Logo.png'"><div class="flex-1 flex flex-col justify-center"><h4 class="font-bold text-[#4B0082] text-md leading-tight">${item.title}</h4><p class="text-xs text-gray-500 mt-1 leading-relaxed">${item.desc || ''}</p><span class="text-[10px] text-[#D4AF37] font-bold mt-2">View Details <i class="fa fa-arrow-right"></i></span></div></div>`;
-                }).join('')}</div></div>`).join('');
+                <div><h3 class="font-bold text-[#D4AF37] text-[10px] uppercase tracking-widest mb-2 border-l-4 border-[#D4AF37] pl-2">${cat}</h3>
+                <div class="space-y-3">${groups[cat].map(i => `
+                    <div onclick="openDetail('event', ${eventsData.indexOf(i)})" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer"><img src="${i.images[0] || i.logo || 'CDST_Logo.png'}" class="w-20 h-20 rounded-lg object-cover bg-gray-100" onerror="this.src='CDST_Logo.png'"><div class="flex-1 flex flex-col justify-center"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.title}</h4><p class="text-[10px] text-gray-500 mt-1 leading-relaxed line-clamp-2">${i.desc || ''}</p><span class="text-[9px] text-[#D4AF37] font-bold mt-2 uppercase">View Info <i class="fa fa-arrow-right"></i></span></div></div>`).join('')}</div></div>`).join('');
         }
 
-        function renderGroupedDirectory(searchTerm = '', category = 'All') {
+        function renderGroupedDirectory(term = '', cat = 'All') {
             const list = document.getElementById('directoryList');
-            let filtered = dirData;
-            if (category !== 'All') filtered = filtered.filter(d => d.cat === category);
-            if (searchTerm) filtered = filtered.filter(d => d.name.toLowerCase().includes(searchTerm) || (d.ward && d.ward.toLowerCase().includes(searchTerm)));
-            if(!filtered.length) { list.innerHTML = '<p class="text-center text-gray-400 mt-10">No results found.</p>'; return; }
-            const groups = filtered.reduce((acc, item) => { acc[item.cat] = acc[item.cat] || []; acc[item.cat].push(item); return acc; }, {});
-            list.innerHTML = Object.keys(groups).map(cat => `
-                <div class="mb-5"><h3 class="font-bold text-[#4B0082] text-sm bg-gray-100 px-3 py-1 rounded-lg inline-block mb-3">${cat} <span class="text-xs text-gray-400 ml-1">(${groups[cat].length})</span></h3><div class="grid grid-cols-1 gap-3">${groups[cat].map(item => {
-                    const index = dirData.indexOf(item);
-                    const displayImg = item.img ? item.img : 'CDST_Logo.png'; 
-                    return `<div onclick="openDetail('dir', ${index})" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex gap-3 items-start cursor-pointer active:scale-95 transition-transform"><img src="${displayImg}" class="w-14 h-14 rounded-lg object-cover bg-gray-50 border border-gray-100" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><div class="flex justify-between items-start"><h4 class="font-bold text-[#4B0082] text-md leading-tight break-words">${item.name}</h4>${item.type ? `<span class="text-[9px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 whitespace-nowrap ml-1 flex-shrink-0">${item.type}</span>` : ''}</div><p class="text-xs text-gray-500 mt-0.5 leading-snug break-words">${item.desc || '-'}</p><div class="flex items-center mt-2 text-xs text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${item.ward || 'Taunggyi'}</div></div></div>`;
-                }).join('')}</div></div>`).join('');
+            let data = dirData.filter(d => (cat === 'All' || d.cat === cat) && (d.name.toLowerCase().includes(term) || (d.ward && d.ward.toLowerCase().includes(term))));
+            const groups = data.reduce((a, i) => { a[i.cat] = a[i.cat] || []; a[i.cat].push(i); return a; }, {});
+            list.innerHTML = Object.keys(groups).map(c => `
+                <div class="mb-5"><h3 class="font-bold text-[#4B0082] text-xs bg-gray-100 px-3 py-1 rounded-lg inline-block mb-3">${c}</h3><div class="grid grid-cols-1 gap-3">${groups[c].map(i => `
+                    <div onclick="openDetail('dir', ${dirData.indexOf(i)})" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex gap-3 items-start cursor-pointer"><img src="${i.img || 'CDST_Logo.png'}" class="w-14 h-14 rounded-lg object-cover bg-gray-50" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><div class="flex justify-between items-start mb-1"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.name}</h4><span class="text-[8px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 flex-shrink-0">${i.type || ''}</span></div>
+                    <div class="mb-1">${getStars(i.rating)}</div><p class="text-[10px] text-gray-500 leading-snug break-words line-clamp-1">${i.desc || '-'}</p><div class="flex items-center mt-2 text-[10px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || 'Taunggyi'}</div></div></div>`).join('')}</div></div>`).join('');
         }
 
-        // --- Detail View ---
         function openDetail(type, index) {
-            const modal = document.getElementById('detailPage');
-            const content = document.getElementById('detailContent');
-            const header = document.getElementById('detailHeader');
-            const renderRow = (l, v) => `<div class="border-b border-gray-100 py-3"><p class="text-xs text-gray-400 mb-1">${l}</p><p class="text-gray-800 font-medium text-sm leading-relaxed">${v || '-'}</p></div>`;
-            const renderPhone = (l, v) => v ? `<div class="border-b border-gray-100 py-3 flex justify-between items-center"><div><p class="text-xs text-gray-400 mb-1">${l}</p><p class="text-[#4B0082] font-bold text-sm">${v}</p></div><a href="tel:${v}" class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold"><i class="fa fa-phone"></i> Call</a></div>` : '';
-            
-            let html = '';
+            const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
+            const renderR = (l, v) => `<div class="border-b border-gray-100 py-3"><p class="text-[10px] text-gray-400 mb-0.5">${l}</p><p class="text-gray-800 font-medium text-xs leading-relaxed break-words">${v || '-'}</p></div>`;
+            const renderP = (l, v) => v ? `<div class="border-b border-gray-100 py-3 flex justify-between items-center"><div><p class="text-[10px] text-gray-400 mb-0.5">${l}</p><p class="text-[#4B0082] font-bold text-xs">${v}</p></div><a href="tel:${v}" class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold"><i class="fa fa-phone"></i> CALL</a></div>` : '';
             if(type === 'event') {
-                const i = eventsData[index];
-                header.innerText = "Event Info";
-                html = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.logo || 'CDST_Logo.png'}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[10px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm space-y-1">${renderRow('Description', i.desc)}${renderRow('From', i.fromDate)}${renderRow('To', i.toDate)}${renderRow('Time', i.time)}${renderRow('Place', i.place)}</div></div>`;
+                const i = eventsData[index]; document.getElementById('detailHeader').innerText = "Event Info";
+                content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.logo || i.images[0] || 'CDST_Logo.png'}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderR('Description', i.desc)}${renderR('From', i.fromDate)}${renderR('To', i.toDate)}${renderR('Time', i.time)}${renderR('Place', i.place)}</div></div>`;
             } else {
-                const i = dirData[index];
-                header.innerText = i.name;
-                html = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.img || 'CDST_Logo.png'}" class="w-24 h-24 rounded-lg object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-xl font-bold text-[#4B0082] leading-tight">${i.name}</h2><p class="text-xs text-gray-500 mt-1">${i.type || ''}</p></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Info</h3>${renderRow('Category', i.cat)}${renderRow('Description', i.desc)}${renderRow('Address', i.addr)}${renderRow('Ward', i.ward)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Contact</h3>${renderPhone('Phone 1', i.ph1)}${renderPhone('Phone 2', i.ph2)}${renderPhone('Phone 3', i.ph3)}</div></div>`;
+                const i = dirData[index]; document.getElementById('detailHeader').innerText = i.name;
+                content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.img || 'CDST_Logo.png'}" class="w-24 h-24 rounded-lg object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><p class="text-xs text-gray-500 mt-2">${i.type || ''}</p></div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderR('Category', i.cat)}${renderR('Description', i.desc)}${renderR('Address', i.addr)}${renderR('Ward', i.ward)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderP('Phone 1', i.ph1)}${renderP('Phone 2', i.ph2)}${renderP('Phone 3', i.ph3)}</div></div>`;
             }
-            content.innerHTML = html;
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            document.getElementById('bottomNav').style.transform = 'translateY(150%)';
+            modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
 
-        function closeDetail() {
-            document.getElementById('detailPage').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            document.getElementById('bottomNav').style.transform = 'translateY(0)';
-        }
+        function closeDetail() { document.getElementById('detailPage').style.display = 'none'; document.body.style.overflow = 'auto'; document.getElementById('bottomNav').style.transform = 'translateY(0)'; }
 
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => { if(p.id !== 'detailPage') p.classList.remove('active-page'); if(p.id !== 'detailPage') setTimeout(() => { if(!p.classList.contains('active-page')) p.style.display = 'none'; }, 200); });
-            const activePage = document.getElementById(pageId + 'Page');
-            activePage.style.display = 'block';
-            setTimeout(() => activePage.classList.add('active-page'), 10);
-            
+        function showPage(p) {
+            document.querySelectorAll('.page').forEach(page => { page.classList.remove('active-page'); setTimeout(() => { if(!page.classList.contains('active-page')) page.style.display = 'none'; }, 200); });
+            const active = document.getElementById(p + 'Page'); active.style.display = 'block'; setTimeout(() => active.classList.add('active-page'), 10);
             const navs = {'home': 'nav-home', 'directory': 'nav-directory', 'contact': 'nav-contact'};
-            Object.values(navs).forEach(id => {
-                const btn = document.getElementById(id);
-                btn.classList.remove('text-[#FFD700]', 'scale-110');
-                if(id !== 'nav-directory') btn.classList.add('text-gray-400');
-                else btn.querySelector('div').classList.remove('ring-4', 'ring-[#FFD700]/30');
-            });
-            const active = document.getElementById(navs[pageId]);
-            if (pageId === 'directory') active.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30');
-            else active.classList.add('text-[#FFD700]', 'scale-110');
+            Object.values(navs).forEach(id => { const btn = document.getElementById(id); btn.classList.remove('text-[#FFD700]', 'scale-110'); if(id !== 'nav-directory') btn.classList.add('text-gray-400'); else btn.querySelector('div').classList.remove('ring-4', 'ring-[#FFD700]/30'); });
+            const a = document.getElementById(navs[p]); if (p === 'directory') a.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30'); else a.classList.add('text-[#FFD700]', 'scale-110');
             window.scrollTo(0,0);
         }
-
         loadAllData();
     </script>
 </body>
