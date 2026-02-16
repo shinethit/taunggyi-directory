@@ -10,7 +10,6 @@
     <meta name="apple-mobile-web-app-title" content="Cherry Directory">
     <link rel="apple-touch-icon" href="CDST_Logo.png">
     <link rel="icon" type="image/png" sizes="192x192" href="CDST_Logo.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="CDST_Logo.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -22,15 +21,10 @@
         .active-page { display: block; opacity: 1; transition: opacity 0.3s; }
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
-        .viber-bg { background-color: #7360f2; }
-        .telegram-bg { background-color: #229ED9; }
-
-        /* Content Formatting */
         .post-content { white-space: pre-wrap; line-height: 1.8; word-break: break-word; }
         .gallery-scroll { display: flex; overflow-x: auto; gap: 12px; padding: 5px; scroll-snap-type: x mandatory; }
         .gallery-item { flex: 0 0 100%; scroll-snap-align: center; height: 320px; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .gallery-item img { width: 100%; height: 100%; object-fit: contain; }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .slide-up { animation: slideUp 0.3s ease-out forwards; }
@@ -77,7 +71,7 @@
             <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 relative overflow-hidden text-center">
                 <h3 class="font-bold text-[#4B0082] text-md mb-1">လုပ်ငန်းရှင်များအတွက်</h3>
                 <p class="text-xs text-gray-600 mb-3">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
-                <a id="regBtn" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow cursor-pointer active:scale-95">စာရင်းသွင်းရန်</a>
+                <a id="regBtn" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow cursor-pointer">စာရင်းသွင်းရန်</a>
             </div>
             <div id="adminProfileArea"></div>
             <div id="adminNotesArea" class="space-y-3"></div>
@@ -99,7 +93,6 @@
     </nav>
 
     <script>
-        // SERVICE WORKER REGISTRATION (Back to Stable v2 Logic)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').then(reg => console.log('SW Active'));
@@ -115,12 +108,10 @@
         let eventsData = [], dirData = [];
         let activeDirCat = 'All', activeEventCat = 'All';
 
-        // --- UNIVERSAL IMAGE LINK FIX (iOS & ANDROID) ---
         function fixDriveLink(url) {
             if (!url || url === "" || url === "-") return 'CDST_Logo.png';
             const driveMatch = url.match(/(?:id=|\/d\/|folders\/)([a-zA-Z0-9_-]{25,})/);
             if (driveMatch && driveMatch[1]) {
-                // Using the most stable thumbnail endpoint for all mobile browsers
                 return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1000`;
             }
             return url;
@@ -146,12 +137,15 @@
         }
 
         async function loadAllData() {
+            // Priority: Offline Cache
             const cEvents = localStorage.getItem('cache_events');
             const cDir = localStorage.getItem('cache_dir');
             const cAdmin = localStorage.getItem('cache_admin');
             if(cEvents) { eventsData = JSON.parse(cEvents); setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); }); renderEvents(); }
             if(cDir) { dirData = JSON.parse(cDir); setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); renderDirectory(); }
             if(cAdmin) { renderAdminArea(JSON.parse(cAdmin)); }
+            
+            // Sync Fresh Data
             fetchEvents(); fetchDirectory(); fetchAdmin();
         }
 
@@ -160,8 +154,12 @@
                 const res = await fetch(`${BASE_URL}&gid=${GID_HOME}`);
                 const text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
-                eventsData = json.table.rows.map(r => ({ cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
-                .filter(i => i.title && i.title !== "Title").reverse(); 
+                eventsData = json.table.rows.map(r => ({ 
+                    cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, 
+                    fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, 
+                    place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, 
+                    images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) 
+                })).filter(i => i.title && i.title !== "Title").reverse(); 
                 localStorage.setItem('cache_events', JSON.stringify(eventsData));
                 setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); });
                 renderEvents();
@@ -261,29 +259,28 @@
 
         function openDetail(type, index) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
-            const renderR = (l, v) => `<div class="border-b border-gray-50 py-3"><p class="text-[10px] text-gray-400 mb-0.5 uppercase font-bold tracking-wider">${l}</p><div class="text-gray-800 font-medium text-sm post-content">${v || '-'}</div></div>`;
-            const renderP = (l, v) => v ? `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div><p class="text-[10px] text-gray-400 mb-0.5 uppercase font-bold">${l}</p><p class="text-[#4B0082] font-bold text-sm font-mono">${v}</p></div><a href="tel:${v}" class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm active:scale-90"><i class="fa fa-phone mr-1"></i> CALL</a></div>` : '';
-            const renderC = (l, v, i, c, lp) => v ? `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i class="${i}"></i></div><div><p class="text-[10px] text-gray-400 uppercase font-bold">${l}</p><p class="text-xs font-bold text-gray-700">${v}</p></div></div><a href="${lp}${v.toString().replace('@','')}" target="_blank" class="${c} text-white px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm active:scale-90">CHAT</a></div>` : '';
+            const rR = (l, v) => `<div class="border-b border-gray-50 py-3"><p class="text-[10px] text-gray-400 mb-0.5 uppercase font-bold tracking-wider">${l}</p><div class="text-gray-800 font-medium text-sm post-content">${v || '-'}</div></div>`;
+            const rP = (l, v) => v ? `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div><p class="text-[10px] text-gray-400 mb-0.5 uppercase font-bold">${l}</p><p class="text-[#4B0082] font-bold text-sm font-mono">${v}</p></div><a href="tel:${v}" class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm active:scale-90"><i class="fa fa-phone mr-1"></i> CALL</a></div>` : '';
+            const rC = (l, v, i, c, lp) => v ? `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i class="${i}"></i></div><div><p class="text-[10px] text-gray-400 uppercase font-bold">${l}</p><p class="text-xs font-bold text-gray-700">${v}</p></div></div><a href="${lp}${v.toString().replace('@','')}" target="_blank" class="${c} text-white px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm active:scale-90">CHAT</a></div>` : '';
 
             if(type === 'event') {
                 const i = eventsData[index]; document.getElementById('detailHeader').innerText = "Post Details";
                 const imgs = i.images.length > 0 ? i.images : [];
-                content.innerHTML = `
-                    <div class="space-y-4 slide-up">
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border-b-4 border-[#D4AF37] flex items-center gap-4">
-                            <img src="${fixDriveLink(i.logo)}" referrerpolicy="no-referrer" class="w-16 h-16 rounded-xl object-cover border" onerror="this.src='CDST_Logo.png'">
-                            <div class="flex-1"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-1 inline-block">${i.cat}</span></div>
-                        </div>
-                        ${imgs.length > 0 ? `<div class="bg-white p-2 rounded-2xl shadow-sm"><div class="gallery-scroll">${imgs.map(img => `<div class="gallery-item"><img src="${fixDriveLink(img)}" referrerpolicy="no-referrer" onclick="window.open(this.src)"></div>`).join('')}</div><p class="text-[9px] text-center text-gray-400 mt-2 italic"><i class="fa fa-arrow-left mr-1"></i> Swipe for more images <i class="fa fa-arrow-right ml-1"></i></p></div>` : ''}
-                        <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest">Information</h3>
-                        ${renderR('Description', i.desc)}${renderR('Organized by', i.org)}${renderR('Location', i.place)}${renderR('Date', (i.fromDate + ' to ' + i.toDate))}${renderR('Time', i.time)}</div></div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border-b-4 border-[#D4AF37] flex items-center gap-4">
+                        <img src="${fixDriveLink(i.logo)}" referrerpolicy="no-referrer" class="w-16 h-16 rounded-xl object-cover border" onerror="this.src='CDST_Logo.png'">
+                        <div class="flex-1"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-1 inline-block">${i.cat}</span></div>
+                    </div>
+                    ${imgs.length > 0 ? `<div class="bg-white p-2 rounded-2xl shadow-sm"><div class="gallery-scroll">${imgs.map(img => `<div class="gallery-item"><img src="${fixDriveLink(img)}" referrerpolicy="no-referrer" onclick="window.open(this.src)"></div>`).join('')}</div><p class="text-[9px] text-center text-gray-400 mt-2 italic"><i class="fa fa-arrow-left mr-1"></i> Swipe for all images <i class="fa fa-arrow-right ml-1"></i></p></div>` : ''}
+                    <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest"><i class="fa fa-info-circle mr-2 text-[#D4AF37]"></i> Information</h3>
+                    ${rR('Description', i.desc)}${rR('Organized by', i.org)}${rR('Location', i.place)}${rR('Date', (i.fromDate + ' to ' + i.toDate))}${rR('Time', i.time)}</div></div>`;
             } else {
                 const i = dirData[index]; document.getElementById('detailHeader').innerText = i.name;
                 content.innerHTML = `<div class="space-y-4 slide-up">
                     <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.img)}" referrerpolicy="no-referrer" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-xl font-bold text-[#4B0082]">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-4 py-1.5 rounded-full shadow-sm hover:bg-gray-200"><i class="fa fa-pen mr-1"></i> Write Review</a></div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest">Basic Info</h3>${renderR('Description', i.desc)}${renderR('Category', i.cat)}${renderR('Type', i.type)}${renderR('Address', i.addr)}${renderR('Ward', i.ward)}</div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest">Contact</h3>${renderP('Phone 1', i.ph1)}${renderP('Phone 2', i.ph2)}</div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest">Digital Contact</h3>${renderC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${renderC('Telegram', i.telegram, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest"><i class="fa fa-id-card mr-2 text-[#D4AF37]"></i> Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Address', i.addr)}${rR('Ward', i.ward)}</div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest"><i class="fa fa-phone-volume mr-2 text-[#D4AF37]"></i> Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest"><i class="fa fa-share-nodes mr-2 text-[#D4AF37]"></i> Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${rC('Telegram', i.telegram, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>
                     ${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400"><h3 class="font-bold text-[#4B0082] text-xs uppercase mb-2">Note</h3><p class="text-sm text-gray-600 post-content">${i.note}</p></div>` : ''}</div>`;
             }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
