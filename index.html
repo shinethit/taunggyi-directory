@@ -3,57 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cherry Directory</title>
+    <title>Cherry Directory (Debug Mode)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
-        body { 
-            font-family: 'Pyidaungsu', sans-serif; 
-            padding-bottom: 110px; 
-            background-color: #f8f5ff;
-        }
+        body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 110px; background-color: #f8f5ff; }
         .page { display: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
         .active-page { display: block; opacity: 1; }
-        
-        /* Theme Colors */
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
         .viber-bg { background-color: #7360f2; }
         .telegram-bg { background-color: #229ED9; }
-        
-        /* Animation */
         .slide-up { animation: slideUp 0.3s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* Gallery Scroll */
-        .gallery-scroll {
-            display: flex;
-            overflow-x: auto;
-            gap: 10px;
-            padding-bottom: 10px;
-            scroll-snap-type: x mandatory;
-        }
-        .gallery-item {
-            flex: 0 0 80%;
-            scroll-snap-align: center;
-        }
+        .gallery-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scroll-snap-type: x mandatory; }
+        .gallery-item { flex: 0 0 80%; scroll-snap-align: center; }
     </style>
 </head>
 <body>
 
+    <div id="errorBox" class="hidden fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-6 max-w-sm w-full text-center">
+            <i class="fa fa-exclamation-triangle text-red-500 text-4xl mb-3"></i>
+            <h3 class="font-bold text-lg text-red-600 mb-2">Error Occurred!</h3>
+            <p id="errorMsg" class="text-sm text-gray-700 mb-4 bg-gray-100 p-2 rounded text-left overflow-auto max-h-40">Loading...</p>
+            <button onclick="document.getElementById('errorBox').style.display='none'" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm">Close</button>
+        </div>
+    </div>
+
     <header class="purple-gradient text-white pt-4 pb-6 px-4 shadow-xl rounded-b-[30px] border-b-2 border-[#D4AF37] relative z-0">
-        
         <div class="text-center mb-4 border-b border-white/10 pb-2">
-            <p id="dateEng" class="text-[10px] text-[#FFD700] font-mono opacity-90 tracking-widest uppercase">LOADING DATE...</p>
+            <p id="dateEng" class="text-[10px] text-[#FFD700] font-mono opacity-90 tracking-widest uppercase">LOADING...</p>
             <p id="dateMm" class="text-xs text-white font-bold mt-1">...</p>
             <p id="timeClock" class="text-2xl font-bold text-white mt-1 tracking-widest drop-shadow-md">00:00</p>
         </div>
-
         <div class="flex items-center gap-4">
-            <img src="CDST_Logo.png" alt="Logo" 
-                 class="w-16 h-16 rounded-xl border-2 border-[#FFD700] shadow-lg object-cover bg-[#37006a]"
-                 onerror="this.style.display='none'">
+            <img src="CDST_Logo.png" alt="Logo" class="w-16 h-16 rounded-xl border-2 border-[#FFD700] shadow-lg object-cover bg-[#37006a]" onerror="this.style.display='none'">
             <div class="text-left">
                 <h1 class="text-xl font-bold tracking-wider text-white font-['Pyidaungsu']">Cherry Directory</h1>
                 <p class="text-[10px] text-gray-300 tracking-widest uppercase">Since 2026 • by Shine Thit</p>
@@ -62,151 +48,100 @@
     </header>
 
     <div class="max-w-4xl mx-auto p-4 mt-2 mb-20 relative">
-        
         <section id="homePage" class="page active-page space-y-4">
             <div class="flex items-center mb-2 px-2">
                 <i class="fa fa-bullhorn text-[#4B0082] mr-2 text-xl"></i>
                 <h2 class="font-bold text-lg text-[#4B0082]">Events & News</h2>
             </div>
-            <div id="announcementList" class="space-y-4 pb-4">
-                <div class="text-center text-gray-400 py-10 animate-pulse">Loading events...</div>
-            </div>
+            <div id="announcementList" class="space-y-4 pb-4"><div class="text-center text-gray-400 py-10 animate-pulse">Loading events...</div></div>
         </section>
 
         <section id="directoryPage" class="page">
             <div class="sticky top-2 z-30 bg-[#f8f5ff]/95 backdrop-blur-sm py-2">
-                <div class="relative">
-                    <input type="text" id="searchInput" onkeyup="filterDirectory()" 
-                           placeholder="လုပ်ငန်းအမည် ရှာရန်..." 
-                           class="w-full p-3 pl-10 rounded-xl shadow-md border border-[#D4AF37] outline-none focus:ring-2 focus:ring-[#4B0082]">
-                    <i class="fa fa-search absolute left-4 top-4 text-[#D4AF37]"></i>
-                </div>
+                <input type="text" id="searchInput" onkeyup="filterDirectory()" placeholder="လုပ်ငန်းအမည် ရှာရန်..." class="w-full p-3 pl-10 rounded-xl shadow-md border border-[#D4AF37] outline-none">
+                <i class="fa fa-search absolute left-4 top-4 text-[#D4AF37]"></i>
             </div>
-            <div id="directoryList" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div class="text-center text-gray-400 py-10 col-span-2">Loading directory...</div>
-            </div>
+            <div id="directoryList" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"><div class="text-center text-gray-400 py-10 col-span-2">Loading directory...</div></div>
         </section>
 
         <section id="contactPage" class="page">
-            
             <div class="bg-white p-6 rounded-3xl shadow-lg border-l-4 border-[#D4AF37] mb-6 relative overflow-hidden">
-                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
-                    <i class="fa fa-file-pen text-9xl text-[#4B0082]"></i>
-                </div>
                 <h3 class="font-bold text-[#4B0082] text-lg mb-2 relative z-10">လုပ်ငန်းရှင်များအတွက်</h3>
-                <p class="text-sm text-gray-600 mb-4 relative z-10">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက အောက်ပါ Form ကို ဖြည့်စွက်ပေးပါ။</p>
-                <a href="#" id="registerLink" target="_blank" class="block w-full gold-gradient text-white text-center font-bold py-3 rounded-xl shadow-md hover:opacity-90 transition relative z-10">
-                    <i class="fa fa-plus-circle mr-2"></i> လုပ်ငန်းစာရင်းသွင်းရန်
-                </a>
+                <p class="text-sm text-gray-600 mb-4 relative z-10">မိမိတို့ လုပ်ငန်းကို ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
+                <a href="#" id="registerLink" target="_blank" class="block w-full gold-gradient text-white text-center font-bold py-3 rounded-xl shadow-md relative z-10">လုပ်ငန်းစာရင်းသွင်းရန်</a>
             </div>
-
             <div class="bg-white p-6 rounded-3xl shadow-lg border-t-4 border-[#4B0082]">
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 purple-gradient rounded-full mx-auto flex items-center justify-center text-white text-2xl mb-3 shadow-md">
-                        <i class="fa fa-headset"></i>
-                    </div>
-                    <h2 class="font-bold text-2xl text-[#4B0082]">Admin Contact</h2>
-                    <p class="text-gray-400 text-xs mt-1">For general inquiries & support</p>
-                </div>
-                <div id="contactInfo" class="space-y-4">
-                    <div class="text-center text-gray-400">Loading info...</div>
-                </div>
+                <h2 class="font-bold text-2xl text-[#4B0082] text-center mb-4">Admin Contact</h2>
+                <div id="contactInfo" class="space-y-4"><div class="text-center text-gray-400">Loading info...</div></div>
             </div>
         </section>
 
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
             <div class="sticky top-0 bg-white/95 backdrop-blur-md p-3 shadow-sm z-50 flex items-center border-b border-gray-200">
-                <button onclick="closeDetail()" class="w-10 h-10 rounded-full bg-gray-100 text-[#4B0082] flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition-colors">
-                    <i class="fa fa-arrow-left"></i>
-                </button>
+                <button onclick="closeDetail()" class="w-10 h-10 rounded-full bg-gray-100 text-[#4B0082] flex items-center justify-center"><i class="fa fa-arrow-left"></i></button>
                 <span class="ml-3 font-bold text-[#4B0082] truncate" id="detailHeader">Details</span>
             </div>
-            <div id="detailContent" class="p-5 max-w-2xl mx-auto pb-24 slide-up">
-                </div>
+            <div id="detailContent" class="p-5 max-w-2xl mx-auto pb-24 slide-up"></div>
         </section>
-
     </div>
 
     <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50 transition-transform duration-300">
-        <button onclick="showPage('home')" class="nav-item flex flex-col items-center p-2 w-16 text-[#FFD700]" id="nav-home">
-            <i class="fa fa-home text-xl mb-1"></i>
-            <span class="text-[10px] font-bold">Home</span>
-        </button>
-        <button onclick="showPage('directory')" class="nav-item flex flex-col items-center p-2 w-16 relative" id="nav-directory">
-             <div class="bg-[#D4AF37] text-[#37006a] w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow border-4 border-[#f8f5ff]">
-                <i class="fa fa-search text-xl font-bold"></i>
-            </div>
-            <span class="text-[10px] font-bold mt-1">Search</span>
-        </button>
-        <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact">
-            <i class="fa fa-info-circle text-xl mb-1"></i>
-            <span class="text-[10px] font-bold">Admin</span>
-        </button>
+        <button onclick="showPage('home')" class="nav-item flex flex-col items-center p-2 w-16 text-[#FFD700]" id="nav-home"><i class="fa fa-home text-xl mb-1"></i><span class="text-[10px] font-bold">Home</span></button>
+        <button onclick="showPage('directory')" class="nav-item flex flex-col items-center p-2 w-16 relative" id="nav-directory"><div class="bg-[#D4AF37] text-[#37006a] w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow border-4 border-[#f8f5ff]"><i class="fa fa-search text-xl font-bold"></i></div><span class="text-[10px] font-bold mt-1">Search</span></button>
+        <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact"><i class="fa fa-info-circle text-xl mb-1"></i><span class="text-[10px] font-bold">Admin</span></button>
     </nav>
 
     <script>
-        // =================================================================
-        // ⚠️ GID များ ပြန်ထည့်ပါ ⚠️
-        // =================================================================
+        // ==========================================
+        // ⚠️ GID များ အမှန်ထည့်ပါ ⚠️
+        // ==========================================
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const GID_HOME = '0';      
-        const GID_DIR = '1267218282';       
-        const GID_CONTACT = '626044868';   
-        // =================================================================
+        const GID_DIR = '1267218282';       // <--- ပြောင်းပါ
+        const GID_CONTACT = '626044868';   // <--- ပြောင်းပါ
+        // ==========================================
 
-        // =================================================================
-        // ⚠️ Form Links ⚠️
-        // =================================================================
-        const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog"; 
+        const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
         const REGISTER_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog";
         document.getElementById('registerLink').href = REGISTER_FORM_LINK;
-        // =================================================================
+
+        // Error Show Function
+        function showError(msg) {
+            document.getElementById('errorBox').classList.remove('hidden');
+            document.getElementById('errorMsg').innerText = msg;
+        }
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         let eventsData = [], dirData = [];
 
-        // --- Date & Time Logic ---
         function updateDateTime() {
-            const now = new Date();
-            
-            // English Date
-            const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-            document.getElementById('dateEng').innerText = now.toLocaleDateString('en-US', dateOptions);
-
-            // Time (12 Hr)
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; 
-            document.getElementById('timeClock').innerText = `${hours}:${minutes} ${ampm}`;
-
-            // Myanmar Date (Simple Mapping)
-            const monthsMm = ["ဇန်နဝါရီ","ဖေဖော်ဝါရီ","မတ်","ဧပြီ","မေ","ဇွန်","ဇူလိုင်","သြဂုတ်","စက်တင်ဘာ","အောက်တိုဘာ","နိုဝင်ဘာ","ဒီဇင်ဘာ"];
-            const daysMm = ["တနင်္ဂနွေ","တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ","စနေ"];
-            
-            const dayName = daysMm[now.getDay()];
-            const dayNum = now.getDate().toString().replace(/[0-9]/g, d => "၀၁၂၃၄၅၆၇၈၉"[d]);
-            const monthName = monthsMm[now.getMonth()];
-            const yearNum = now.getFullYear().toString().replace(/[0-9]/g, d => "၀၁၂၃၄၅၆၇၈၉"[d]);
-
-            document.getElementById('dateMm').innerText = `${dayName}၊ ${dayNum} ${monthName} ${yearNum}`;
+            try {
+                const now = new Date();
+                const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+                document.getElementById('dateEng').innerText = now.toLocaleDateString('en-US', dateOptions);
+                let hours = now.getHours();
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12; hours = hours ? hours : 12; 
+                document.getElementById('timeClock').innerText = `${hours}:${minutes} ${ampm}`;
+                const monthsMm = ["ဇန်နဝါရီ","ဖေဖော်ဝါရီ","မတ်","ဧပြီ","မေ","ဇွန်","ဇူလိုင်","သြဂုတ်","စက်တင်ဘာ","အောက်တိုဘာ","နိုဝင်ဘာ","ဒီဇင်ဘာ"];
+                const daysMm = ["တနင်္ဂနွေ","တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ","စနေ"];
+                document.getElementById('dateMm').innerText = `${daysMm[now.getDay()]}၊ ${now.getDate().toString().replace(/[0-9]/g, d => "၀၁၂၃၄၅၆၇၈၉"[d])} ${monthsMm[now.getMonth()]} ${now.getFullYear().toString().replace(/[0-9]/g, d => "၀၁၂၃၄၅၆၇၈၉"[d])}`;
+            } catch(e) { console.error("Time Error"); }
         }
-        setInterval(updateDateTime, 1000); // Update every second
-        updateDateTime(); // Run immediately
+        setInterval(updateDateTime, 1000); updateDateTime();
 
         async function loadAllData() {
-            // Events (Column A is Category now)
+            // Events
             fetchData(GID_HOME, (rows) => {
                 eventsData = rows.map(r => ({
-                    cat: r.c[0]?.v, // Category
-                    title: r.c[1]?.v, desc: r.c[2]?.v, 
+                    cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, 
                     fromDate: r.c[3]?.v, toDate: r.c[4]?.v,
                     time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v,
                     images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean)
                 }));
                 renderEvents();
-            });
+            }, "Events");
 
             // Directory
             fetchData(GID_DIR, (rows) => {
@@ -218,34 +153,38 @@
                     img: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v
                 }));
                 renderDirectory(dirData);
-            });
+            }, "Directory");
 
             // Contact
             fetchData(GID_CONTACT, (rows) => {
-                const list = document.getElementById('contactInfo');
-                list.innerHTML = rows.map(r => `
+                document.getElementById('contactInfo').innerHTML = rows.map(r => `
                     <div class="bg-gray-50 p-5 rounded-2xl border border-gray-200 mb-4 shadow-sm">
-                        <h3 class="text-[#4B0082] font-bold text-lg mb-3 flex items-center">
-                            <i class="fa fa-user-circle mr-2"></i> ${r.c[0]?.v || 'Admin'}
-                        </h3>
+                        <h3 class="text-[#4B0082] font-bold text-lg mb-3 flex items-center"><i class="fa fa-user-circle mr-2"></i> ${r.c[0]?.v || 'Admin'}</h3>
                         <div class="space-y-3">
-                            ${r.c[1]?.v ? `<a href="tel:${r.c[1].v}" class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100 hover:border-[#D4AF37]"><span class="font-mono font-bold">${r.c[1].v}</span> <i class="fa fa-phone text-green-500"></i></a>` : ''}
-                            ${r.c[2]?.v ? `<a href="tel:${r.c[2].v}" class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100 hover:border-[#D4AF37]"><span class="font-mono font-bold">${r.c[2].v}</span> <i class="fa fa-phone text-green-500"></i></a>` : ''}
-                            ${r.c[3]?.v ? `<a href="viber://chat?number=${r.c[3].v}" class="flex items-center justify-between viber-bg text-white p-3 rounded-xl"><span class="font-bold">Viber</span> <i class="fab fa-viber text-xl"></i></a>` : ''}
-                            ${r.c[4]?.v ? `<a href="https://t.me/${r.c[4].v.replace('@','')}" target="_blank" class="flex items-center justify-between telegram-bg text-white p-3 rounded-xl"><span class="font-bold">Telegram</span> <i class="fab fa-telegram text-xl"></i></a>` : ''}
+                            ${r.c[1]?.v ? `<a href="tel:${r.c[1].v}" class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100"><span class="font-mono font-bold">${r.c[1].v}</span> <i class="fa fa-phone text-green-500"></i></a>` : ''}
+                            ${r.c[2]?.v ? `<a href="tel:${r.c[2].v}" class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100"><span class="font-mono font-bold">${r.c[2].v}</span> <i class="fa fa-phone text-green-500"></i></a>` : ''}
                         </div>
-                    </div>
-                `).join('');
-            });
+                    </div>`).join('');
+            }, "Contact");
         }
 
-        async function fetchData(gid, callback) {
+        async function fetchData(gid, callback, tabName) {
             try {
                 const res = await fetch(`${BASE_URL}&gid=${gid}`);
+                if (!res.ok) throw new Error("Network response was not ok");
                 const text = await res.text();
+                
+                // Check if Google Sheet returned HTML (Login page) instead of JSON
+                if (!text.includes("google.visualization.Query.setResponse")) {
+                     throw new Error(`Google Sheet Permission Error!\n(Sheet ${tabName || ''} is not Public).\nPlease click 'Share' -> 'Anyone with the link'.`);
+                }
+                
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 callback(json.table.rows);
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                showError(`Error Loading ${tabName || 'Data'}:\n${e.message}`);
+            }
         }
 
         function getStars(rating) {
@@ -260,18 +199,12 @@
             return html;
         }
 
-        // Render Functions
         function renderEvents() {
             const list = document.getElementById('announcementList');
-            // Empty check for all fields to ensure no broken cards
             if(!eventsData.length) { list.innerHTML = '<p class="text-center text-gray-400">No events found.</p>'; return; }
-            
             list.innerHTML = eventsData.map((item, index) => {
-                // If title is missing, skip rendering this card
-                if (!item.title) return '';
-
+                if (!item.title) return ''; // Skip empty rows
                 const displayImg = item.images.length > 0 ? item.images[0] : (item.logo ? item.logo : 'CDST_Logo.png');
-                
                 return `
                 <div onclick="openDetail('event', ${index})" class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3 cursor-pointer">
                     <img src="${displayImg}" class="w-24 h-24 object-cover" onerror="this.src='CDST_Logo.png'">
@@ -279,5 +212,84 @@
                         ${item.cat ? `<span class="text-[10px] text-white bg-[#D4AF37] px-2 py-0.5 rounded-full self-start mb-1 font-bold uppercase">${item.cat}</span>` : ''}
                         <h3 class="font-bold text-[#4B0082] line-clamp-1 text-lg">${item.title}</h3>
                         <p class="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">${item.desc || ''}</p>
-                        <div class="mt-2 text-right">
-                             <span class="text-[10px] text-[#4B0082] font-bold">Read More <i class="fa fa
+                        <div class="mt-2 text-right"><span class="text-[10px] text-[#4B0082] font-bold">Read More <i class="fa fa-arrow-right ml-1"></i></span></div>
+                    </div>
+                </div>`
+            }).join('');
+        }
+
+        function renderDirectory(data) {
+            const list = document.getElementById('directoryList');
+            if(!data.length) { list.innerHTML = '<p class="col-span-2 text-center text-gray-400">No data.</p>'; return; }
+            list.innerHTML = data.map((item, index) => {
+                const realIndex = dirData.indexOf(item);
+                const displayImg = item.img ? item.img : 'CDST_Logo.png'; 
+                return `
+                <div onclick="openDetail('dir', ${realIndex})" class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37] cursor-pointer">
+                    <div class="flex items-start gap-3">
+                        <img src="${displayImg}" class="w-16 h-16 rounded-lg object-cover bg-gray-100 border border-gray-200" onerror="this.src='CDST_Logo.png'">
+                        <div class="flex-1 overflow-hidden">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded inline-block truncate">${item.cat || 'General'}</span>
+                                ${getStars(item.rating)}
+                            </div>
+                            <h3 class="font-bold text-[#4B0082] text-md truncate">${item.name || 'Unknown'}</h3>
+                            <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-marker-alt mr-1 text-[#D4AF37]"></i>${item.city || item.ward || 'Taunggyi'}</p>
+                        </div>
+                    </div>
+                </div>`
+            }).join('');
+        }
+
+        function openDetail(type, index) {
+            const modal = document.getElementById('detailPage');
+            const content = document.getElementById('detailContent');
+            const header = document.getElementById('detailHeader');
+            const renderRow = (label, value) => `<div class="border-b border-gray-100 py-3"><p class="text-xs text-gray-400 mb-1">${label}</p><p class="text-gray-800 font-medium text-sm leading-relaxed">${value || '-'}</p></div>`;
+            const renderContactRow = (label, value, iconClass, colorClass, linkPrefix) => `<div class="border-b border-gray-100 py-3 flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><i class="${iconClass}"></i></div><div><p class="text-xs text-gray-400">${label}</p><p class="text-sm font-bold text-gray-700">${value || '-'}</p></div></div>${value ? `<a href="${linkPrefix}${value.replace('@','')}" target="_blank" class="${colorClass} text-white px-3 py-1 rounded-lg text-xs font-bold shadow-sm">Open</a>` : ''}</div>`;
+            const renderPhoneRow = (label, value) => `<div class="border-b border-gray-100 py-3 flex items-center justify-between"><div><p class="text-xs text-gray-400 mb-1">${label}</p><p class="text-[#4B0082] font-bold text-sm">${value || '-'}</p></div>${value ? `<a href="tel:${value}" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow flex items-center transition"><i class="fa fa-phone mr-1"></i> Call</a>` : ''}</div>`;
+
+            let html = '';
+            if(type === 'event') {
+                const i = eventsData[index];
+                header.innerText = "Event Info";
+                html = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.logo ? i.logo : 'CDST_Logo.png'}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-4 border-4 border-[#D4AF37] shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-xl font-bold text-[#4B0082]">${i.title || '-'}</h2>${i.org ? `<p class="text-[#D4AF37] font-bold text-xs mt-1 uppercase">By ${i.org}</p>` : ''}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Event Information</h3>${renderRow('အမည်', i.title)}${renderRow('ကဏ္ဍ', i.cat)}${renderRow('ဖော်ပြချက်', i.desc)}${renderRow('စမည့်နေ့ရက်', i.fromDate)}${renderRow('ပြီးမည့်နေ့ရက်', i.toDate)}${renderRow('အချိန်', i.time)}${renderRow('နေရာ', i.place)}${renderRow('စီစဉ်သူ', i.org)}</div>${i.images.length > 0 ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-3 border-b border-gray-100 pb-2">Gallery</h3><div class="gallery-scroll">${i.images.map(img => `<div class="gallery-item"><img src="${img}" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" onclick="window.open(this.src)"></div>`).join('')}</div></div>` : ''}</div>`;
+            } else if (type === 'dir') {
+                const i = dirData[index];
+                header.innerText = i.name;
+                const detailImg = i.img ? i.img : 'CDST_Logo.png';
+                html = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${detailImg}" class="w-32 h-32 rounded-lg object-cover mx-auto mb-3 border-4 border-[#D4AF37] shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-xl font-bold text-[#4B0082]">${i.name || '-'}</h2><div class="flex justify-center mt-2 mb-2">${getStars(i.rating)}</div><a href="${REVIEW_FORM_LINK}" target="_blank" class="inline-block text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full hover:bg-gray-200"><i class="fa fa-pen mr-1"></i> Write a Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Basic Info</h3>${renderRow('ကဏ္ဍ', i.cat)}${renderRow('လုပ်ငန်းအမျိုးအစား', i.type)}${renderRow('လုပ်ငန်းအသေးစိတ်ဖော်ပြချက်', i.desc)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Location</h3>${renderRow('လိပ်စာ', i.addr)}${renderRow('ရပ်ကွက်', i.ward)}${renderRow('မြို့', i.city)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Phone Numbers</h3>${renderPhoneRow('ဆက်သွယ်ရန် (၁)', i.ph1)}${renderPhoneRow('ဆက်သွယ်ရန် (၂)', i.ph2)}${renderPhoneRow('ဆက်သွယ်ရန် (၃)', i.ph3)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Digital Contact</h3>${renderContactRow('Email', i.email, 'fa fa-envelope', 'bg-blue-500', 'mailto:')}${renderContactRow('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${renderContactRow('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Note</h3><p class="text-sm text-gray-600 min-h-[20px]">${i.note || '-'}</p></div></div>`;
+            }
+            content.innerHTML = html;
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            document.getElementById('bottomNav').style.transform = 'translateY(150%)';
+        }
+
+        function closeDetail() {
+            document.getElementById('detailPage').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('bottomNav').style.transform = 'translateY(0)';
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => { if(p.id !== 'detailPage') p.classList.remove('active-page'); if(p.id !== 'detailPage') setTimeout(() => { if(!p.classList.contains('active-page')) p.style.display = 'none'; }, 200); });
+            const activePage = document.getElementById(pageId + 'Page');
+            activePage.style.display = 'block';
+            setTimeout(() => activePage.classList.add('active-page'), 10);
+            document.querySelectorAll('.nav-item').forEach(btn => { btn.classList.remove('text-[#FFD700]', 'scale-110'); if(btn.id !== 'nav-directory') btn.classList.add('text-gray-400'); else btn.querySelector('div').classList.remove('ring-4', 'ring-[#FFD700]/30'); });
+            const activeBtn = document.getElementById('nav-' + pageId);
+            if (pageId === 'directory') activeBtn.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30'); else activeBtn.classList.add('text-[#FFD700]', 'scale-110');
+            window.scrollTo(0, 0);
+        }
+
+        function filterDirectory() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = dirData.filter(d => (d.name && d.name.toLowerCase().includes(term)) || (d.cat && d.cat.toLowerCase().includes(term)));
+            renderDirectory(filtered);
+        }
+
+        loadAllData();
+    </script>
+</body>
+</html>
