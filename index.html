@@ -10,38 +10,34 @@
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
         body { 
             font-family: 'Pyidaungsu', sans-serif; 
-            padding-bottom: 90px;
+            padding-bottom: 110px; /* Nav bar အတွက် နေရာပိုပေးထားသည် */
             background-color: #f8f5ff;
         }
-        .page { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .page { display: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
         .active-page { display: block; opacity: 1; }
         
         /* Theme Colors */
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
-        .text-purple { color: #4B0082; }
-        .border-gold { border-color: #D4AF37; }
-        
-        /* Nav Active State */
-        .nav-active { color: #FFD700; transform: translateY(-5px); }
-        .nav-item { transition: all 0.3s; }
     </style>
 </head>
 <body>
 
-    <header class="purple-gradient text-white pt-8 pb-6 px-4 shadow-2xl text-center rounded-b-[40px] border-b-4 border-[#D4AF37] relative">
+    <header class="purple-gradient text-white pt-8 pb-8 px-4 shadow-2xl text-center rounded-b-[40px] border-b-4 border-[#D4AF37] relative z-0 overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+
         <div class="relative z-10">
-            <div class="flex justify-center mb-3">
+            <div class="flex justify-center mb-5">
                 <img src="CDST_Logo.png" alt="CDST Logo" 
-                     class="w-28 h-28 rounded-full border-4 border-[#FFD700] shadow-xl object-cover bg-white p-1">
+                     class="w-36 h-36 rounded-2xl border-4 border-[#FFD700] shadow-2xl object-cover bg-[#37006a]">
             </div>
             
-            <h1 id="pageTitle" class="text-2xl font-bold tracking-wider text-[#FFD700] drop-shadow-md font-['Pyidaungsu']">Home</h1>
-            <p class="text-xs text-gray-200 mt-1 tracking-widest uppercase font-semibold">Cherry Directory since 2026</p>
+            <h1 id="pageTitle" class="text-3xl font-bold tracking-wider text-[#FFD700] drop-shadow-md font-['Pyidaungsu']">Home</h1>
+            <p class="text-sm text-gray-200 mt-2 tracking-widest uppercase font-semibold">Cherry Directory since 2026</p>
         </div>
     </header>
 
-    <div class="max-w-4xl mx-auto p-4 mt-2">
+    <div class="max-w-4xl mx-auto p-4 mt-2 mb-20">
         
         <section id="homePage" class="page active-page space-y-4">
             <div class="flex items-center mb-2 px-2">
@@ -54,7 +50,7 @@
         </section>
 
         <section id="directoryPage" class="page">
-            <div class="sticky top-2 z-30 bg-[#f8f5ff]/90 backdrop-blur-sm py-2">
+            <div class="sticky top-2 z-30 bg-[#f8f5ff]/95 backdrop-blur-sm py-2">
                 <div class="relative">
                     <input type="text" id="searchInput" onkeyup="filterDirectory()" 
                            placeholder="လုပ်ငန်းအမည် ရှာရန်..." 
@@ -82,16 +78,145 @@
 
     </div>
 
-    <nav class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-50 rounded-2xl border border-[#D4AF37]/50">
-        <button onclick="showPage('home', 'Home')" class="nav-item flex flex-col items-center p-2" id="nav-home">
-            <i class="fa fa-home text-lg mb-1"></i>
+    <nav class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[9999] rounded-2xl border border-[#D4AF37]/50">
+        
+        <button onclick="showPage('home', 'Home')" class="nav-item flex flex-col items-center p-2 w-16 transition-all duration-300 text-[#FFD700]" id="nav-home">
+            <i class="fa fa-home text-xl mb-1"></i>
             <span class="text-[10px] font-bold">Home</span>
         </button>
-        <button onclick="showPage('directory', 'Directory')" class="nav-item flex flex-col items-center p-2" id="nav-directory">
-             <div class="bg-[#D4AF37] text-[#37006a] w-10 h-10 rounded-full flex items-center justify-center -mt-6 shadow-lg border-2 border-[#f8f5ff]">
-                <i class="fa fa-search text-lg"></i>
+
+        <button onclick="showPage('directory', 'Directory')" class="nav-item flex flex-col items-center p-2 w-16 transition-all duration-300 relative" id="nav-directory">
+             <div class="bg-[#D4AF37] text-[#37006a] w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-[0_4px_10px_rgba(212,175,55,0.5)] border-4 border-[#f8f5ff] transform transition-transform duration-300 hover:scale-110">
+                <i class="fa fa-search text-xl font-bold"></i>
             </div>
             <span class="text-[10px] font-bold mt-1">Search</span>
         </button>
-        <button onclick="showPage('contact', 'Contact')" class="nav-item flex flex-col items-center p-2" id="nav-contact">
-            <i class="fa fa
+
+        <button onclick="showPage('contact', 'Contact')" class="nav-item flex flex-col items-center p-2 w-16 transition-all duration-300 hover:text-gray-200" id="nav-contact">
+            <i class="fa fa-info-circle text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">Contact</span>
+        </button>
+    </nav>
+
+    <script>
+        // ==========================================
+        // သင့် ID များ (အရင်အတိုင်း ပြန်ထည့်ပါ)
+        // ==========================================
+        const SHEET_ID = 'သင့်_GOOGLE_SHEET_ID_ဒီမှာထည့်ပါ';
+        const GID_HOME = '0'; 
+        const GID_DIR = 'သင့်_DIRECTORY_TAB_GID'; 
+        const GID_CONTACT = 'သင့်_CONTACT_TAB_GID';
+        // ==========================================
+
+        const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+        let dirData = [];
+
+        async function loadAllData() {
+            // Load Announcements
+            fetchData(`${BASE_URL}&gid=${GID_HOME}`, (rows) => {
+                const list = document.getElementById('announcementList');
+                if(!rows || rows.length === 0) { list.innerHTML = '<p class="text-center text-gray-400">No updates yet</p>'; return; }
+                
+                list.innerHTML = rows.map(r => `
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3">
+                        ${r.c[3]?.v ? `<img src="${r.c[3].v}" class="w-24 h-24 object-cover">` : ''}
+                        <div class="p-3 flex-1">
+                            <h3 class="font-bold text-[#4B0082] line-clamp-1">${r.c[0]?.v || ''}</h3>
+                            <p class="text-xs text-gray-500 line-clamp-2 mt-1">${r.c[1]?.v || ''}</p>
+                            <div class="text-[#D4AF37] text-xs font-bold mt-2"><i class="fa fa-calendar-alt mr-1"></i> ${r.c[2]?.v || ''}</div>
+                        </div>
+                    </div>
+                `).join('');
+            });
+
+            // Load Directory
+            fetchData(`${BASE_URL}&gid=${GID_DIR}`, (rows) => {
+                dirData = rows.map(r => ({
+                    name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, 
+                    addr: r.c[3]?.v, ward: r.c[4]?.v, 
+                    phones: [r.c[6]?.v, r.c[7]?.v, r.c[8]?.v].filter(Boolean), 
+                    img: r.c[10]?.v
+                }));
+                renderDirectory(dirData);
+            });
+
+            // Load Contact
+            fetchData(`${BASE_URL}&gid=${GID_CONTACT}`, (rows) => {
+                document.getElementById('contactInfo').innerHTML = rows.map(r => `
+                    <div class="flex justify-between py-2 border-b border-gray-100 last:border-0">
+                        <span class="text-[#4B0082] font-bold text-sm">${r.c[0]?.v}:</span>
+                        <span class="text-gray-600 text-sm text-right">${r.c[1]?.v}</span>
+                    </div>
+                `).join('');
+            });
+        }
+
+        async function fetchData(url, callback) {
+            try {
+                const res = await fetch(url);
+                const text = await res.text();
+                const json = JSON.parse(text.substr(47).slice(0, -2));
+                callback(json.table.rows);
+            } catch (e) { console.log('Loading...'); }
+        }
+
+        function renderDirectory(data) {
+            document.getElementById('directoryList').innerHTML = data.map(i => `
+                <div class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37]">
+                    <div class="flex items-start gap-3">
+                        ${i.img ? `<img src="${i.img}" class="w-16 h-16 rounded-lg object-cover bg-gray-100">` : `<div class="w-16 h-16 rounded-lg bg-[#f8f5ff] flex items-center justify-center text-[#D4AF37]"><i class="fa fa-store text-2xl"></i></div>`}
+                        <div class="flex-1">
+                            <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block">${i.cat || 'General'}</span>
+                            <h3 class="font-bold text-[#4B0082] text-md">${i.name}</h3>
+                            <p class="text-xs text-gray-500 mt-1"><i class="fa fa-map-pin mr-1 text-[#D4AF37]"></i>${i.ward || i.addr}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        ${i.phones.map(p => `<a href="tel:${p}" class="flex-1 bg-[#4B0082] text-white text-center py-2 rounded-lg text-xs font-bold shadow hover:bg-[#5e0a9e]"><i class="fa fa-phone mr-1"></i> Call</a>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ====== FIXED NAVIGATION LOGIC ======
+        function showPage(pageId, title) {
+            // 1. Hide all pages
+            document.querySelectorAll('.page').forEach(p => {
+                p.classList.remove('active-page');
+                setTimeout(() => p.style.display = 'none', 200);
+            });
+
+            // 2. Show active page
+            const activePage = document.getElementById(pageId + 'Page');
+            activePage.style.display = 'block';
+            setTimeout(() => activePage.classList.add('active-page'), 10);
+            
+            document.getElementById('pageTitle').innerText = title;
+            
+            // 3. Update Nav Buttons
+            // Reset all
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                if(btn.id !== 'nav-directory') {
+                    btn.classList.remove('text-[#FFD700]', 'scale-110');
+                    btn.classList.add('text-gray-400');
+                } else {
+                    btn.querySelector('div').classList.remove('ring-4', 'ring-[#FFD700]/30');
+                }
+            });
+
+            // Highlight active button
+            const activeBtn = document.getElementById('nav-' + pageId);
+            if (pageId === 'directory') {
+                activeBtn.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30');
+            } else {
+                activeBtn.classList.remove('text-gray-400');
+                activeBtn.classList.add('text-[#FFD700]', 'scale-110');
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        loadAllData();
+    </script>
+</body>
+</html>
