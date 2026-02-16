@@ -43,9 +43,11 @@
 <body>
 
     <header class="purple-gradient text-white pt-4 pb-6 px-4 shadow-xl rounded-b-[30px] border-b-2 border-[#D4AF37] relative z-0">
-        <div class="flex justify-between items-center text-[10px] text-[#FFD700] mb-2 px-2 opacity-80 font-mono">
-            <span><i class="fa fa-eye mr-1"></i>Views: <span id="viewCounter">...</span></span>
-            <span><i class="fa fa-users mr-1"></i>Online: <span id="onlineCounter">...</span></span>
+        
+        <div class="text-center mb-4 border-b border-white/10 pb-2">
+            <p id="dateEng" class="text-[10px] text-[#FFD700] font-mono opacity-90 tracking-widest uppercase">LOADING DATE...</p>
+            <p id="dateMm" class="text-xs text-white font-bold mt-1">...</p>
+            <p id="timeClock" class="text-2xl font-bold text-white mt-1 tracking-widest drop-shadow-md">00:00</p>
         </div>
 
         <div class="flex items-center gap-4">
@@ -148,53 +150,72 @@
         // =================================================================
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const GID_HOME = '0';      
-        const GID_DIR = '1267218282';       // <--- Directory GID
-        const GID_CONTACT = '626044868';   // <--- Contact GID
+        const GID_DIR = '1267218282';       
+        const GID_CONTACT = '626044868';   
         // =================================================================
 
         // =================================================================
-        // ⚠️ Form Links များ ဒီမှာထည့်ပါ ⚠️
+        // ⚠️ Form Links ⚠️
         // =================================================================
-        const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog"; // Review ပေးရန် Form Link
-        const REGISTER_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog"; // လုပ်ငန်းစာရင်းသွင်းရန် Form Link
-        
-        // Link Registration Button
+        const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog"; 
+        const REGISTER_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog";
         document.getElementById('registerLink').href = REGISTER_FORM_LINK;
         // =================================================================
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         let eventsData = [], dirData = [];
 
-        function initAnalytics() {
-            const online = Math.floor(Math.random() * (50 - 15 + 1)) + 15;
-            document.getElementById('onlineCounter').innerText = online;
-            const namespace = 'cherry-directory-' + SHEET_ID.substr(0,5); 
-            fetch(`https://api.countapi.xyz/hit/${namespace}/visits`)
-                .then(res => res.json()).then(data => { document.getElementById('viewCounter').innerText = data.value || '1,204'; })
-                .catch(() => { document.getElementById('viewCounter').innerText = '1,204'; });
+        // --- Date & Time Logic ---
+        function updateDateTime() {
+            const now = new Date();
+            
+            // English Date
+            const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('dateEng').innerText = now.toLocaleDateString('en-US', dateOptions);
+
+            // Time (12 Hr)
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            document.getElementById('timeClock').innerText = `${hours}:${minutes} ${ampm}`;
+
+            // Myanmar Date (Simple Mapping)
+            const monthsMm = ["ဇန်နဝါရီ","ဖေဖော်ဝါရီ","မတ်","ဧပြီ","မေ","ဇွန်","ဇူလိုင်","သြဂုတ်","စက်တင်ဘာ","အောက်တိုဘာ","နိုဝင်ဘာ","ဒီဇင်ဘာ"];
+            const daysMm = ["တနင်္ဂနွေ","တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ","စနေ"];
+            
+            const dayName = daysMm[now.getDay()];
+            const dayNum = now.getDate().toString().replace(/[0-9]/g, d => "၀၁၂၃၄၅၆၇၈၉"[d]);
+            const monthName = monthsMm[now.getMonth()];
+            const yearNum = now.getFullYear().toString().replace(/[0-9]/g, d => "၀၁၂၃၄၅၆၇၈၉"[d]);
+
+            document.getElementById('dateMm').innerText = `${dayName}၊ ${dayNum} ${monthName} ${yearNum}`;
         }
+        setInterval(updateDateTime, 1000); // Update every second
+        updateDateTime(); // Run immediately
 
         async function loadAllData() {
-            initAnalytics();
-            // Events
+            // Events (Column A is Category now)
             fetchData(GID_HOME, (rows) => {
                 eventsData = rows.map(r => ({
-                    title: r.c[0]?.v, desc: r.c[1]?.v, fromDate: r.c[2]?.v, toDate: r.c[3]?.v,
-                    time: r.c[4]?.v, place: r.c[5]?.v, org: r.c[6]?.v, logo: r.c[7]?.v,
-                    images: [r.c[8]?.v, r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v].filter(Boolean)
+                    cat: r.c[0]?.v, // Category
+                    title: r.c[1]?.v, desc: r.c[2]?.v, 
+                    fromDate: r.c[3]?.v, toDate: r.c[4]?.v,
+                    time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v,
+                    images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean)
                 }));
                 renderEvents();
             });
 
-            // Directory (A-P)
+            // Directory
             fetchData(GID_DIR, (rows) => {
                 dirData = rows.map(r => ({
                     name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v,
-                    desc: r.c[3]?.v, // Detail Description (Column D)
-                    addr: r.c[4]?.v, ward: r.c[5]?.v, city: r.c[6]?.v,
+                    desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, city: r.c[6]?.v,
                     ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v,
                     viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v,
-                    img: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v // Column P
+                    img: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v
                 }));
                 renderDirectory(dirData);
             });
@@ -242,211 +263,21 @@
         // Render Functions
         function renderEvents() {
             const list = document.getElementById('announcementList');
-            if(!eventsData.length) { list.innerHTML = '<p class="text-center text-gray-400">No events.</p>'; return; }
+            // Empty check for all fields to ensure no broken cards
+            if(!eventsData.length) { list.innerHTML = '<p class="text-center text-gray-400">No events found.</p>'; return; }
+            
             list.innerHTML = eventsData.map((item, index) => {
+                // If title is missing, skip rendering this card
+                if (!item.title) return '';
+
                 const displayImg = item.images.length > 0 ? item.images[0] : (item.logo ? item.logo : 'CDST_Logo.png');
+                
                 return `
                 <div onclick="openDetail('event', ${index})" class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3 cursor-pointer">
                     <img src="${displayImg}" class="w-24 h-24 object-cover" onerror="this.src='CDST_Logo.png'">
-                    <div class="p-3 flex-1">
-                        <h3 class="font-bold text-[#4B0082] line-clamp-1">${item.title || 'Event'}</h3>
-                        <p class="text-xs text-gray-500 mt-1 line-clamp-1">${item.desc || '-'}</p>
-                        <div class="text-[#D4AF37] text-xs font-bold mt-2 flex items-center">
-                            <i class="fa fa-calendar-alt mr-1"></i> ${item.fromDate || 'Soon'}
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        function renderDirectory(data) {
-            const list = document.getElementById('directoryList');
-            if(!data.length) { list.innerHTML = '<p class="col-span-2 text-center text-gray-400">No data.</p>'; return; }
-            list.innerHTML = data.map((item, index) => {
-                const realIndex = dirData.indexOf(item);
-                const displayImg = item.img ? item.img : 'CDST_Logo.png'; 
-                return `
-                <div onclick="openDetail('dir', ${realIndex})" class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37] cursor-pointer">
-                    <div class="flex items-start gap-3">
-                        <img src="${displayImg}" class="w-16 h-16 rounded-lg object-cover bg-gray-100 border border-gray-200" onerror="this.src='CDST_Logo.png'">
-                        <div class="flex-1 overflow-hidden">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded inline-block truncate">${item.cat || 'General'}</span>
-                                ${getStars(item.rating)}
-                            </div>
-                            <h3 class="font-bold text-[#4B0082] text-md truncate">${item.name || 'Unknown'}</h3>
-                            <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-marker-alt mr-1 text-[#D4AF37]"></i>${item.city || item.ward || 'Taunggyi'}</p>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        function openDetail(type, index) {
-            const modal = document.getElementById('detailPage');
-            const content = document.getElementById('detailContent');
-            const header = document.getElementById('detailHeader');
-            
-            const renderRow = (label, value) => `
-                <div class="border-b border-gray-100 py-3">
-                    <p class="text-xs text-gray-400 mb-1">${label}</p>
-                    <p class="text-gray-800 font-medium text-sm leading-relaxed">${value || '-'}</p>
-                </div>
-            `;
-
-            const renderContactRow = (label, value, iconClass, colorClass, linkPrefix) => `
-                <div class="border-b border-gray-100 py-3 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
-                            <i class="${iconClass}"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-400">${label}</p>
-                            <p class="text-sm font-bold text-gray-700">${value || '-'}</p>
-                        </div>
-                    </div>
-                    ${value ? `<a href="${linkPrefix}${value.replace('@','')}" target="_blank" class="${colorClass} text-white px-3 py-1 rounded-lg text-xs font-bold shadow-sm">Open</a>` : ''}
-                </div>`;
-
-            const renderPhoneRow = (label, value) => `
-                <div class="border-b border-gray-100 py-3 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs text-gray-400 mb-1">${label}</p>
-                        <p class="text-[#4B0082] font-bold text-sm">${value || '-'}</p>
-                    </div>
-                    ${value ? `<a href="tel:${value}" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow flex items-center transition"><i class="fa fa-phone mr-1"></i> Call</a>` : ''}
-                </div>`;
-
-            let html = '';
-
-            if(type === 'event') {
-                const i = eventsData[index];
-                header.innerText = "Event Info";
-                html = `
-                    <div class="space-y-4">
-                        <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center">
-                            <img src="${i.logo ? i.logo : 'CDST_Logo.png'}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-4 border-4 border-[#D4AF37] shadow-sm bg-white" onerror="this.src='CDST_Logo.png'">
-                            <h2 class="text-xl font-bold text-[#4B0082]">${i.title || '-'}</h2>
-                            ${i.org ? `<p class="text-[#D4AF37] font-bold text-xs mt-1 uppercase">By ${i.org}</p>` : ''}
-                        </div>
-
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                            <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Event Information</h3>
-                            ${renderRow('အမည် (Title)', i.title)}
-                            ${renderRow('ဖော်ပြချက် (Description)', i.desc)}
-                            ${renderRow('စမည့်နေ့ရက် (From Date)', i.fromDate)}
-                            ${renderRow('ပြီးမည့်နေ့ရက် (To Date)', i.toDate)}
-                            ${renderRow('အချိန် (Time)', i.time)}
-                            ${renderRow('နေရာ (Place)', i.place)}
-                            ${renderRow('စီစဉ်သူ (Organized by)', i.org)}
-                        </div>
-
-                        ${i.images.length > 0 ? `
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                            <h3 class="font-bold text-[#4B0082] mb-3 border-b border-gray-100 pb-2">Gallery</h3>
-                            <div class="gallery-scroll">
-                                ${i.images.map(img => `
-                                    <div class="gallery-item">
-                                        <img src="${img}" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" onclick="window.open(this.src)">
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>` : ''}
-                    </div>`;
-            } 
-            else if (type === 'dir') {
-                const i = dirData[index];
-                header.innerText = i.name;
-                const detailImg = i.img ? i.img : 'CDST_Logo.png';
-
-                html = `
-                    <div class="space-y-4">
-                        <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center">
-                            <img src="${detailImg}" class="w-32 h-32 rounded-lg object-cover mx-auto mb-3 border-4 border-[#D4AF37] shadow-sm bg-white" onerror="this.src='CDST_Logo.png'">
-                            <h2 class="text-xl font-bold text-[#4B0082]">${i.name || '-'}</h2>
-                            <div class="flex justify-center mt-2 mb-2">${getStars(i.rating)}</div>
-                            <a href="${REVIEW_FORM_LINK}" target="_blank" class="inline-block text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full hover:bg-gray-200">
-                                <i class="fa fa-pen mr-1"></i> Write a Review
-                            </a>
-                        </div>
-
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                            <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Basic Info</h3>
-                            ${renderRow('ကဏ္ဍ (Category)', i.cat)}
-                            ${renderRow('လုပ်ငန်းအမျိုးအစား (Type)', i.type)}
-                            ${renderRow('လုပ်ငန်းအသေးစိတ်ဖော်ပြချက် (Description)', i.desc)}
-                        </div>
-
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                            <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Location</h3>
-                            ${renderRow('လိပ်စာ (Address)', i.addr)}
-                            ${renderRow('ရပ်ကွက် (Ward)', i.ward)}
-                            ${renderRow('မြို့ (City)', i.city)}
-                        </div>
-
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                            <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Phone Numbers</h3>
-                            ${renderPhoneRow('ဆက်သွယ်ရန် (၁)', i.ph1)}
-                            ${renderPhoneRow('ဆက်သွယ်ရန် (၂)', i.ph2)}
-                            ${renderPhoneRow('ဆက်သွယ်ရန် (၃)', i.ph3)}
-                        </div>
-
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                            <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Digital Contact</h3>
-                            ${renderContactRow('Email', i.email, 'fa fa-envelope', 'bg-blue-500', 'mailto:')}
-                            ${renderContactRow('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}
-                            ${renderContactRow('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}
-                        </div>
-
-                        <div class="bg-white p-5 rounded-2xl shadow-sm">
-                             <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Note</h3>
-                             <p class="text-sm text-gray-600 min-h-[20px]">${i.note || '-'}</p>
-                        </div>
-                    </div>`;
-            }
-
-            content.innerHTML = html;
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            document.getElementById('bottomNav').style.transform = 'translateY(150%)';
-        }
-
-        function closeDetail() {
-            document.getElementById('detailPage').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            document.getElementById('bottomNav').style.transform = 'translateY(0)';
-        }
-
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => {
-                if(p.id !== 'detailPage') p.classList.remove('active-page');
-                if(p.id !== 'detailPage') setTimeout(() => { if(!p.classList.contains('active-page')) p.style.display = 'none'; }, 200);
-            });
-            const activePage = document.getElementById(pageId + 'Page');
-            activePage.style.display = 'block';
-            setTimeout(() => activePage.classList.add('active-page'), 10);
-            
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.classList.remove('text-[#FFD700]', 'scale-110');
-                if(btn.id !== 'nav-directory') btn.classList.add('text-gray-400');
-                else btn.querySelector('div').classList.remove('ring-4', 'ring-[#FFD700]/30');
-            });
-            const activeBtn = document.getElementById('nav-' + pageId);
-            if (pageId === 'directory') activeBtn.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30');
-            else activeBtn.classList.add('text-[#FFD700]', 'scale-110');
-            window.scrollTo(0, 0);
-        }
-
-        function filterDirectory() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = dirData.filter(d => 
-                (d.name && d.name.toLowerCase().includes(term)) || 
-                (d.cat && d.cat.toLowerCase().includes(term))
-            );
-            renderDirectory(filtered);
-        }
-
-        loadAllData();
-    </script>
-</body>
-</html>
+                    <div class="p-3 flex-1 flex flex-col justify-center">
+                        ${item.cat ? `<span class="text-[10px] text-white bg-[#D4AF37] px-2 py-0.5 rounded-full self-start mb-1 font-bold uppercase">${item.cat}</span>` : ''}
+                        <h3 class="font-bold text-[#4B0082] line-clamp-1 text-lg">${item.title}</h3>
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">${item.desc || ''}</p>
+                        <div class="mt-2 text-right">
+                             <span class="text-[10px] text-[#4B0082] font-bold">Read More <i class="fa fa
