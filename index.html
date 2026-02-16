@@ -9,14 +9,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
         body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 110px; background-color: #f8f5ff; }
-        .page { display: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
-        .active-page { display: block; opacity: 1; }
+        .page { display: none; opacity: 0; }
+        .active-page { display: block; opacity: 1; transition: opacity 0.3s; }
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
         .viber-bg { background-color: #7360f2; }
         .telegram-bg { background-color: #229ED9; }
-        .slide-up { animation: slideUp 0.3s ease-out forwards; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .gallery-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scroll-snap-type: x mandatory; }
@@ -45,7 +43,9 @@
     <div class="max-w-4xl mx-auto p-4 mt-1 mb-20 relative">
         <section id="homePage" class="page active-page space-y-3">
             <div class="flex overflow-x-auto gap-2 pb-2 no-scrollbar" id="eventFilters"></div>
-            <div id="announcementList" class="space-y-6 pb-4"></div>
+            <div id="announcementList" class="space-y-6 pb-4">
+                <div class="text-center text-gray-400 py-10">Loading News & Events...</div>
+            </div>
         </section>
 
         <section id="directoryPage" class="page">
@@ -56,7 +56,9 @@
                 </div>
                 <div class="flex overflow-x-auto gap-2 pb-1 no-scrollbar" id="dirFilters"></div>
             </div>
-            <div id="directoryList" class="space-y-6 mt-2 pb-4"></div>
+            <div id="directoryList" class="space-y-6 mt-2 pb-4">
+                <div class="text-center text-gray-400 py-10">Loading Directory...</div>
+            </div>
         </section>
 
         <section id="contactPage" class="page space-y-4">
@@ -65,7 +67,9 @@
                 <p class="text-xs text-gray-600 mb-3">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
                 <a id="registerLinkBtn" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow hover:opacity-90 relative z-10 cursor-pointer">စာရင်းသွင်းရန်</a>
             </div>
-            <div id="contactInfo" class="space-y-4"></div>
+            <div id="contactInfo" class="space-y-4">
+                <div class="text-center text-gray-400 py-10">Loading Admin Info...</div>
+            </div>
         </section>
 
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
@@ -73,7 +77,7 @@
                 <button onclick="closeDetail()" class="w-9 h-9 rounded-full bg-gray-100 text-[#4B0082] flex items-center justify-center hover:bg-[#D4AF37] hover:text-white"><i class="fa fa-arrow-left"></i></button>
                 <span class="ml-3 font-bold text-[#4B0082] truncate text-sm" id="detailHeader">Details</span>
             </div>
-            <div id="detailContent" class="p-5 max-w-2xl mx-auto pb-24 slide-up"></div>
+            <div id="detailContent" class="p-5 max-w-2xl mx-auto pb-24"></div>
         </section>
     </div>
 
@@ -84,7 +88,7 @@
     </nav>
 
     <script>
-        // GID & LINKS
+        // CONFIG
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const GID_HOME = '0';
         const GID_DIR = '1267218282';
@@ -92,7 +96,6 @@
 
         const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
         const REGISTER_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog";
-        
         document.getElementById('registerLinkBtn').href = REGISTER_FORM_LINK;
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
@@ -119,86 +122,99 @@
         }
 
         async function loadAllData() {
+            // Analytics
             const namespace = 'cherry-directory-' + SHEET_ID.substr(0,5);
             fetch(`https://api.countapi.xyz/hit/${namespace}/visits`).then(res => res.json()).then(data => { document.getElementById('viewCounter').innerText = data.value || '1.2K'; }).catch(() => { document.getElementById('viewCounter').innerText = '1.2K'; });
-            const online = Math.floor(Math.random() * 30) + 15;
-            document.querySelector('[id="onlineCounter"]')?.innerText || (document.getElementById('onlineCounter').innerText = online);
 
-            fetchData(GID_HOME, (rows) => {
-                eventsData = rows.map(r => ({ cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) })).filter(i => i.title && i.title !== "Title");
+            // Each function fetch separately to avoid chain crash
+            fetchEvents();
+            fetchDirectory();
+            fetchAdmin();
+        }
+
+        async function fetchEvents() {
+            try {
+                const res = await fetch(`${BASE_URL}&gid=${GID_HOME}`);
+                const text = await res.text();
+                const json = JSON.parse(text.substr(47).slice(0, -2));
+                const rows = json.table.rows;
+                eventsData = rows.map(r => ({
+                    cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, 
+                    time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, 
+                    images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean)
+                })).filter(i => i.title && i.title !== "Title");
                 setupFilters('eventFilters', eventsData, (c) => { activeEventCategory = c; renderGroupedEvents(); });
                 renderGroupedEvents();
-            });
+            } catch (e) { document.getElementById('announcementList').innerHTML = '<p class="text-center text-red-400">Events Load Error</p>'; }
+        }
 
-            fetchData(GID_DIR, (rows) => {
-                dirData = rows.map(r => ({ name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, city: r.c[6]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v, viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v, img: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v }))
-                .filter(i => i.name && i.name !== "Name");
+        async function fetchDirectory() {
+            try {
+                const res = await fetch(`${BASE_URL}&gid=${GID_DIR}`);
+                const text = await res.text();
+                const json = JSON.parse(text.substr(47).slice(0, -2));
+                const rows = json.table.rows;
+                dirData = rows.map(r => ({
+                    name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, 
+                    ward: r.c[5]?.v, city: r.c[6]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v, 
+                    viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v, img: r.c[13]?.v, 
+                    rating: r.c[14]?.v, note: r.c[15]?.v
+                })).filter(i => i.name && i.name !== "Name");
                 setupFilters('dirFilters', dirData, (c) => { activeDirCategory = c; handleSearch(); });
                 renderGroupedDirectory();
-            });
+            } catch (e) { document.getElementById('directoryList').innerHTML = '<p class="text-center text-red-400">Directory Load Error</p>'; }
+        }
 
-            fetchData(GID_CONTACT, (rows) => {
-                const adminRows = rows.filter(r => r.c[0]?.v && r.c[0]?.v !== "Description");
-                document.getElementById('contactInfo').innerHTML = adminRows.map(r => `
+        async function fetchAdmin() {
+            try {
+                const res = await fetch(`${BASE_URL}&gid=${GID_CONTACT}`);
+                const text = await res.text();
+                const json = JSON.parse(text.substr(47).slice(0, -2));
+                const rows = json.table.rows.filter(r => r.c[0]?.v && r.c[0]?.v !== "Description");
+                document.getElementById('contactInfo').innerHTML = rows.map(r => `
                     <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-[#4B0082]">
-                        <div class="mb-4 text-center border-b pb-4">
-                            <i class="fa fa-user-shield text-3xl text-[#4B0082] mb-2"></i>
-                            <h3 class="font-bold text-lg text-[#4B0082]">Admin Profile</h3>
-                        </div>
-                        
-                        ${r.c[6]?.v ? `
-                        <div class="mb-6 bg-yellow-400 border-l-8 border-[#B8860B] p-4 rounded-r-lg shadow-inner">
-                            <h4 class="font-bold text-sm text-[#37006a] uppercase flex items-center gap-2 mb-1">
-                                <i class="fa fa-bullhorn animate-bounce"></i> ANNOUNCEMENT
-                            </h4>
-                            <p class="text-md text-[#37006a] font-bold leading-relaxed break-words">${r.c[6].v}</p>
-                        </div>` : ''}
-
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-start gap-4">
-                                <span class="text-xs text-gray-400 font-bold uppercase">Description</span>
-                                <span class="text-sm font-bold text-[#4B0082] text-right">${r.c[0]?.v || '-'}</span>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 gap-3 pt-2">
-                                ${r.c[1]?.v ? `<a href="tel:${r.c[1].v}" class="flex items-center justify-between bg-green-500 text-white p-3 rounded-xl shadow hover:bg-green-600 transition"><span class="font-mono font-bold">${r.c[1].v}</span><i class="fa fa-phone"></i></a>` : ''}
-                                ${r.c[2]?.v ? `<a href="tel:${r.c[2].v}" class="flex items-center justify-between bg-green-500 text-white p-3 rounded-xl shadow hover:bg-green-600 transition"><span class="font-mono font-bold">${r.c[2].v}</span><i class="fa fa-phone"></i></a>` : ''}
-                                ${r.c[3]?.v ? `<a href="viber://chat?number=${r.c[3].v}" class="flex items-center justify-between viber-bg text-white p-3 rounded-xl shadow hover:opacity-90 transition"><span class="font-bold">Viber Chat</span><i class="fab fa-viber"></i></a>` : ''}
-                                ${r.c[4]?.v ? `<a href="https://t.me/${r.c[4].v.toString().replace('@','')}" target="_blank" class="flex items-center justify-between telegram-bg text-white p-3 rounded-xl shadow hover:opacity-90 transition"><span class="font-bold">Telegram Chat</span><i class="fab fa-telegram"></i></a>` : ''}
-                                ${r.c[5]?.v ? `<a href="mailto:${r.c[5].v}" class="flex items-center justify-between bg-red-500 text-white p-3 rounded-xl shadow hover:bg-red-600 transition"><span class="text-xs font-bold truncate pr-2">${r.c[5].v}</span><i class="fa fa-envelope"></i></a>` : ''}
-                            </div>
+                        <h3 class="font-bold text-[#4B0082] mb-4 text-center border-b pb-2">Admin Profile</h3>
+                        ${r.c[6]?.v ? `<div class="mb-5 bg-yellow-400 border-l-8 border-[#B8860B] p-3 text-[#37006a] font-bold text-sm shadow-inner"><i class="fa fa-bullhorn mr-2"></i>${r.c[6].v}</div>` : ''}
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-start border-b border-gray-50 pb-2"><span class="text-[10px] text-gray-400">Description</span><span class="text-xs font-bold text-right ml-4 text-[#4B0082]">${r.c[0]?.v || '-'}</span></div>
+                            ${renderAdminLink('Phone 1', r.c[1]?.v, 'tel:', 'fa-phone-alt', 'text-green-500')}
+                            ${renderAdminLink('Phone 2', r.c[2]?.v, 'tel:', 'fa-phone-alt', 'text-green-500')}
+                            ${renderAdminLink('Viber', r.c[3]?.v, 'viber://chat?number=', 'fa-viber', 'text-[#7360f2]', true)}
+                            ${renderAdminLink('Telegram', r.c[4]?.v, 'https://t.me/', 'fa-telegram', 'text-[#229ED9]', false, true)}
+                            ${renderAdminLink('Email', r.c[5]?.v, 'mailto:', 'fa-envelope', 'text-red-500')}
                         </div>
                     </div>`).join('');
-            });
+            } catch (e) { document.getElementById('contactInfo').innerHTML = '<p class="text-center text-red-400">Admin Load Error</p>'; }
         }
 
-        async function fetchData(gid, callback) {
-            try { const res = await fetch(`${BASE_URL}&gid=${gid}`); const text = await res.text(); const json = JSON.parse(text.substr(47).slice(0, -2)); callback(json.table.rows); } catch (e) { console.error(e); }
+        function renderAdminLink(label, val, prefix, icon, color, isFab=false, isTg=false) {
+            if(!val) return '';
+            let link = prefix + val;
+            if(isTg) link = prefix + val.toString().replace('@','');
+            return `<div class="flex justify-between items-center border-b border-gray-50 pb-2"><span class="text-[10px] text-gray-400">${label}</span><div class="flex items-center gap-2"><span class="${label.includes('Phone')?'font-mono':''} text-xs font-bold">${val}</span><a href="${link}" class="${color}"><i class="${isFab?'fab':'fa'} ${icon}"></i></a></div></div>`;
         }
 
-        function setupFilters(containerId, data, callback) {
+        function setupFilters(cid, data, cb) {
             const cats = ['All', ...new Set(data.map(i => i.cat).filter(Boolean))];
-            const cont = document.getElementById(containerId);
-            cont.innerHTML = cats.map(c => `<button class="flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold border transition-all ${c==='All'?'bg-[#D4AF37] text-white border-[#D4AF37]':'bg-white text-gray-600 border-gray-200'}">${c}</button>`).join('');
+            const cont = document.getElementById(cid);
+            cont.innerHTML = cats.map(c => `<button class="filter-btn flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold border transition-all ${c==='All'?'bg-[#D4AF37] text-white border-[#D4AF37]':'bg-white text-gray-600 border-gray-200'}">${c}</button>`).join('');
             cont.querySelectorAll('button').forEach((btn, idx) => {
                 btn.onclick = () => {
                     cont.querySelectorAll('button').forEach(b => { b.classList.remove('bg-[#D4AF37]','text-white','border-[#D4AF37]'); b.classList.add('bg-white','text-gray-600','border-gray-200'); });
                     btn.classList.add('bg-[#D4AF37]','text-white','border-[#D4AF37]'); btn.classList.remove('bg-white','text-gray-600','border-gray-200');
-                    callback(cats[idx]);
+                    cb(cats[idx]);
                 };
             });
         }
-
-        function handleSearch() { renderGroupedDirectory(document.getElementById('searchInput').value.toLowerCase(), activeDirCategory); }
 
         function renderGroupedEvents() {
             const list = document.getElementById('announcementList');
             let data = activeEventCategory === 'All' ? eventsData : eventsData.filter(e => e.cat === activeEventCategory);
             const groups = data.reduce((a, i) => { a[i.cat] = a[i.cat] || []; a[i.cat].push(i); return a; }, {});
             list.innerHTML = Object.keys(groups).map(cat => `
-                <div class="mb-4"><h3 class="font-bold text-[#D4AF37] text-[10px] uppercase tracking-widest mb-2 border-l-4 border-[#D4AF37] pl-2">${cat}</h3>
+                <div><h3 class="font-bold text-[#D4AF37] text-[10px] uppercase tracking-widest mb-2 border-l-4 border-[#D4AF37] pl-2">${cat}</h3>
                 <div class="space-y-3">${groups[cat].map(i => `
-                    <div onclick="openDetail('event', ${eventsData.indexOf(i)})" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 transition-transform"><img src="${i.images[0] || i.logo || 'CDST_Logo.png'}" class="w-20 h-20 rounded-lg object-cover bg-gray-100" onerror="this.src='CDST_Logo.png'"><div class="flex-1 flex flex-col justify-center"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.title}</h4><p class="text-[10px] text-gray-500 mt-1 leading-relaxed line-clamp-2">${i.desc || ''}</p></div></div>`).join('')}</div></div>`).join('');
+                    <div onclick="openDetail('event', ${eventsData.indexOf(i)})" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer"><img src="${i.images[0] || i.logo || 'CDST_Logo.png'}" class="w-20 h-20 rounded-lg object-cover bg-gray-100" onerror="this.src='CDST_Logo.png'"><div class="flex-1 flex flex-col justify-center"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.title}</h4><p class="text-[10px] text-gray-500 mt-1 leading-relaxed line-clamp-2">${i.desc || ''}</p><span class="text-[9px] text-[#D4AF37] font-bold mt-2 uppercase">View Details <i class="fa fa-arrow-right"></i></span></div></div>`).join('')}</div></div>`).join('');
         }
 
         function renderGroupedDirectory(term = '', cat = 'All') {
@@ -207,9 +223,11 @@
             const groups = data.reduce((a, i) => { a[i.cat] = a[i.cat] || []; a[i.cat].push(i); return a; }, {});
             list.innerHTML = Object.keys(groups).map(c => `
                 <div class="mb-5"><h3 class="font-bold text-[#4B0082] text-xs bg-gray-100 px-3 py-1 rounded-lg inline-block mb-3">${c}</h3><div class="grid grid-cols-1 gap-3">${groups[c].map(i => `
-                    <div onclick="openDetail('dir', ${dirData.indexOf(i)})" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex gap-3 items-start cursor-pointer active:scale-95 transition-transform"><img src="${i.img || 'CDST_Logo.png'}" class="w-14 h-14 rounded-lg object-cover bg-gray-50 border" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><div class="flex justify-between items-start mb-1"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.name}</h4><span class="text-[8px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 flex-shrink-0">${i.type || ''}</span></div>
+                    <div onclick="openDetail('dir', ${dirData.indexOf(i)})" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex gap-3 items-start cursor-pointer"><img src="${i.img || 'CDST_Logo.png'}" class="w-14 h-14 rounded-lg object-cover bg-gray-50 border" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><div class="flex justify-between items-start mb-1"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.name}</h4><span class="text-[8px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 flex-shrink-0">${i.type || ''}</span></div>
                     <div class="mb-1">${getStars(i.rating)}</div><p class="text-[10px] text-gray-500 leading-snug break-words line-clamp-1">${i.desc || '-'}</p><div class="flex items-center mt-2 text-[10px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || 'Taunggyi'}</div></div></div>`).join('')}</div></div>`).join('');
         }
+
+        function handleSearch() { renderGroupedDirectory(document.getElementById('searchInput').value.toLowerCase(), activeDirCategory); }
 
         function openDetail(type, index) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
@@ -222,7 +240,7 @@
                 content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.logo || 'CDST_Logo.png'}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 border-gray-100 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm space-y-1">${rR('Description', i.desc)}${rR('From', i.fromDate)}${rR('To', i.toDate)}${rR('Time', i.time)}${rR('Place', i.place)}${rR('Organizer', i.org)}</div>${i.images.length > 0 ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-3 border-b pb-2">Gallery</h3><div class="gallery-scroll">${i.images.map(img => `<div class="gallery-item"><img src="${img}" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" onclick="window.open(this.src)"></div>`).join('')}</div></div>` : ''}</div>`;
             } else {
                 const i = dirData[index]; document.getElementById('detailHeader').innerText = i.name;
-                content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.img || 'CDST_Logo.png'}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_FORM_LINK}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full shadow-sm hover:bg-gray-200"><i class="fa fa-pen mr-1"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Description', i.desc)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Location</h3>${rR('Address', i.addr)}${rR('Ward', i.ward)}${rR('City', i.city)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${renderP('Phone 1', i.ph1)}${renderP('Phone 2', i.ph2)}${renderP('Phone 3', i.ph3)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Digital Contact</h3>${renderC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${renderC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}${renderC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><p class="text-xs text-gray-600 leading-relaxed break-words">${i.note}</p></div>` : ''}</div>`;
+                content.innerHTML = `<div class="space-y-4"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${i.img || 'CDST_Logo.png'}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight break-words">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_FORM_LINK}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full shadow-sm hover:bg-gray-200"><i class="fa fa-pen mr-1"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Description', i.desc)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Location</h3>${rR('Address', i.addr)}${rR('Ward', i.ward)}${rR('City', i.city)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Contact Numbers</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}${rP('Phone 3', i.ph3)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-2 border-b pb-2">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${rC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}${rC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><p class="text-xs text-gray-600 leading-relaxed break-words">${i.note}</p></div>` : ''}</div>`;
             }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
@@ -237,6 +255,7 @@
             const a = document.getElementById(navs[p]); if (p === 'directory') a.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30'); else a.classList.add('text-[#FFD700]', 'scale-110');
             window.scrollTo(0,0);
         }
+
         loadAllData();
     </script>
 </body>
