@@ -3,137 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taunggyi Directory by Shine Thit</title>
+    <title>Cherry Directory by Shine Thit</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
-        body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 70px; }
-        .page { display: none; }
-        .active-page { display: block; }
-        .nav-active { color: #2563eb; }
+        body { 
+            font-family: 'Pyidaungsu', sans-serif; 
+            padding-bottom: 80px;
+            background-color: #f8f5ff; /* ခရမ်းနုရောင် နောက်ခံ */
+        }
+        .page { display: none; transition: all 0.3s ease-in-out; opacity: 0; }
+        .active-page { display: block; opacity: 1; }
+        
+        /* Theme Colors & Gradients */
+        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
+        .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
+        .text-gold { color: #FFD700; }
+        .text-purple { color: #4B0082; }
+        .border-gold { border-color: #D4AF37; }
+
+        /* Navigation Styles */
+        .nav-active { 
+            color: #FFD700; 
+            transform: translateY(-5px);
+        }
+        .nav-item { transition: all 0.3s; }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
-    <header class="bg-blue-600 text-white p-5 shadow-md sticky top-0 z-50">
-        <h1 id="pageTitle" class="text-xl font-bold text-center">Home</h1>
+    <header class="purple-gradient text-white pt-8 pb-6 px-6 shadow-2xl text-center rounded-b-[40px] border-b-4 border-[#D4AF37] relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        
+        <div class="relative z-10">
+            <div class="flex justify-center mb-4">
+                 <img src="Logo%20of%20Cherry%20Directory%20by%20ST.png" alt="Cherry Directory Logo" 
+                     class="w-36 h-36 rounded-3xl border-4 border-[#FFD700]/80 shadow-2xl object-cover bg-[#37006a]">
+            </div>
+            
+            <h1 id="pageTitle" class="text-3xl font-bold tracking-wider text-gold drop-shadow-md font-['Pyidaungsu']">Home</h1>
+            <p class="text-xs text-gold/80 mt-2 tracking-widest uppercase font-semibold">Cherry Directory since 2026</p>
+        </div>
     </header>
 
-    <div class="max-w-4xl mx-auto p-4">
+    <div class="max-w-4xl mx-auto p-5 mt-2">
         
-        <section id="homePage" class="page active-page">
-            <h2 class="font-bold text-lg mb-4 text-blue-700"><i class="fa fa-bullhorn mr-2"></i>သတင်းနှင့် ကြေညာချက်များ</h2>
-            <div id="announcementList" class="space-y-4">
-                </div>
-        </section>
-
-        <section id="directoryPage" class="page">
-            <input type="text" id="searchInput" onkeyup="filterDirectory()" 
-                   placeholder="လုပ်ငန်းအမည်ဖြင့် ရှာရန်..." 
-                   class="w-full p-4 rounded-2xl shadow-sm border-none mb-4 outline-none focus:ring-2 focus:ring-blue-400">
-            <div id="directoryList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                </div>
-        </section>
-
-        <section id="contactPage" class="page">
-            <div class="bg-white p-6 rounded-3xl shadow-sm">
-                <h2 class="font-bold text-xl mb-4 text-blue-700 border-b pb-2">Creator Info</h2>
-                <div id="contactInfo" class="space-y-3">
-                    </div>
+        <section id="homePage" class="page active-page space-y-4">
+            <div class="flex items-center mb-4">
+                <span class="gold-gradient p-2 rounded-lg mr-3 shadow-md"><i class="fa fa-bullhorn text-white"></i></span>
+                <h2 class="font-bold text-xl text-purple">သတင်းနှင့် ပွဲတော်ရက်များ</h2>
+            </div>
+            <div id="announcementList" class="space-y-5 pb-4">
+                <div class="text-center text-gray-400 py-10 animate-pulse">Loading data...</div>
             </div>
         </section>
 
-    </div>
-
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-3 shadow-inner z-50">
-        <button onclick="showPage('home', 'Home')" class="nav-item flex flex-col items-center text-gray-400" id="nav-home">
-            <i class="fa fa-home text-xl"></i>
-            <span class="text-xs">Home</span>
-        </button>
-        <button onclick="showPage('directory', 'Directory')" class="nav-item flex flex-col items-center text-gray-400" id="nav-directory">
-            <i class="fa fa-list text-xl"></i>
-            <span class="text-xs">Directory</span>
-        </button>
-        <button onclick="showPage('contact', 'Contact Us')" class="nav-item flex flex-col items-center text-gray-400" id="nav-contact">
-            <i class="fa fa-info-circle text-xl"></i>
-            <span class="text-xs">Contact</span>
-        </button>
-    </nav>
-
-    <script>
-        const SHEET_ID = 'သင့်_GOOGLE_SHEET_ID_ဒီမှာထည့်ပါ';
-        // Sheet တစ်ခုချင်းစီရဲ့ GID နံပါတ်တွေကို Sheet URL ထဲကနေ ကြည့်ထည့်ပါ (ပထမဆုံး Sheet က gid=0 ပါ)
-        const URL_HOME = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=0`;
-        const URL_DIR = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=စာမျက်နှာ၂_ID`;
-        const URL_CONTACT = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=စာမျက်နှာ၃_ID`;
-
-        let dirData = [];
-
-        async function loadAllData() {
-            // Load Announcements
-            fetchData(URL_HOME, (rows) => {
-                document.getElementById('announcementList').innerHTML = rows.map(r => `
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-orange-400">
-                        ${r.c[3]?.v ? `<img src="${r.c[3].v}" class="w-full h-40 object-cover rounded-xl mb-3">` : ''}
-                        <h3 class="font-bold text-blue-800">${r.c[0]?.v || ''}</h3>
-                        <p class="text-gray-600 text-sm mt-1">${r.c[1]?.v || ''}</p>
-                        <p class="text-xs text-orange-500 mt-2 font-bold">${r.c[2]?.v || ''}</p>
-                    </div>
-                `).join('');
-            });
-
-            // Load Directory
-            fetchData(URL_DIR, (rows) => {
-                dirData = rows.map(r => ({
-                    name: r.c[0]?.v, cat: r.c[1]?.v, addr: r.c[3]?.v, phones: [r.c[6]?.v, r.c[7]?.v].filter(Boolean), img: r.c[10]?.v
-                }));
-                renderDirectory(dirData);
-            });
-
-            // Load Contact
-            fetchData(URL_CONTACT, (rows) => {
-                document.getElementById('contactInfo').innerHTML = rows.map(r => `
-                    <p class="flex justify-between"><strong>${r.c[0]?.v}:</strong> <span>${r.c[1]?.v}</span></p>
-                `).join('');
-            });
-        }
-
-        async function fetchData(url, callback) {
-            const res = await fetch(url);
-            const text = await res.text();
-            const json = JSON.parse(text.substr(47).slice(0, -2));
-            callback(json.table.rows);
-        }
-
-        function renderDirectory(data) {
-            document.getElementById('directoryList').innerHTML = data.map(i => `
-                <div class="bg-white p-4 rounded-2xl shadow-sm">
-                    <h3 class="font-bold">${i.name}</h3>
-                    <p class="text-xs text-gray-400">${i.addr}</p>
-                    <div class="mt-3 flex gap-2">
-                        ${i.phones.map(p => `<a href="tel:${p}" class="bg-green-500 text-white px-3 py-1 rounded-lg text-xs">Call ${p}</a>`).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function showPage(pageId, title) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(pageId + 'Page').classList.add('active-page');
-            document.getElementById('pageTitle').innerText = title;
-            
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
-            document.getElementById('nav-' + pageId).classList.add('nav-active');
-        }
-
-        function filterDirectory() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            renderDirectory(dirData.filter(d => d.name.toLowerCase().includes(term)));
-        }
-
-        loadAllData();
-        showPage('home', 'Home'); // Default page
-    </script>
-</body>
-</html>
+        <section id="directoryPage" class="page">
+            <div class="sticky top-4 z-30 bg-[#f8f5ff]/80 backdrop-blur-md py-2">
+                <div class="relative">
+                    <input type="text" id="searchInput" onkeyup="filterDirectory()" 
+                           placeholder="လုပ်ငန်းအမည် / အမျိုးအစား ရှာရန်..." 
+                           class="w-full p-4 pl-12 rounded-2xl shadow-lg border-2 border-[#D4AF37]/50 outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 bg-white/90 text-purple font-medium transition-all">
+                    <i class="fa fa-search absolute left-5 top-5 text-[#D4AF37]
