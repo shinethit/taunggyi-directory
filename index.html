@@ -10,7 +10,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
         body { 
             font-family: 'Pyidaungsu', sans-serif; 
-            padding-bottom: 110px; /* Nav bar အတွက် နေရာပိုပေးထားသည် */
+            padding-bottom: 110px; 
             background-color: #f8f5ff;
         }
         .page { display: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
@@ -79,7 +79,6 @@
     </div>
 
     <nav class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[9999] rounded-2xl border border-[#D4AF37]/50">
-        
         <button onclick="showPage('home', 'Home')" class="nav-item flex flex-col items-center p-2 w-16 transition-all duration-300 text-[#FFD700]" id="nav-home">
             <i class="fa fa-home text-xl mb-1"></i>
             <span class="text-[10px] font-bold">Home</span>
@@ -100,12 +99,22 @@
 
     <script>
         // ==========================================
-        // သင့် ID များ (အရင်အတိုင်း ပြန်ထည့်ပါ)
+        // ၁။ Sheet ID (ဒါကို ကျွန်တော် ဖြည့်ပေးလိုက်ပါပြီ)
         // ==========================================
-        const SHEET_ID = 'သင့်_GOOGLE_SHEET_ID_ဒီမှာထည့်ပါ';
-        const GID_HOME = '0'; 
-        const GID_DIR = 'သင့်_DIRECTORY_TAB_GID'; 
-        const GID_CONTACT = 'သင့်_CONTACT_TAB_GID';
+        const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
+        
+        // ==========================================
+        // ၂။ GID (Tab နံပါတ်များ) - ⚠️ ဒါကို Shine Thit ပြင်ပေးရပါမယ် ⚠️
+        // Google Sheet ရဲ့ Tab တစ်ခုချင်းစီကို နှိပ်ပြီး URL အဆုံးက gid= နံပါတ်ကို ကူးထည့်ပါ
+        // ==========================================
+        
+        const GID_HOME = '0'; // ပထမဆုံး Tab (Announcements) ဖြစ်လေ့ရှိပါတယ်
+        
+        // Directory Tab ကိုနှိပ်၊ URL အနောက်က gid= နံပါတ်ကို ဒီမှာထည့်ပါ (ဥပမာ '123456')
+        const GID_DIR = '1267218282'; 
+        
+        // Contact Tab ကိုနှိပ်၊ URL အနောက်က gid= နံပါတ်ကို ဒီမှာထည့်ပါ
+        const GID_CONTACT = '626044868'; 
         // ==========================================
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
@@ -116,7 +125,6 @@
             fetchData(`${BASE_URL}&gid=${GID_HOME}`, (rows) => {
                 const list = document.getElementById('announcementList');
                 if(!rows || rows.length === 0) { list.innerHTML = '<p class="text-center text-gray-400">No updates yet</p>'; return; }
-                
                 list.innerHTML = rows.map(r => `
                     <div class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3">
                         ${r.c[3]?.v ? `<img src="${r.c[3].v}" class="w-24 h-24 object-cover">` : ''}
@@ -161,6 +169,10 @@
         }
 
         function renderDirectory(data) {
+            if(!data || data.length === 0) {
+                 document.getElementById('directoryList').innerHTML = '<p class="text-center text-red-400 mt-10">Sheet GID မှားနေပါသည် (Code ကိုစစ်ပါ)</p>';
+                 return;
+            }
             document.getElementById('directoryList').innerHTML = data.map(i => `
                 <div class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37]">
                     <div class="flex items-start gap-3">
@@ -178,23 +190,16 @@
             `).join('');
         }
 
-        // ====== FIXED NAVIGATION LOGIC ======
         function showPage(pageId, title) {
-            // 1. Hide all pages
             document.querySelectorAll('.page').forEach(p => {
                 p.classList.remove('active-page');
                 setTimeout(() => p.style.display = 'none', 200);
             });
-
-            // 2. Show active page
             const activePage = document.getElementById(pageId + 'Page');
             activePage.style.display = 'block';
             setTimeout(() => activePage.classList.add('active-page'), 10);
-            
             document.getElementById('pageTitle').innerText = title;
             
-            // 3. Update Nav Buttons
-            // Reset all
             document.querySelectorAll('.nav-item').forEach(btn => {
                 if(btn.id !== 'nav-directory') {
                     btn.classList.remove('text-[#FFD700]', 'scale-110');
@@ -204,7 +209,6 @@
                 }
             });
 
-            // Highlight active button
             const activeBtn = document.getElementById('nav-' + pageId);
             if (pageId === 'directory') {
                 activeBtn.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30');
@@ -212,7 +216,6 @@
                 activeBtn.classList.remove('text-gray-400');
                 activeBtn.classList.add('text-[#FFD700]', 'scale-110');
             }
-
             window.scrollTo(0, 0);
         }
 
