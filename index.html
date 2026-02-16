@@ -86,12 +86,25 @@
         </section>
 
         <section id="contactPage" class="page">
+            
+            <div class="bg-white p-6 rounded-3xl shadow-lg border-l-4 border-[#D4AF37] mb-6 relative overflow-hidden">
+                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
+                    <i class="fa fa-file-pen text-9xl text-[#4B0082]"></i>
+                </div>
+                <h3 class="font-bold text-[#4B0082] text-lg mb-2 relative z-10">လုပ်ငန်းရှင်များအတွက်</h3>
+                <p class="text-sm text-gray-600 mb-4 relative z-10">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက အောက်ပါ Form ကို ဖြည့်စွက်ပေးပါ။</p>
+                <a href="#" id="registerLink" target="_blank" class="block w-full gold-gradient text-white text-center font-bold py-3 rounded-xl shadow-md hover:opacity-90 transition relative z-10">
+                    <i class="fa fa-plus-circle mr-2"></i> လုပ်ငန်းစာရင်းသွင်းရန်
+                </a>
+            </div>
+
             <div class="bg-white p-6 rounded-3xl shadow-lg border-t-4 border-[#4B0082]">
                 <div class="text-center mb-6">
-                    <div class="w-16 h-16 gold-gradient rounded-full mx-auto flex items-center justify-center text-white text-2xl mb-3 shadow-md">
-                        <i class="fa fa-user-shield"></i>
+                    <div class="w-16 h-16 purple-gradient rounded-full mx-auto flex items-center justify-center text-white text-2xl mb-3 shadow-md">
+                        <i class="fa fa-headset"></i>
                     </div>
                     <h2 class="font-bold text-2xl text-[#4B0082]">Admin Contact</h2>
+                    <p class="text-gray-400 text-xs mt-1">For general inquiries & support</p>
                 </div>
                 <div id="contactInfo" class="space-y-4">
                     <div class="text-center text-gray-400">Loading info...</div>
@@ -135,11 +148,19 @@
         // =================================================================
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const GID_HOME = '0';      
-        const GID_DIR = '1267218282';       // <--- Directory GID ထည့်ပါ
-        const GID_CONTACT = '626044868';   // <--- Contact GID ထည့်ပါ
+        const GID_DIR = '1267218282';       // <--- Directory GID
+        const GID_CONTACT = '626044868';   // <--- Contact GID
         // =================================================================
 
-        const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog"; // Review Form Link ဒီမှာထည့်ပါ
+        // =================================================================
+        // ⚠️ Form Links များ ဒီမှာထည့်ပါ ⚠️
+        // =================================================================
+        const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog"; // Review ပေးရန် Form Link
+        const REGISTER_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog"; // လုပ်ငန်းစာရင်းသွင်းရန် Form Link
+        
+        // Link Registration Button
+        document.getElementById('registerLink').href = REGISTER_FORM_LINK;
+        // =================================================================
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         let eventsData = [], dirData = [];
@@ -155,7 +176,7 @@
 
         async function loadAllData() {
             initAnalytics();
-            // Events 
+            // Events
             fetchData(GID_HOME, (rows) => {
                 eventsData = rows.map(r => ({
                     title: r.c[0]?.v, desc: r.c[1]?.v, fromDate: r.c[2]?.v, toDate: r.c[3]?.v,
@@ -165,25 +186,15 @@
                 renderEvents();
             });
 
-            // Directory (Corrected Column Mapping A-P)
+            // Directory (A-P)
             fetchData(GID_DIR, (rows) => {
                 dirData = rows.map(r => ({
-                    name: r.c[0]?.v,           // A
-                    cat: r.c[1]?.v,            // B
-                    type: r.c[2]?.v,           // C
-                    desc: r.c[3]?.v,           // D (Detail Description)
-                    addr: r.c[4]?.v,           // E
-                    ward: r.c[5]?.v,           // F
-                    city: r.c[6]?.v,           // G
-                    ph1: r.c[7]?.v,            // H
-                    ph2: r.c[8]?.v,            // I
-                    ph3: r.c[9]?.v,            // J
-                    viber: r.c[10]?.v,         // K
-                    telegram: r.c[11]?.v,      // L
-                    email: r.c[12]?.v,         // M
-                    img: r.c[13]?.v,           // N
-                    rating: r.c[14]?.v,        // O
-                    note: r.c[15]?.v           // P
+                    name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v,
+                    desc: r.c[3]?.v, // Detail Description (Column D)
+                    addr: r.c[4]?.v, ward: r.c[5]?.v, city: r.c[6]?.v,
+                    ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v,
+                    viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v,
+                    img: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v // Column P
                 }));
                 renderDirectory(dirData);
             });
@@ -276,7 +287,6 @@
             const content = document.getElementById('detailContent');
             const header = document.getElementById('detailHeader');
             
-            // Helper for Simple Rows
             const renderRow = (label, value) => `
                 <div class="border-b border-gray-100 py-3">
                     <p class="text-xs text-gray-400 mb-1">${label}</p>
@@ -354,9 +364,7 @@
                         <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center">
                             <img src="${detailImg}" class="w-32 h-32 rounded-lg object-cover mx-auto mb-3 border-4 border-[#D4AF37] shadow-sm bg-white" onerror="this.src='CDST_Logo.png'">
                             <h2 class="text-xl font-bold text-[#4B0082]">${i.name || '-'}</h2>
-                            
                             <div class="flex justify-center mt-2 mb-2">${getStars(i.rating)}</div>
-                            
                             <a href="${REVIEW_FORM_LINK}" target="_blank" class="inline-block text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full hover:bg-gray-200">
                                 <i class="fa fa-pen mr-1"></i> Write a Review
                             </a>
