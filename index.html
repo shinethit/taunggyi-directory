@@ -25,12 +25,12 @@
         .viber-bg { background-color: #7360f2; }
         .telegram-bg { background-color: #229ED9; }
 
-        /* Blog Style Formatting */
+        /* Blog Style Content Formatting */
         .post-content { white-space: pre-wrap; line-height: 1.8; word-break: break-word; }
 
-        /* Full Contain Gallery */
+        /* Full Image Gallery Layout */
         .gallery-scroll { display: flex; overflow-x: auto; gap: 12px; padding: 5px; scroll-snap-type: x mandatory; }
-        .gallery-item { flex: 0 0 100%; scroll-snap-align: center; height: 300px; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .gallery-item { flex: 0 0 100%; scroll-snap-align: center; height: 320px; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .gallery-item img { width: 100%; height: 100%; object-fit: contain; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -83,7 +83,7 @@
             <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 relative overflow-hidden">
                 <h3 class="font-bold text-[#4B0082] text-md mb-1">လုပ်ငန်းရှင်များအတွက်</h3>
                 <p class="text-xs text-gray-600 mb-3">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
-                <a id="regBtn" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow cursor-pointer">စာရင်းသွင်းရန်</a>
+                <a id="regBtn" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow cursor-pointer active:scale-95">စာရင်းသွင်းရန်</a>
             </div>
             <div id="adminProfileArea"></div>
             <div id="adminNotesArea" class="space-y-3"></div>
@@ -118,13 +118,12 @@
         let eventsData = [], dirData = [];
         let activeDirCat = 'All', activeEventCat = 'All';
 
+        // --- IMPROVED GOOGLE DRIVE LINK CONVERTER ---
         function fixDriveLink(url) {
-            if (!url || url === "" || url === "-") return 'CDST_Logo.png';
-            if (url.includes('drive.google.com')) {
-                let fileId = "";
-                if (url.includes('/d/')) fileId = url.split('/d/')[1].split('/')[0];
-                else if (url.includes('id=')) fileId = url.split('id=')[1].split('&')[0];
-                if (fileId) return `http://googleusercontent.com/profile/picture/8{fileId}`;
+            if (!url || typeof url !== 'string' || url.trim() === "" || url === "-") return 'CDST_Logo.png';
+            const driveMatch = url.match(/(?:id=|\/d\/|folders\/)([a-zA-Z0-9_-]{25,})/);
+            if (driveMatch && driveMatch[1]) {
+                return "https://lh3.googleusercontent.com/d/" + driveMatch[1];
             }
             return url;
         }
@@ -149,10 +148,11 @@
         }
 
         async function loadAllData() {
-            // Restore Local Storage Caching
+            // Restore Offline Cache
             const cEvents = localStorage.getItem('cache_events');
             const cDir = localStorage.getItem('cache_dir');
             const cAdmin = localStorage.getItem('cache_admin');
+
             if(cEvents) { eventsData = JSON.parse(cEvents); setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); }); renderEvents(); }
             if(cDir) { dirData = JSON.parse(cDir); setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); renderDirectory(); }
             if(cAdmin) { renderAdminArea(JSON.parse(cAdmin)); }
@@ -169,7 +169,7 @@
                 const text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 eventsData = json.table.rows.map(r => ({ cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
-                .filter(i => i.title && i.title !== "Title").reverse();
+                .filter(i => i.title && i.title !== "Title").reverse(); 
                 localStorage.setItem('cache_events', JSON.stringify(eventsData));
                 setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); });
                 renderEvents();
@@ -206,7 +206,7 @@
                 <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-[#4B0082] mb-6">
                     <div class="mb-4 text-center border-b pb-4"><i class="fa fa-user-shield text-3xl text-[#4B0082] mb-2"></i><h3 class="font-bold text-lg text-[#4B0082]">Admin Profile</h3></div>
                     <div class="space-y-4">
-                        <div class="flex justify-between items-start border-b border-gray-50 pb-2"><span class="text-[10px] text-gray-400 uppercase">Description</span><span class="text-xs font-bold text-[#4B0082] text-right ml-4">${profile.c[0]?.v || '-'}</span></div>
+                        <div class="flex justify-between items-start border-b border-gray-50 pb-2"><span class="text-[10px] text-gray-400 uppercase font-bold">Description</span><span class="text-xs font-bold text-[#4B0082] text-right ml-4">${profile.c[0]?.v || '-'}</span></div>
                         ${renderAdminBtn('Phone 1', profile.c[1]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}
                         ${renderAdminBtn('Phone 2', profile.c[2]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}
                         ${renderAdminBtn('Viber Chat', profile.c[3]?.v, 'viber://chat?number=', 'fa-viber', 'viber-bg', true)}
@@ -269,11 +269,9 @@
 
         function openDetail(type, index) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
-            
-            // Helper UI Functions
-            const renderR = (l, v) => `<div class="border-b border-gray-50 py-3"><p class="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wider font-bold">${l}</p><div class="text-gray-800 font-medium text-sm post-content">${v || '-'}</div></div>`;
+            const renderR = (l, v) => `<div class="border-b border-gray-50 py-3"><p class="text-[10px] text-gray-400 mb-0.5 uppercase font-bold tracking-wider">${l}</p><div class="text-gray-800 font-medium text-sm post-content">${v || '-'}</div></div>`;
             const renderP = (l, v) => v ? `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div><p class="text-[10px] text-gray-400 mb-0.5 uppercase font-bold">${l}</p><p class="text-[#4B0082] font-bold text-sm font-mono">${v}</p></div><a href="tel:${v}" class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm active:scale-90"><i class="fa fa-phone mr-1"></i> CALL</a></div>` : '';
-            const renderC = (l, v, i, c, lp) => v ? `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i class="${i}"></i></div><div><p class="text-[10px] text-gray-400 font-bold uppercase">${l}</p><p class="text-xs font-bold text-gray-700">${v}</p></div></div><a href="${lp}${v.toString().replace('@','')}" target="_blank" class="${c} text-white px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm active:scale-90">CHAT</a></div>` : '';
+            const renderC = (l, v, i, c, lp) => v ? `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i class="${i}"></i></div><div><p class="text-[10px] text-gray-400 uppercase font-bold">${l}</p><p class="text-xs font-bold text-gray-700">${v}</p></div></div><a href="${lp}${v.toString().replace('@','')}" target="_blank" class="${c} text-white px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm active:scale-90">CHAT</a></div>` : '';
 
             if(type === 'event') {
                 const i = eventsData[index]; document.getElementById('detailHeader').innerText = "Post Details";
@@ -287,7 +285,7 @@
                             <img src="${fixDriveLink(i.img)}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'">
                             <h2 class="text-xl font-bold text-[#4B0082] leading-tight break-words">${i.name}</h2>
                             <div class="flex justify-center mt-1">${getStars(i.rating)}</div>
-                            <a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-50 text-gray-500 px-4 py-1.5 rounded-full shadow-sm hover:bg-gray-100"><i class="fa fa-pen mr-1"></i> Write Review</a>
+                            <a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-4 py-1.5 rounded-full shadow-sm hover:bg-gray-200"><i class="fa fa-pen mr-1"></i> Write Review</a>
                         </div>
                         <div class="bg-white p-5 rounded-2xl shadow-sm">
                             <h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest"><i class="fa fa-id-card mr-2 text-[#D4AF37]"></i> Basic Info</h3>
