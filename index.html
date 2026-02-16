@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cherry Directory by Shine Thit</title>
+    <title>Cherry Directory</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -20,23 +20,28 @@
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
         
-        /* Animation for Detail Page */
+        /* Animation */
         .slide-up { animation: slideUp 0.3s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <header id="mainHeader" class="purple-gradient text-white pt-8 pb-8 px-4 shadow-2xl text-center rounded-b-[40px] border-b-4 border-[#D4AF37] relative z-0 overflow-hidden transition-all duration-300">
-        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div class="relative z-10">
-            <div class="flex justify-center mb-5">
-                <img src="CDST_Logo.png" alt="CDST Logo" 
-                     class="w-36 h-36 rounded-2xl border-4 border-[#FFD700] shadow-2xl object-cover bg-[#37006a]"
-                     onerror="this.style.display='none'">
+    <header class="purple-gradient text-white pt-4 pb-6 px-4 shadow-xl rounded-b-[30px] border-b-2 border-[#D4AF37] relative z-0">
+        <div class="flex justify-between items-center text-[10px] text-[#FFD700] mb-2 px-2 opacity-80 font-mono">
+            <span><i class="fa fa-eye mr-1"></i>Views: <span id="viewCounter">...</span></span>
+            <span><i class="fa fa-users mr-1"></i>Online: <span id="onlineCounter">...</span></span>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <img src="CDST_Logo.png" alt="Logo" 
+                 class="w-16 h-16 rounded-xl border-2 border-[#FFD700] shadow-lg object-cover bg-[#37006a]"
+                 onerror="this.style.display='none'">
+            
+            <div class="text-left">
+                <h1 class="text-xl font-bold tracking-wider text-white font-['Pyidaungsu']">Cherry Directory</h1>
+                <p class="text-[10px] text-gray-300 tracking-widest uppercase">Since 2026 • by Shine Thit</p>
             </div>
-            <h1 id="headerTitle" class="text-3xl font-bold tracking-wider text-[#FFD700] drop-shadow-md font-['Pyidaungsu']">Home</h1>
-            <p class="text-sm text-gray-200 mt-2 tracking-widest uppercase font-semibold">Cherry Directory since 2026</p>
         </div>
     </header>
 
@@ -45,10 +50,10 @@
         <section id="homePage" class="page active-page space-y-4">
             <div class="flex items-center mb-2 px-2">
                 <i class="fa fa-bullhorn text-[#4B0082] mr-2 text-xl"></i>
-                <h2 class="font-bold text-lg text-[#4B0082]">သတင်းနှင့် ပွဲတော်ရက်များ</h2>
+                <h2 class="font-bold text-lg text-[#4B0082]">Events & News</h2>
             </div>
             <div id="announcementList" class="space-y-4 pb-4">
-                <div class="text-center text-gray-400 py-10 animate-pulse">Loading updates...</div>
+                <div class="text-center text-gray-400 py-10 animate-pulse">Loading events...</div>
             </div>
         </section>
 
@@ -69,27 +74,26 @@
         <section id="contactPage" class="page">
             <div class="bg-white p-6 rounded-3xl shadow-lg border-t-4 border-[#4B0082]">
                 <div class="text-center mb-6">
-                    <div class="w-20 h-20 gold-gradient rounded-full mx-auto flex items-center justify-center text-white text-3xl mb-3 shadow-md">
-                        <i class="fa fa-user-tie"></i>
+                    <div class="w-16 h-16 gold-gradient rounded-full mx-auto flex items-center justify-center text-white text-2xl mb-3 shadow-md">
+                        <i class="fa fa-user-shield"></i>
                     </div>
-                    <h2 class="font-bold text-2xl text-[#4B0082]">Shine Thit</h2>
-                    <p class="text-gray-500 text-sm">Creator & Manager</p>
+                    <h2 class="font-bold text-2xl text-[#4B0082]">Admin Contact</h2>
                 </div>
-                <div id="contactInfo" class="space-y-3 bg-gray-50 p-4 rounded-xl">
-                    Loading...
+                <div id="contactInfo" class="space-y-4">
+                    <div class="text-center text-gray-400">Loading info...</div>
                 </div>
             </div>
         </section>
 
-        <section id="detailPage" class="page fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto pb-24 hidden">
-            <div class="sticky top-0 bg-[#f8f5ff]/95 backdrop-blur-md p-4 flex items-center shadow-sm z-50">
-                <button onclick="closeDetail()" class="bg-white text-[#4B0082] w-10 h-10 rounded-full shadow-md flex items-center justify-center border border-[#D4AF37]">
+        <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-md p-3 shadow-sm z-50 flex items-center border-b border-gray-200">
+                <button onclick="closeDetail()" class="w-10 h-10 rounded-full bg-gray-100 text-[#4B0082] flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition-colors">
                     <i class="fa fa-arrow-left"></i>
                 </button>
-                <h2 id="detailHeaderTitle" class="ml-4 font-bold text-lg text-[#4B0082] truncate flex-1">Details</h2>
+                <span class="ml-3 font-bold text-[#4B0082] truncate" id="detailHeader">Details</span>
             </div>
 
-            <div id="detailContent" class="p-5 slide-up max-w-2xl mx-auto">
+            <div id="detailContent" class="p-5 max-w-2xl mx-auto pb-24 slide-up">
                 </div>
         </section>
 
@@ -108,7 +112,7 @@
         </button>
         <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact">
             <i class="fa fa-info-circle text-xl mb-1"></i>
-            <span class="text-[10px] font-bold">Contact</span>
+            <span class="text-[10px] font-bold">Admin</span>
         </button>
     </nav>
 
@@ -117,88 +121,114 @@
         // ⚠️ GID များကို ဤနေရာတွင် အမှန်ပြင်ထည့်ပါ ⚠️
         // =================================================================
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
-        const GID_HOME = '0'; 
-        const GID_DIR = '1267218282'; // <--- Directory Tab GID ထည့်ပါ
-        const GID_CONTACT = '626044868'; // <--- Contact Tab GID ထည့်ပါ
+        const GID_HOME = '0';      // Sheet 1 (Events)
+        const GID_DIR = '1267218282';       // Sheet 2 (Directory) - GID ပြင်ပါ
+        const GID_CONTACT = '626044868';   // Sheet 3 (Contact) - GID ပြင်ပါ
         // =================================================================
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         
-        // Data Storage
-        let announcementsData = [];
-        let directoryData = [];
-        let lastPage = 'home'; // To remember where to go back
+        // Data Store
+        let eventsData = [];
+        let dirData = [];
 
+        // --- 1. Analytics Logic (Simulated + Real) ---
+        function initAnalytics() {
+            // Simulated Online Users (Random between 15 and 50)
+            const online = Math.floor(Math.random() * (50 - 15 + 1)) + 15;
+            document.getElementById('onlineCounter').innerText = online;
+            
+            // Total Views (Using Free CountAPI)
+            // Note: This creates a unique key for your app based on domain
+            const namespace = 'cherry-directory-' + SHEET_ID.substr(0,5); 
+            fetch(`https://api.countapi.xyz/hit/${namespace}/visits`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('viewCounter').innerText = data.value || '1,204';
+                })
+                .catch(() => {
+                    document.getElementById('viewCounter').innerText = '1,204'; // Fallback
+                });
+        }
+
+        // --- 2. Load Data ---
         async function loadAllData() {
-            // 1. Announcements
+            initAnalytics();
+
+            // Load Events (Sheet 1)
+            // Columns: Title(0)|Desc(1)|From(2)|To(3)|Time(4)|Place(5)|Img(6)
             fetchData(GID_HOME, (rows) => {
-                announcementsData = rows.map(r => ({
-                    title: r.c[0]?.v || '(No Title)',
+                eventsData = rows.map(r => ({
+                    title: r.c[0]?.v || 'No Title',
                     desc: r.c[1]?.v || '',
-                    date: r.c[2]?.v || '',
-                    img: r.c[3]?.v || null
+                    fromDate: r.c[2]?.v,
+                    toDate: r.c[3]?.v,
+                    time: r.c[4]?.v,
+                    place: r.c[5]?.v,
+                    img: r.c[6]?.v
                 }));
-                renderAnnouncements();
+                renderEvents();
             });
 
-            // 2. Directory
+            // Load Directory (Sheet 2)
+            // Cols: Name(0)|Cat(1)|Type(2)|Detail(3)|Desc(4)|Addr(5)|Ward(6)|City(7)|Ph1(8)|Ph2(9)|Ph3(10)|Email(11)|Img(12)|Rating(13)|Note(14)
             fetchData(GID_DIR, (rows) => {
-                directoryData = rows.map(r => ({
+                dirData = rows.map(r => ({
                     name: r.c[0]?.v || 'Unknown',
                     cat: r.c[1]?.v || 'General',
-                    type: r.c[2]?.v, 
-                    addr: r.c[3]?.v || '', 
-                    ward: r.c[4]?.v, 
-                    city: r.c[5]?.v,
-                    phones: [r.c[6]?.v, r.c[7]?.v, r.c[8]?.v].filter(Boolean), 
-                    email: r.c[9]?.v,
-                    img: r.c[10]?.v,
-                    rating: r.c[11]?.v,
-                    note: r.c[12]?.v // Notes column for extra info
+                    type: r.c[2]?.v,
+                    detail: r.c[3]?.v,
+                    desc: r.c[4]?.v,
+                    addr: r.c[5]?.v,
+                    ward: r.c[6]?.v,
+                    city: r.c[7]?.v,
+                    phones: [r.c[8]?.v, r.c[9]?.v, r.c[10]?.v].filter(Boolean),
+                    email: r.c[11]?.v,
+                    img: r.c[12]?.v,
+                    rating: r.c[13]?.v,
+                    note: r.c[14]?.v
                 }));
-                renderDirectory(directoryData);
-            }, "Directory");
+                renderDirectory(dirData);
+            });
 
-            // 3. Contact
+            // Load Contact (Sheet 3)
+            // Cols: Description(0)|Number(1)|Email(2)
             fetchData(GID_CONTACT, (rows) => {
-                document.getElementById('contactInfo').innerHTML = rows.map(r => `
-                    <div class="flex justify-between py-2 border-b border-gray-100 last:border-0">
-                        <span class="text-[#4B0082] font-bold text-sm">${r.c[0]?.v || ''}:</span>
-                        <span class="text-gray-600 text-sm text-right">${r.c[1]?.v || ''}</span>
+                const list = document.getElementById('contactInfo');
+                list.innerHTML = rows.map(r => `
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-3">
+                        <p class="text-gray-700 font-bold mb-2">${r.c[0]?.v || 'Admin'}</p>
+                        ${r.c[1]?.v ? `<a href="tel:${r.c[1].v}" class="flex items-center text-[#4B0082] mb-1"><i class="fa fa-phone w-6"></i> ${r.c[1].v}</a>` : ''}
+                        ${r.c[2]?.v ? `<a href="mailto:${r.c[2].v}" class="flex items-center text-blue-600"><i class="fa fa-envelope w-6"></i> ${r.c[2].v}</a>` : ''}
                     </div>
                 `).join('');
             });
         }
 
-        async function fetchData(gid, callback, type="") {
+        async function fetchData(gid, callback) {
             try {
                 const res = await fetch(`${BASE_URL}&gid=${gid}`);
                 const text = await res.text();
-                if (!text.includes("google.visualization.Query.setResponse")) throw new Error("GID Error");
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 callback(json.table.rows);
-            } catch (e) {
-                if(type === "Directory" && gid === '0') {
-                    document.getElementById('directoryList').innerHTML = `<div class="col-span-2 text-center text-red-500 py-10">Directory GID is 0 (Check Code)</div>`;
-                }
-            }
+            } catch (e) { console.error("Data Load Error", e); }
         }
 
-        // --- Render Lists ---
+        // --- 3. Render Lists ---
 
-        function renderAnnouncements() {
+        function renderEvents() {
             const list = document.getElementById('announcementList');
-            if(!announcementsData.length) { list.innerHTML = '<p class="text-center text-gray-400">No updates.</p>'; return; }
+            if(!eventsData.length) { list.innerHTML = '<p class="text-center text-gray-400">No events found.</p>'; return; }
             
-            list.innerHTML = announcementsData.map((item, index) => `
-                <div onclick="openDetail(${index}, 'announcement')" class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3 cursor-pointer active:scale-95 transition-transform">
-                    ${item.img ? `<img src="${item.img}" class="w-28 h-28 object-cover">` : ''}
-                    <div class="p-3 flex-1 flex flex-col justify-center">
-                        <h3 class="font-bold text-[#4B0082] line-clamp-2 leading-tight mb-1">${item.title}</h3>
-                        <p class="text-xs text-gray-500 line-clamp-2">${item.desc}</p>
+            list.innerHTML = eventsData.map((item, index) => `
+                <div onclick="openDetail('event', ${index})" class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3 cursor-pointer">
+                    ${item.img ? `<img src="${item.img}" class="w-24 h-24 object-cover">` : ''}
+                    <div class="p-3 flex-1">
+                        <h3 class="font-bold text-[#4B0082] line-clamp-1">${item.title}</h3>
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-1">${item.desc}</p>
                         <div class="text-[#D4AF37] text-xs font-bold mt-2 flex items-center">
-                            <i class="fa fa-calendar-alt mr-1"></i> ${item.date} 
-                            <span class="ml-auto text-[10px] bg-gray-100 px-2 py-1 rounded text-gray-500">Read More ></span>
+                            <i class="fa fa-clock mr-1"></i> ${item.fromDate || 'Coming Soon'}
+                            <span class="ml-auto text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">View Info</span>
                         </div>
                     </div>
                 </div>
@@ -207,151 +237,130 @@
 
         function renderDirectory(data) {
             const list = document.getElementById('directoryList');
-            if(!data.length) { list.innerHTML = '<p class="col-span-2 text-center text-gray-400">No data found.</p>'; return; }
+            if(!data.length) { list.innerHTML = '<p class="col-span-2 text-center text-gray-400">No data.</p>'; return; }
             
             list.innerHTML = data.map((item, index) => {
-                // Find original index for filtering correct item
-                const realIndex = directoryData.indexOf(item); 
+                const realIndex = dirData.indexOf(item);
                 return `
-                <div onclick="openDetail(${realIndex}, 'directory')" class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37] cursor-pointer active:scale-95 transition-transform">
+                <div onclick="openDetail('dir', ${realIndex})" class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37] cursor-pointer">
                     <div class="flex items-start gap-3">
                         ${item.img ? `<img src="${item.img}" class="w-16 h-16 rounded-lg object-cover bg-gray-100">` : `<div class="w-16 h-16 rounded-lg bg-[#f8f5ff] flex items-center justify-center text-[#D4AF37]"><i class="fa fa-store text-2xl"></i></div>`}
                         <div class="flex-1 overflow-hidden">
                             <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate">${item.cat}</span>
                             <h3 class="font-bold text-[#4B0082] text-md truncate">${item.name}</h3>
-                            <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-pin mr-1 text-[#D4AF37]"></i>${item.ward || item.addr}</p>
+                            <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-marker-alt mr-1 text-[#D4AF37]"></i>${item.city || item.ward || 'Taunggyi'}</p>
                         </div>
-                    </div>
-                    <div class="mt-3 flex justify-between items-center border-t pt-2 border-gray-100">
-                        <span class="text-xs text-gray-400 font-bold">${item.phones.length} Phone(s)</span>
-                        <span class="text-xs text-[#D4AF37] font-bold">Details <i class="fa fa-arrow-right ml-1"></i></span>
                     </div>
                 </div>
             `}).join('');
         }
 
-        // --- Detail View Logic ---
+        // --- 4. Detailed View Logic (The Fix) ---
 
-        function openDetail(index, type) {
-            const detailPage = document.getElementById('detailPage');
+        function openDetail(type, index) {
+            const modal = document.getElementById('detailPage');
             const content = document.getElementById('detailContent');
-            const headerTitle = document.getElementById('detailHeaderTitle');
-            const bottomNav = document.getElementById('bottomNav');
-
+            const header = document.getElementById('detailHeader');
             let html = '';
 
-            if (type === 'announcement') {
-                const item = announcementsData[index];
-                headerTitle.innerText = "News & Events";
+            if(type === 'event') {
+                const i = eventsData[index];
+                header.innerText = "Event Details";
                 html = `
-                    <div class="bg-white rounded-3xl overflow-hidden shadow-lg border-t-8 border-[#D4AF37]">
-                        ${item.img ? `<img src="${item.img}" class="w-full h-auto max-h-80 object-cover">` : ''}
-                        <div class="p-6">
-                            <div class="flex items-center text-[#D4AF37] font-bold text-sm mb-3">
-                                <i class="fa fa-calendar-alt mr-2"></i> ${item.date}
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-4">
+                        ${i.img ? `<img src="${i.img}" class="w-full max-h-80 object-cover">` : ''}
+                        <div class="p-5">
+                            <h2 class="text-2xl font-bold text-[#4B0082] mb-2">${i.title}</h2>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                ${i.fromDate ? `<span class="bg-[#f8f5ff] text-[#4B0082] px-3 py-1 rounded text-xs font-bold border border-[#D4AF37]"><i class="fa fa-calendar-check mr-1"></i> Start: ${i.fromDate}</span>` : ''}
+                                ${i.toDate ? `<span class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-xs"><i class="fa fa-calendar-times mr-1"></i> End: ${i.toDate}</span>` : ''}
                             </div>
-                            <h1 class="text-2xl font-bold text-[#4B0082] mb-4 leading-snug">${item.title}</h1>
-                            <div class="text-gray-600 leading-relaxed text-sm whitespace-pre-line">${item.desc}</div>
+                            ${i.time ? `<p class="text-sm text-gray-600 mb-2"><i class="fa fa-clock text-[#D4AF37] w-5"></i> ${i.time}</p>` : ''}
+                            ${i.place ? `<p class="text-sm text-gray-600 mb-4"><i class="fa fa-map-pin text-[#D4AF37] w-5"></i> ${i.place}</p>` : ''}
+                            <hr class="my-4">
+                            <h3 class="font-bold text-gray-800 mb-2">Description</h3>
+                            <p class="text-gray-600 leading-relaxed whitespace-pre-line">${i.desc}</p>
                         </div>
                     </div>
                 `;
-            } else if (type === 'directory') {
-                const item = directoryData[index];
-                headerTitle.innerText = item.name;
+            } 
+            else if (type === 'dir') {
+                const i = dirData[index];
+                header.innerText = i.name;
                 html = `
                     <div class="space-y-4">
-                        <div class="bg-white rounded-3xl overflow-hidden shadow-lg border-b-4 border-[#D4AF37]">
-                            ${item.img ? `<img src="${item.img}" class="w-full h-64 object-cover">` : `<div class="h-40 purple-gradient flex items-center justify-center"><i class="fa fa-store text-6xl text-white/30"></i></div>`}
-                            <div class="p-6">
-                                <span class="bg-[#f8f5ff] text-[#4B0082] text-xs font-bold px-3 py-1 rounded-full mb-2 inline-block">${item.cat}</span>
-                                <h1 class="text-2xl font-bold text-[#4B0082] mb-1">${item.name}</h1>
-                                ${item.type ? `<p class="text-sm text-gray-500 italic mb-2">${item.type}</p>` : ''}
-                                ${item.rating ? `<div class="text-orange-400 text-sm mb-2"><i class="fa fa-star"></i> ${item.rating} Rating</div>` : ''}
-                            </div>
+                        <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center">
+                            ${i.img ? `<img src="${i.img}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4 border-gray-100 shadow-sm">` : `<div class="w-24 h-24 rounded-full bg-[#f8f5ff] mx-auto mb-4 flex items-center justify-center text-[#4B0082] text-4xl"><i class="fa fa-store"></i></div>`}
+                            <h2 class="text-2xl font-bold text-[#4B0082]">${i.name}</h2>
+                            <p class="text-[#D4AF37] font-bold text-sm mt-1 uppercase">${i.cat}</p>
+                            ${i.type ? `<p class="text-gray-400 text-xs mt-1">${i.type}</p>` : ''}
+                            ${i.rating ? `<div class="mt-2 text-orange-400"><i class="fa fa-star"></i> ${i.rating} / 5.0</div>` : ''}
                         </div>
 
-                        <div class="grid grid-cols-1 gap-3">
-                            ${item.phones.map(p => `
-                                <a href="tel:${p}" class="bg-[#4B0082] text-white p-4 rounded-2xl shadow-md flex items-center justify-between hover:bg-[#37006a] transition">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3"><i class="fa fa-phone"></i></div>
-                                        <span class="font-bold text-lg">${p}</span>
-                                    </div>
-                                    <span class="text-xs bg-[#D4AF37] text-[#37006a] px-2 py-1 rounded font-bold">CALL</span>
-                                </a>
-                            `).join('')}
+                        ${i.phones.length > 0 ? `
+                        <div class="bg-white p-4 rounded-2xl shadow-sm">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider">Contact Numbers</h3>
+                            <div class="space-y-2">
+                                ${i.phones.map(p => `
+                                    <a href="tel:${p}" class="flex items-center justify-between bg-[#f8f5ff] p-3 rounded-xl hover:bg-[#D4AF37] hover:text-white transition group">
+                                        <span class="font-bold font-mono text-lg">${p}</span>
+                                        <i class="fa fa-phone bg-white text-[#4B0082] w-8 h-8 rounded-full flex items-center justify-center shadow-sm"></i>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>` : ''}
+
+                        <div class="bg-white p-5 rounded-2xl shadow-sm space-y-4">
+                            ${i.desc ? `<div><h3 class="font-bold text-[#4B0082] mb-1">About</h3><p class="text-sm text-gray-600">${i.desc}</p></div>` : ''}
+                            ${i.detail ? `<div><h3 class="font-bold text-[#4B0082] mb-1">Details</h3><p class="text-sm text-gray-600">${i.detail}</p></div>` : ''}
+                            
+                            <div class="border-t border-gray-100 pt-3">
+                                <h3 class="font-bold text-[#4B0082] mb-2">Location</h3>
+                                <p class="text-sm text-gray-600 flex"><i class="fa fa-map-marker-alt text-[#D4AF37] w-6 flex-shrink-0"></i> 
+                                    <span>${i.addr || ''} <br> ${i.ward || ''} <br> ${i.city || ''}</span>
+                                </p>
+                            </div>
+
+                            ${i.email ? `
+                            <div class="border-t border-gray-100 pt-3">
+                                <h3 class="font-bold text-[#4B0082] mb-1">Email</h3>
+                                <a href="mailto:${i.email}" class="text-blue-600 text-sm">${i.email}</a>
+                            </div>` : ''}
                         </div>
 
-                        <div class="bg-white p-6 rounded-3xl shadow-sm space-y-4">
-                            <div class="flex items-start">
-                                <i class="fa fa-map-marker-alt text-[#D4AF37] text-xl mt-1 mr-4 w-5"></i>
-                                <div>
-                                    <h3 class="font-bold text-gray-800">Address</h3>
-                                    <p class="text-gray-600 text-sm mt-1">${item.addr}</p>
-                                    ${item.ward ? `<p class="text-gray-500 text-xs mt-1">Ward: ${item.ward}</p>` : ''}
-                                </div>
-                            </div>
-                            ${item.email ? `
-                            <div class="flex items-start border-t border-gray-100 pt-3">
-                                <i class="fa fa-envelope text-[#D4AF37] text-xl mt-1 mr-4 w-5"></i>
-                                <div>
-                                    <h3 class="font-bold text-gray-800">Email</h3>
-                                    <a href="mailto:${item.email}" class="text-blue-600 text-sm mt-1 block">${item.email}</a>
-                                </div>
-                            </div>` : ''}
-                            ${item.note ? `
-                            <div class="bg-[#f8f5ff] p-4 rounded-xl border border-gray-100 mt-2">
-                                <h3 class="font-bold text-[#4B0082] text-sm mb-1"><i class="fa fa-info-circle mr-1"></i> Note</h3>
-                                <p class="text-gray-600 text-xs leading-relaxed">${item.note}</p>
-                            </div>` : ''}
-                        </div>
+                        ${i.note ? `<div class="bg-yellow-50 p-4 rounded-xl text-xs text-yellow-800 border border-yellow-200"><i class="fa fa-info-circle mr-1"></i> ${i.note}</div>` : ''}
                     </div>
                 `;
             }
 
             content.innerHTML = html;
-            detailPage.style.display = 'block';
-            bottomNav.style.transform = 'translateY(150%)'; // Hide Bottom Nav
-            document.body.style.overflow = 'hidden'; // Stop scrolling background
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Stop scrolling
+            document.getElementById('bottomNav').style.transform = 'translateY(150%)'; // Hide Nav
         }
 
         function closeDetail() {
-            const detailPage = document.getElementById('detailPage');
-            const bottomNav = document.getElementById('bottomNav');
-            
-            detailPage.style.display = 'none';
-            bottomNav.style.transform = 'translateY(0)'; // Show Bottom Nav
+            document.getElementById('detailPage').style.display = 'none';
             document.body.style.overflow = 'auto'; // Restore scrolling
+            document.getElementById('bottomNav').style.transform = 'translateY(0)'; // Show Nav
         }
 
         // --- Navigation Logic ---
-
         function showPage(pageId) {
-            lastPage = pageId; // Update last page
-            
-            // Hide all pages
             document.querySelectorAll('.page').forEach(p => {
                 if(p.id !== 'detailPage') p.classList.remove('active-page');
-                if(p.id !== 'detailPage') setTimeout(() => { if(!p.classList.contains('active-page')) p.style.display = 'none'; }, 100);
+                if(p.id !== 'detailPage') setTimeout(() => { if(!p.classList.contains('active-page')) p.style.display = 'none'; }, 200);
             });
 
-            // Show active page
             const activePage = document.getElementById(pageId + 'Page');
             activePage.style.display = 'block';
             setTimeout(() => activePage.classList.add('active-page'), 10);
             
-            // Header Title Update
-            const titles = {'home': 'Home', 'directory': 'Directory', 'contact': 'Contact'};
-            document.getElementById('headerTitle').innerText = titles[pageId];
-
             // Nav Styling
             document.querySelectorAll('.nav-item').forEach(btn => {
-                if(btn.id !== 'nav-directory') {
-                    btn.classList.remove('text-[#FFD700]', 'scale-110');
-                    btn.classList.add('text-gray-400');
-                } else {
-                    btn.querySelector('div').classList.remove('ring-4', 'ring-[#FFD700]/30');
-                }
+                btn.classList.remove('text-[#FFD700]', 'scale-110');
+                if(btn.id !== 'nav-directory') btn.classList.add('text-gray-400');
+                else btn.querySelector('div').classList.remove('ring-4', 'ring-[#FFD700]/30');
             });
 
             const activeBtn = document.getElementById('nav-' + pageId);
@@ -366,15 +375,28 @@
 
         function filterDirectory() {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = directoryData.filter(d => 
-                d.name.toLowerCase().includes(term) || 
-                (d.cat && d.cat.toLowerCase().includes(term))
-            );
-            renderDirectory(filtered);
+            const filtered = dirData.filter(d => d.name.toLowerCase().includes(term) || d.cat.toLowerCase().includes(term));
+            const list = document.getElementById('directoryList');
+            
+            if(!filtered.length) { list.innerHTML = '<p class="col-span-2 text-center text-gray-400">Not found.</p>'; return; }
+            
+            list.innerHTML = filtered.map(item => {
+                const realIndex = dirData.indexOf(item);
+                return `
+                <div onclick="openDetail('dir', ${realIndex})" class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37] cursor-pointer">
+                    <div class="flex items-start gap-3">
+                        ${item.img ? `<img src="${item.img}" class="w-16 h-16 rounded-lg object-cover bg-gray-100">` : `<div class="w-16 h-16 rounded-lg bg-[#f8f5ff] flex items-center justify-center text-[#D4AF37]"><i class="fa fa-store text-2xl"></i></div>`}
+                        <div class="flex-1 overflow-hidden">
+                            <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate">${item.cat}</span>
+                            <h3 class="font-bold text-[#4B0082] text-md truncate">${item.name}</h3>
+                            <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-marker-alt mr-1 text-[#D4AF37]"></i>${item.city || item.ward || 'Taunggyi'}</p>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
         }
 
         loadAllData();
-        showPage('home'); // Init
     </script>
 </body>
 </html>
