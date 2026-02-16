@@ -25,6 +25,19 @@
         /* Animation */
         .slide-up { animation: slideUp 0.3s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Gallery Scroll */
+        .gallery-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding-bottom: 10px;
+            scroll-snap-type: x mandatory;
+        }
+        .gallery-item {
+            flex: 0 0 80%;
+            scroll-snap-align: center;
+        }
     </style>
 </head>
 <body>
@@ -126,8 +139,7 @@
         const GID_CONTACT = '626044868';   // <--- Contact GID ထည့်ပါ
         // =================================================================
 
-        // Link to your Google Form for Reviews (Optional - Shine Thit ထည့်ချင်ရင် ဒီမှာ Form Link ထည့်ပါ)
-        const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog"; 
+        const REVIEW_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog"; // Review Form Link ဒီမှာထည့်ပါ
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         let eventsData = [], dirData = [];
@@ -143,27 +155,30 @@
 
         async function loadAllData() {
             initAnalytics();
-            // Events
+            // Events (Updated Columns: Title, Desc, From, To, Time, Place, Org, Logo, Img1-5)
             fetchData(GID_HOME, (rows) => {
                 eventsData = rows.map(r => ({
-                    title: r.c[0]?.v, desc: r.c[1]?.v, fromDate: r.c[2]?.v, toDate: r.c[3]?.v,
-                    time: r.c[4]?.v, place: r.c[5]?.v, img: r.c[6]?.v
+                    title: r.c[0]?.v, 
+                    desc: r.c[1]?.v, 
+                    fromDate: r.c[2]?.v, 
+                    toDate: r.c[3]?.v,
+                    time: r.c[4]?.v, 
+                    place: r.c[5]?.v,
+                    org: r.c[6]?.v,
+                    logo: r.c[7]?.v,
+                    images: [r.c[8]?.v, r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v].filter(Boolean)
                 }));
                 renderEvents();
             });
 
-            // Directory (Updated Columns)
+            // Directory
             fetchData(GID_DIR, (rows) => {
                 dirData = rows.map(r => ({
-                    name: r.c[0]?.v || 'Unknown', cat: r.c[1]?.v || 'General', type: r.c[2]?.v,
+                    name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v,
                     detail: r.c[3]?.v, desc: r.c[4]?.v, addr: r.c[5]?.v, ward: r.c[6]?.v, city: r.c[7]?.v,
-                    phones: [r.c[8]?.v, r.c[9]?.v, r.c[10]?.v].filter(Boolean), // Ph1, Ph2, Ph3
-                    viber: r.c[11]?.v,
-                    telegram: r.c[12]?.v,
-                    email: r.c[13]?.v,
-                    img: r.c[14]?.v,
-                    rating: r.c[15]?.v,
-                    note: r.c[16]?.v
+                    ph1: r.c[8]?.v, ph2: r.c[9]?.v, ph3: r.c[10]?.v,
+                    viber: r.c[11]?.v, telegram: r.c[12]?.v, email: r.c[13]?.v,
+                    img: r.c[14]?.v, rating: r.c[15]?.v, note: r.c[16]?.v
                 }));
                 renderDirectory(dirData);
             });
@@ -179,8 +194,6 @@
                         <div class="space-y-3">
                             ${r.c[1]?.v ? `<a href="tel:${r.c[1].v}" class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100 hover:border-[#D4AF37]"><span class="font-mono font-bold">${r.c[1].v}</span> <i class="fa fa-phone text-green-500"></i></a>` : ''}
                             ${r.c[2]?.v ? `<a href="tel:${r.c[2].v}" class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100 hover:border-[#D4AF37]"><span class="font-mono font-bold">${r.c[2].v}</span> <i class="fa fa-phone text-green-500"></i></a>` : ''}
-                            ${r.c[3]?.v ? `<a href="viber://chat?number=${r.c[3].v}" class="flex items-center justify-between viber-bg text-white p-3 rounded-xl"><span class="font-bold">Viber</span> <i class="fab fa-viber text-xl"></i></a>` : ''}
-                            ${r.c[4]?.v ? `<a href="https://t.me/${r.c[4].v.replace('@','')}" target="_blank" class="flex items-center justify-between telegram-bg text-white p-3 rounded-xl"><span class="font-bold">Telegram</span> <i class="fab fa-telegram text-xl"></i></a>` : ''}
                         </div>
                     </div>
                 `).join('');
@@ -196,7 +209,6 @@
             } catch (e) { console.error(e); }
         }
 
-        // Helper: Generate Star HTML
         function getStars(rating) {
             if(!rating) return '';
             let html = '<div class="flex text-orange-400 text-sm">';
@@ -213,18 +225,22 @@
         function renderEvents() {
             const list = document.getElementById('announcementList');
             if(!eventsData.length) { list.innerHTML = '<p class="text-center text-gray-400">No events.</p>'; return; }
-            list.innerHTML = eventsData.map((item, index) => `
+            list.innerHTML = eventsData.map((item, index) => {
+                // Main image is Image 1 (index 0) or Logo or default
+                const displayImg = item.images.length > 0 ? item.images[0] : (item.logo ? item.logo : 'CDST_Logo.png');
+                
+                return `
                 <div onclick="openDetail('event', ${index})" class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3 cursor-pointer">
-                    ${item.img ? `<img src="${item.img}" class="w-24 h-24 object-cover">` : ''}
+                    <img src="${displayImg}" class="w-24 h-24 object-cover" onerror="this.src='CDST_Logo.png'">
                     <div class="p-3 flex-1">
-                        <h3 class="font-bold text-[#4B0082] line-clamp-1">${item.title}</h3>
-                        <p class="text-xs text-gray-500 mt-1 line-clamp-1">${item.desc}</p>
+                        <h3 class="font-bold text-[#4B0082] line-clamp-1">${item.title || 'Event'}</h3>
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-1">${item.desc || '-'}</p>
                         <div class="text-[#D4AF37] text-xs font-bold mt-2 flex items-center">
-                            <i class="fa fa-clock mr-1"></i> ${item.fromDate || 'Soon'}
+                            <i class="fa fa-calendar-alt mr-1"></i> ${item.fromDate || 'Soon'}
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function renderDirectory(data) {
@@ -232,16 +248,17 @@
             if(!data.length) { list.innerHTML = '<p class="col-span-2 text-center text-gray-400">No data.</p>'; return; }
             list.innerHTML = data.map((item, index) => {
                 const realIndex = dirData.indexOf(item);
+                const displayImg = item.img ? item.img : 'CDST_Logo.png'; 
                 return `
                 <div onclick="openDetail('dir', ${realIndex})" class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37] cursor-pointer">
                     <div class="flex items-start gap-3">
-                        ${item.img ? `<img src="${item.img}" class="w-16 h-16 rounded-lg object-cover bg-gray-100">` : `<div class="w-16 h-16 rounded-lg bg-[#f8f5ff] flex items-center justify-center text-[#D4AF37]"><i class="fa fa-store text-2xl"></i></div>`}
+                        <img src="${displayImg}" class="w-16 h-16 rounded-lg object-cover bg-gray-100 border border-gray-200" onerror="this.src='CDST_Logo.png'">
                         <div class="flex-1 overflow-hidden">
                             <div class="flex justify-between">
-                                <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate">${item.cat}</span>
+                                <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate">${item.cat || 'General'}</span>
                                 ${getStars(item.rating)}
                             </div>
-                            <h3 class="font-bold text-[#4B0082] text-md truncate">${item.name}</h3>
+                            <h3 class="font-bold text-[#4B0082] text-md truncate">${item.name || 'Unknown'}</h3>
                             <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-marker-alt mr-1 text-[#D4AF37]"></i>${item.city || item.ward || 'Taunggyi'}</p>
                         </div>
                     </div>
@@ -253,79 +270,133 @@
             const modal = document.getElementById('detailPage');
             const content = document.getElementById('detailContent');
             const header = document.getElementById('detailHeader');
+            
+            // Helper for Simple Rows
+            const renderRow = (label, value) => `
+                <div class="border-b border-gray-100 py-3">
+                    <p class="text-xs text-gray-400 mb-1">${label}</p>
+                    <p class="text-gray-800 font-medium text-sm">${value || '-'}</p>
+                </div>
+            `;
+
             let html = '';
 
             if(type === 'event') {
                 const i = eventsData[index];
                 header.innerText = "Event Info";
+                
+                // Images Logic
+                const mainImage = i.images.length > 0 ? i.images[0] : (i.logo ? i.logo : 'CDST_Logo.png');
+                const hasGallery = i.images.length > 1;
+
                 html = `
-                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-4">
-                        ${i.img ? `<img src="${i.img}" class="w-full max-h-80 object-cover">` : ''}
-                        <div class="p-5">
-                            <h2 class="text-2xl font-bold text-[#4B0082] mb-2">${i.title || 'Event'}</h2>
-                            <div class="flex flex-wrap gap-2 mb-4">
-                                ${i.fromDate ? `<span class="bg-[#f8f5ff] text-[#4B0082] px-3 py-1 rounded text-xs font-bold border border-[#D4AF37]"><i class="fa fa-calendar-check mr-1"></i> Start: ${i.fromDate}</span>` : ''}
-                            </div>
-                            <p class="text-gray-600 leading-relaxed whitespace-pre-line">${i.desc}</p>
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center">
+                            <img src="${i.logo ? i.logo : 'CDST_Logo.png'}" class="w-32 h-32 rounded-xl object-cover mx-auto mb-4 border-4 border-[#D4AF37] shadow-sm bg-white" onerror="this.src='CDST_Logo.png'">
+                            <h2 class="text-xl font-bold text-[#4B0082]">${i.title || '-'}</h2>
+                            ${i.org ? `<p class="text-[#D4AF37] font-bold text-xs mt-1 uppercase">By ${i.org}</p>` : ''}
                         </div>
+
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                            <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Event Information</h3>
+                            ${renderRow('အမည် (Title)', i.title)}
+                            ${renderRow('ဖော်ပြချက် (Description)', i.desc)}
+                            ${renderRow('စမည့်နေ့ရက် (From Date)', i.fromDate)}
+                            ${renderRow('ပြီးမည့်နေ့ရက် (To Date)', i.toDate)}
+                            ${renderRow('အချိန် (Time)', i.time)}
+                            ${renderRow('နေရာ (Place)', i.place)}
+                            ${renderRow('စီစဉ်သူ (Organized by)', i.org)}
+                        </div>
+
+                        ${i.images.length > 0 ? `
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                            <h3 class="font-bold text-[#4B0082] mb-3 border-b border-gray-100 pb-2">Gallery</h3>
+                            <div class="gallery-scroll">
+                                ${i.images.map(img => `
+                                    <div class="gallery-item">
+                                        <img src="${img}" class="w-full h-48 object-cover rounded-xl border border-gray-200" onclick="window.open(this.src)">
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-2 text-center">Swipe to see more photos</p>
+                        </div>` : ''}
                     </div>`;
             } 
             else if (type === 'dir') {
                 const i = dirData[index];
                 header.innerText = i.name;
+                const detailImg = i.img ? i.img : 'CDST_Logo.png';
+
+                // Helper for Contact Rows
+                const renderContactRow = (label, value, iconClass, colorClass, linkPrefix) => `
+                    <div class="border-b border-gray-100 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                                <i class="${iconClass}"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">${label}</p>
+                                <p class="text-sm font-bold text-gray-700">${value || '-'}</p>
+                            </div>
+                        </div>
+                        ${value ? `<a href="${linkPrefix}${value.replace('@','')}" target="_blank" class="${colorClass} text-white px-3 py-1 rounded-lg text-xs font-bold shadow-sm">Open</a>` : ''}
+                    </div>`;
+
+                const renderPhoneRow = (label, value) => `
+                    <div class="border-b border-gray-100 py-3 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1">${label}</p>
+                            <p class="text-[#4B0082] font-bold text-sm">${value || '-'}</p>
+                        </div>
+                        ${value ? `<a href="tel:${value}" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow flex items-center transition"><i class="fa fa-phone mr-1"></i> Call</a>` : ''}
+                    </div>`;
+
                 html = `
                     <div class="space-y-4">
-                        <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center relative">
-                            ${i.img ? `<img src="${i.img}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4 border-gray-100 shadow-sm">` : `<div class="w-24 h-24 rounded-full bg-[#f8f5ff] mx-auto mb-4 flex items-center justify-center text-[#4B0082] text-4xl"><i class="fa fa-store"></i></div>`}
-                            <h2 class="text-2xl font-bold text-[#4B0082]">${i.name}</h2>
-                            <p class="text-[#D4AF37] font-bold text-sm mt-1 uppercase">${i.cat}</p>
+                        <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center">
+                            <img src="${detailImg}" class="w-32 h-32 rounded-lg object-cover mx-auto mb-4 border-4 border-[#D4AF37] shadow-sm bg-white" onerror="this.src='CDST_Logo.png'">
+                            <h2 class="text-xl font-bold text-[#4B0082]">${i.name || '-'}</h2>
                             <div class="flex justify-center mt-2">${getStars(i.rating)}</div>
-                            
                             <a href="${REVIEW_FORM_LINK}" target="_blank" class="inline-block mt-3 text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full hover:bg-gray-200">
                                 <i class="fa fa-pen mr-1"></i> Write a Review
                             </a>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-2">
-                            ${i.phones.map((p, idx) => `
-                                <a href="tel:${p}" class="bg-[#4B0082] text-white p-3 rounded-2xl shadow-md flex items-center justify-between hover:bg-[#37006a] transition">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3 font-bold">${idx+1}</div>
-                                        <span class="font-bold font-mono text-lg">${p}</span>
-                                    </div>
-                                    <i class="fa fa-phone bg-[#D4AF37] text-[#37006a] w-8 h-8 rounded-full flex items-center justify-center"></i>
-                                </a>
-                            `).join('')}
-                            
-                            <div class="flex gap-2 mt-1">
-                                ${i.viber ? `
-                                <a href="viber://chat?number=${i.viber}" class="flex-1 viber-bg text-white p-3 rounded-2xl flex items-center justify-center gap-2 shadow-md">
-                                    <i class="fab fa-viber text-2xl"></i> <span class="font-bold">Viber</span>
-                                </a>` : ''}
-                                
-                                ${i.telegram ? `
-                                <a href="https://t.me/${i.telegram.replace('@','')}" target="_blank" class="flex-1 telegram-bg text-white p-3 rounded-2xl flex items-center justify-center gap-2 shadow-md">
-                                    <i class="fab fa-telegram text-2xl"></i> <span class="font-bold">Telegram</span>
-                                </a>` : ''}
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                            <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Basic Info</h3>
+                            ${renderRow('ကဏ္ဍ (Category)', i.cat)}
+                            ${renderRow('လုပ်ငန်းအမျိုးအစား (Type)', i.type)}
+                            ${renderRow('လုပ်ငန်း အသေးစိတ် (Detail)', i.detail)}
+                            <div class="py-3">
+                                <p class="text-xs text-gray-400 mb-1">ဖော်ပြချက် (Description)</p>
+                                <p class="text-gray-800 text-sm leading-relaxed">${i.desc || '-'}</p>
                             </div>
                         </div>
 
-                        ${i.note ? `
-                        <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-200 shadow-sm relative overflow-hidden">
-                            <div class="absolute -right-2 -top-2 text-yellow-100 text-6xl"><i class="fa fa-sticky-note"></i></div>
-                            <h3 class="font-bold text-yellow-800 mb-1 relative z-10">Note</h3>
-                            <p class="text-sm text-yellow-900 relative z-10 leading-relaxed">${i.note}</p>
-                        </div>` : ''}
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                            <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Location</h3>
+                            ${renderRow('လိပ်စာ (Address)', i.addr)}
+                            ${renderRow('ရပ်ကွက် (Ward)', i.ward)}
+                            ${renderRow('မြို့ (City)', i.city)}
+                        </div>
 
-                        <div class="bg-white p-5 rounded-2xl shadow-sm space-y-4 border border-gray-100">
-                            ${i.desc ? `<div><h3 class="font-bold text-[#4B0082] mb-1">About</h3><p class="text-sm text-gray-600">${i.desc}</p></div>` : ''}
-                            
-                            <div class="border-t border-gray-100 pt-3">
-                                <h3 class="font-bold text-[#4B0082] mb-2">Location</h3>
-                                <p class="text-sm text-gray-600 flex"><i class="fa fa-map-marker-alt text-[#D4AF37] w-6 flex-shrink-0"></i> 
-                                    <span>${i.addr || ''}, ${i.ward || ''} <br> ${i.city || ''}</span>
-                                </p>
-                            </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                            <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Phone Numbers</h3>
+                            ${renderPhoneRow('ဆက်သွယ်ရန် (၁)', i.ph1)}
+                            ${renderPhoneRow('ဆက်သွယ်ရန် (၂)', i.ph2)}
+                            ${renderPhoneRow('ဆက်သွယ်ရန် (၃)', i.ph3)}
+                        </div>
+
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                            <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Digital Contact</h3>
+                            ${renderContactRow('Email', i.email, 'fa fa-envelope', 'bg-blue-500', 'mailto:')}
+                            ${renderContactRow('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}
+                            ${renderContactRow('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}
+                        </div>
+
+                        <div class="bg-white p-5 rounded-2xl shadow-sm">
+                             <h3 class="font-bold text-[#4B0082] mb-2 border-b border-gray-100 pb-2">Note</h3>
+                             <p class="text-sm text-gray-600 min-h-[20px]">${i.note || '-'}</p>
                         </div>
                     </div>`;
             }
@@ -364,26 +435,11 @@
 
         function filterDirectory() {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = dirData.filter(d => d.name.toLowerCase().includes(term) || d.cat.toLowerCase().includes(term));
-            const list = document.getElementById('directoryList');
-            if(!filtered.length) { list.innerHTML = '<p class="col-span-2 text-center text-gray-400">Not found.</p>'; return; }
-            list.innerHTML = filtered.map(item => {
-                const realIndex = dirData.indexOf(item);
-                return `
-                <div onclick="openDetail('dir', ${realIndex})" class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37] cursor-pointer">
-                    <div class="flex items-start gap-3">
-                        ${item.img ? `<img src="${item.img}" class="w-16 h-16 rounded-lg object-cover bg-gray-100">` : `<div class="w-16 h-16 rounded-lg bg-[#f8f5ff] flex items-center justify-center text-[#D4AF37]"><i class="fa fa-store text-2xl"></i></div>`}
-                        <div class="flex-1 overflow-hidden">
-                            <div class="flex justify-between">
-                                <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate">${item.cat}</span>
-                                ${getStars(item.rating)}
-                            </div>
-                            <h3 class="font-bold text-[#4B0082] text-md truncate">${item.name}</h3>
-                            <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-marker-alt mr-1 text-[#D4AF37]"></i>${item.city || item.ward || 'Taunggyi'}</p>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
+            const filtered = dirData.filter(d => 
+                (d.name && d.name.toLowerCase().includes(term)) || 
+                (d.cat && d.cat.toLowerCase().includes(term))
+            );
+            renderDirectory(filtered);
         }
 
         loadAllData();
