@@ -13,18 +13,21 @@
             padding-bottom: 110px; 
             background-color: #f8f5ff;
         }
-        .page { display: none; }
-        .active-page { display: block; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .page { display: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
+        .active-page { display: block; opacity: 1; }
         
         /* Theme Colors */
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
+        
+        /* Animation for Detail Page */
+        .slide-up { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <header class="purple-gradient text-white pt-8 pb-8 px-4 shadow-2xl text-center rounded-b-[40px] border-b-4 border-[#D4AF37] relative z-0 overflow-hidden">
+    <header id="mainHeader" class="purple-gradient text-white pt-8 pb-8 px-4 shadow-2xl text-center rounded-b-[40px] border-b-4 border-[#D4AF37] relative z-0 overflow-hidden transition-all duration-300">
         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div class="relative z-10">
             <div class="flex justify-center mb-5">
@@ -32,25 +35,20 @@
                      class="w-36 h-36 rounded-2xl border-4 border-[#FFD700] shadow-2xl object-cover bg-[#37006a]"
                      onerror="this.style.display='none'">
             </div>
-            <h1 class="text-3xl font-bold tracking-wider text-[#FFD700] drop-shadow-md font-['Pyidaungsu']">Home</h1>
+            <h1 id="headerTitle" class="text-3xl font-bold tracking-wider text-[#FFD700] drop-shadow-md font-['Pyidaungsu']">Home</h1>
             <p class="text-sm text-gray-200 mt-2 tracking-widest uppercase font-semibold">Cherry Directory since 2026</p>
         </div>
     </header>
 
-    <div class="max-w-4xl mx-auto p-4 mt-2 mb-20">
+    <div class="max-w-4xl mx-auto p-4 mt-2 mb-20 relative">
         
-        <div id="debugMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <strong class="font-bold">သတိပေးချက်!</strong>
-            <span class="block sm:inline" id="debugText">Something went wrong.</span>
-        </div>
-
         <section id="homePage" class="page active-page space-y-4">
             <div class="flex items-center mb-2 px-2">
                 <i class="fa fa-bullhorn text-[#4B0082] mr-2 text-xl"></i>
                 <h2 class="font-bold text-lg text-[#4B0082]">သတင်းနှင့် ပွဲတော်ရက်များ</h2>
             </div>
             <div id="announcementList" class="space-y-4 pb-4">
-                <div class="text-center text-gray-400 py-10">Loading updates...</div>
+                <div class="text-center text-gray-400 py-10 animate-pulse">Loading updates...</div>
             </div>
         </section>
 
@@ -78,14 +76,26 @@
                     <p class="text-gray-500 text-sm">Creator & Manager</p>
                 </div>
                 <div id="contactInfo" class="space-y-3 bg-gray-50 p-4 rounded-xl">
-                    Loading contact info...
+                    Loading...
                 </div>
             </div>
         </section>
 
+        <section id="detailPage" class="page fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto pb-24 hidden">
+            <div class="sticky top-0 bg-[#f8f5ff]/95 backdrop-blur-md p-4 flex items-center shadow-sm z-50">
+                <button onclick="closeDetail()" class="bg-white text-[#4B0082] w-10 h-10 rounded-full shadow-md flex items-center justify-center border border-[#D4AF37]">
+                    <i class="fa fa-arrow-left"></i>
+                </button>
+                <h2 id="detailHeaderTitle" class="ml-4 font-bold text-lg text-[#4B0082] truncate flex-1">Details</h2>
+            </div>
+
+            <div id="detailContent" class="p-5 slide-up max-w-2xl mx-auto">
+                </div>
+        </section>
+
     </div>
 
-    <nav class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[9999] rounded-2xl border border-[#D4AF37]/50">
+    <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50 transition-transform duration-300">
         <button onclick="showPage('home')" class="nav-item flex flex-col items-center p-2 w-16 text-[#FFD700]" id="nav-home">
             <i class="fa fa-home text-xl mb-1"></i>
             <span class="text-[10px] font-bold">Home</span>
@@ -104,58 +114,52 @@
 
     <script>
         // =================================================================
-        // ⚠️ အရေးကြီးသည် - GID များကို သေချာစစ်ဆေးပြီး ထည့်ပါ ⚠️
+        // ⚠️ GID များကို ဤနေရာတွင် အမှန်ပြင်ထည့်ပါ ⚠️
         // =================================================================
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
-        
-        // Tab 1: Announcement (Sheet1 ဖြစ်လေ့ရှိသည် - gid=0)
-        const GID_HOME = '၀'; 
-        
-        // Tab 2: Directory (ဒီနေရာမှာ နံပါတ်ပြောင်းကို ပြောင်းရပါမယ်)
-        // ဥပမာ - const GID_DIR = '12345678';
-        const GID_DIR = '1267218282'; // <--- ဒီမှာ GID အမှန်ထည့်ပါ
-        
-        // Tab 3: Contact (ဒီနေရာမှာ နံပါတ်ပြောင်းကို ပြောင်းရပါမယ်)
-        const GID_CONTACT = '626044868'; // <--- ဒီမှာ GID အမှန်ထည့်ပါ
+        const GID_HOME = '0'; 
+        const GID_DIR = '1267218282'; // <--- Directory Tab GID ထည့်ပါ
+        const GID_CONTACT = '626044868'; // <--- Contact Tab GID ထည့်ပါ
         // =================================================================
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
-        let dirData = [];
+        
+        // Data Storage
+        let announcementsData = [];
+        let directoryData = [];
+        let lastPage = 'home'; // To remember where to go back
 
         async function loadAllData() {
-            // 1. Load Announcements
+            // 1. Announcements
             fetchData(GID_HOME, (rows) => {
-                const list = document.getElementById('announcementList');
-                if(!rows.length) { list.innerHTML = '<p class="text-center text-gray-400">No data found.</p>'; return; }
-                
-                list.innerHTML = rows.map(r => `
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3">
-                        ${r.c[3]?.v ? `<img src="${r.c[3].v}" class="w-24 h-24 object-cover">` : ''}
-                        <div class="p-3 flex-1">
-                            <h3 class="font-bold text-[#4B0082]">${r.c[0]?.v || '(No Title)'}</h3>
-                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">${r.c[1]?.v || ''}</p>
-                            <div class="text-[#D4AF37] text-xs font-bold mt-2">${r.c[2]?.v || ''}</div>
-                        </div>
-                    </div>
-                `).join('');
+                announcementsData = rows.map(r => ({
+                    title: r.c[0]?.v || '(No Title)',
+                    desc: r.c[1]?.v || '',
+                    date: r.c[2]?.v || '',
+                    img: r.c[3]?.v || null
+                }));
+                renderAnnouncements();
             });
 
-            // 2. Load Directory
+            // 2. Directory
             fetchData(GID_DIR, (rows) => {
-                // Data သိမ်းမယ်
-                dirData = rows.map(r => ({
-                    name: r.c[0]?.v || 'အမည်မသိ',
+                directoryData = rows.map(r => ({
+                    name: r.c[0]?.v || 'Unknown',
                     cat: r.c[1]?.v || 'General',
                     type: r.c[2]?.v, 
                     addr: r.c[3]?.v || '', 
                     ward: r.c[4]?.v, 
+                    city: r.c[5]?.v,
                     phones: [r.c[6]?.v, r.c[7]?.v, r.c[8]?.v].filter(Boolean), 
-                    img: r.c[10]?.v
+                    email: r.c[9]?.v,
+                    img: r.c[10]?.v,
+                    rating: r.c[11]?.v,
+                    note: r.c[12]?.v // Notes column for extra info
                 }));
-                renderDirectory(dirData);
+                renderDirectory(directoryData);
             }, "Directory");
 
-            // 3. Load Contact
+            // 3. Contact
             fetchData(GID_CONTACT, (rows) => {
                 document.getElementById('contactInfo').innerHTML = rows.map(r => `
                     <div class="flex justify-between py-2 border-b border-gray-100 last:border-0">
@@ -170,55 +174,177 @@
             try {
                 const res = await fetch(`${BASE_URL}&gid=${gid}`);
                 const text = await res.text();
-                // Check if Google returned an error page instead of JSON
-                if (!text.includes("google.visualization.Query.setResponse")) {
-                    throw new Error(`GID ${gid} မှားယွင်းနေပါသည်`);
-                }
+                if (!text.includes("google.visualization.Query.setResponse")) throw new Error("GID Error");
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 callback(json.table.rows);
             } catch (e) {
-                console.error(e);
-                // GID မှားနေရင် Error ပြမယ်
                 if(type === "Directory" && gid === '0') {
-                    document.getElementById('directoryList').innerHTML = 
-                        `<div class="col-span-2 text-center text-red-500 bg-white p-4 rounded-xl border border-red-300">
-                            <i class="fa fa-exclamation-triangle text-2xl mb-2"></i><br>
-                            Directory GID ထည့်ရန် လိုအပ်နေပါသည်။<br>
-                            <span class="text-xs text-gray-500">Code ထဲတွင် GID_DIR ကို ပြန်ပြင်ပါ။</span>
-                        </div>`;
+                    document.getElementById('directoryList').innerHTML = `<div class="col-span-2 text-center text-red-500 py-10">Directory GID is 0 (Check Code)</div>`;
                 }
             }
         }
 
-        function renderDirectory(data) {
-            const list = document.getElementById('directoryList');
-            if(data.length === 0) {
-                list.innerHTML = '<p class="col-span-2 text-center text-gray-400">No directory data found.</p>';
-                return;
-            }
-            list.innerHTML = data.map(i => `
-                <div class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37]">
-                    <div class="flex items-start gap-3">
-                        ${i.img ? `<img src="${i.img}" class="w-16 h-16 rounded-lg object-cover bg-gray-100">` : `<div class="w-16 h-16 rounded-lg bg-[#f8f5ff] flex items-center justify-center text-[#D4AF37]"><i class="fa fa-store text-2xl"></i></div>`}
-                        <div class="flex-1 overflow-hidden">
-                            <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate max-w-full">${i.cat}</span>
-                            <h3 class="font-bold text-[#4B0082] text-md truncate">${i.name}</h3>
-                            <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-pin mr-1 text-[#D4AF37]"></i>${i.ward || i.addr}</p>
+        // --- Render Lists ---
+
+        function renderAnnouncements() {
+            const list = document.getElementById('announcementList');
+            if(!announcementsData.length) { list.innerHTML = '<p class="text-center text-gray-400">No updates.</p>'; return; }
+            
+            list.innerHTML = announcementsData.map((item, index) => `
+                <div onclick="openDetail(${index}, 'announcement')" class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-[#D4AF37] flex mb-3 cursor-pointer active:scale-95 transition-transform">
+                    ${item.img ? `<img src="${item.img}" class="w-28 h-28 object-cover">` : ''}
+                    <div class="p-3 flex-1 flex flex-col justify-center">
+                        <h3 class="font-bold text-[#4B0082] line-clamp-2 leading-tight mb-1">${item.title}</h3>
+                        <p class="text-xs text-gray-500 line-clamp-2">${item.desc}</p>
+                        <div class="text-[#D4AF37] text-xs font-bold mt-2 flex items-center">
+                            <i class="fa fa-calendar-alt mr-1"></i> ${item.date} 
+                            <span class="ml-auto text-[10px] bg-gray-100 px-2 py-1 rounded text-gray-500">Read More ></span>
                         </div>
-                    </div>
-                    <div class="mt-3 flex gap-2">
-                        ${i.phones.length > 0 ? i.phones.map(p => `<a href="tel:${p}" class="flex-1 bg-[#4B0082] text-white text-center py-2 rounded-lg text-xs font-bold shadow hover:bg-[#5e0a9e]"><i class="fa fa-phone mr-1"></i> Call</a>`).join('') : '<span class="text-xs text-gray-400 w-full text-center py-2">No Phone</span>'}
                     </div>
                 </div>
             `).join('');
         }
 
-        function showPage(pageId) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(pageId + 'Page').classList.add('active-page');
+        function renderDirectory(data) {
+            const list = document.getElementById('directoryList');
+            if(!data.length) { list.innerHTML = '<p class="col-span-2 text-center text-gray-400">No data found.</p>'; return; }
             
-            // Reset Buttons
+            list.innerHTML = data.map((item, index) => {
+                // Find original index for filtering correct item
+                const realIndex = directoryData.indexOf(item); 
+                return `
+                <div onclick="openDetail(${realIndex}, 'directory')" class="bg-white rounded-2xl p-4 shadow-md border-b-2 border-[#D4AF37] cursor-pointer active:scale-95 transition-transform">
+                    <div class="flex items-start gap-3">
+                        ${item.img ? `<img src="${item.img}" class="w-16 h-16 rounded-lg object-cover bg-gray-100">` : `<div class="w-16 h-16 rounded-lg bg-[#f8f5ff] flex items-center justify-center text-[#D4AF37]"><i class="fa fa-store text-2xl"></i></div>`}
+                        <div class="flex-1 overflow-hidden">
+                            <span class="bg-[#f8f5ff] text-[#4B0082] text-[10px] font-bold px-2 py-1 rounded mb-1 inline-block truncate">${item.cat}</span>
+                            <h3 class="font-bold text-[#4B0082] text-md truncate">${item.name}</h3>
+                            <p class="text-xs text-gray-500 mt-1 truncate"><i class="fa fa-map-pin mr-1 text-[#D4AF37]"></i>${item.ward || item.addr}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex justify-between items-center border-t pt-2 border-gray-100">
+                        <span class="text-xs text-gray-400 font-bold">${item.phones.length} Phone(s)</span>
+                        <span class="text-xs text-[#D4AF37] font-bold">Details <i class="fa fa-arrow-right ml-1"></i></span>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // --- Detail View Logic ---
+
+        function openDetail(index, type) {
+            const detailPage = document.getElementById('detailPage');
+            const content = document.getElementById('detailContent');
+            const headerTitle = document.getElementById('detailHeaderTitle');
+            const bottomNav = document.getElementById('bottomNav');
+
+            let html = '';
+
+            if (type === 'announcement') {
+                const item = announcementsData[index];
+                headerTitle.innerText = "News & Events";
+                html = `
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-lg border-t-8 border-[#D4AF37]">
+                        ${item.img ? `<img src="${item.img}" class="w-full h-auto max-h-80 object-cover">` : ''}
+                        <div class="p-6">
+                            <div class="flex items-center text-[#D4AF37] font-bold text-sm mb-3">
+                                <i class="fa fa-calendar-alt mr-2"></i> ${item.date}
+                            </div>
+                            <h1 class="text-2xl font-bold text-[#4B0082] mb-4 leading-snug">${item.title}</h1>
+                            <div class="text-gray-600 leading-relaxed text-sm whitespace-pre-line">${item.desc}</div>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'directory') {
+                const item = directoryData[index];
+                headerTitle.innerText = item.name;
+                html = `
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-lg border-b-4 border-[#D4AF37]">
+                            ${item.img ? `<img src="${item.img}" class="w-full h-64 object-cover">` : `<div class="h-40 purple-gradient flex items-center justify-center"><i class="fa fa-store text-6xl text-white/30"></i></div>`}
+                            <div class="p-6">
+                                <span class="bg-[#f8f5ff] text-[#4B0082] text-xs font-bold px-3 py-1 rounded-full mb-2 inline-block">${item.cat}</span>
+                                <h1 class="text-2xl font-bold text-[#4B0082] mb-1">${item.name}</h1>
+                                ${item.type ? `<p class="text-sm text-gray-500 italic mb-2">${item.type}</p>` : ''}
+                                ${item.rating ? `<div class="text-orange-400 text-sm mb-2"><i class="fa fa-star"></i> ${item.rating} Rating</div>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3">
+                            ${item.phones.map(p => `
+                                <a href="tel:${p}" class="bg-[#4B0082] text-white p-4 rounded-2xl shadow-md flex items-center justify-between hover:bg-[#37006a] transition">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3"><i class="fa fa-phone"></i></div>
+                                        <span class="font-bold text-lg">${p}</span>
+                                    </div>
+                                    <span class="text-xs bg-[#D4AF37] text-[#37006a] px-2 py-1 rounded font-bold">CALL</span>
+                                </a>
+                            `).join('')}
+                        </div>
+
+                        <div class="bg-white p-6 rounded-3xl shadow-sm space-y-4">
+                            <div class="flex items-start">
+                                <i class="fa fa-map-marker-alt text-[#D4AF37] text-xl mt-1 mr-4 w-5"></i>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">Address</h3>
+                                    <p class="text-gray-600 text-sm mt-1">${item.addr}</p>
+                                    ${item.ward ? `<p class="text-gray-500 text-xs mt-1">Ward: ${item.ward}</p>` : ''}
+                                </div>
+                            </div>
+                            ${item.email ? `
+                            <div class="flex items-start border-t border-gray-100 pt-3">
+                                <i class="fa fa-envelope text-[#D4AF37] text-xl mt-1 mr-4 w-5"></i>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">Email</h3>
+                                    <a href="mailto:${item.email}" class="text-blue-600 text-sm mt-1 block">${item.email}</a>
+                                </div>
+                            </div>` : ''}
+                            ${item.note ? `
+                            <div class="bg-[#f8f5ff] p-4 rounded-xl border border-gray-100 mt-2">
+                                <h3 class="font-bold text-[#4B0082] text-sm mb-1"><i class="fa fa-info-circle mr-1"></i> Note</h3>
+                                <p class="text-gray-600 text-xs leading-relaxed">${item.note}</p>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = html;
+            detailPage.style.display = 'block';
+            bottomNav.style.transform = 'translateY(150%)'; // Hide Bottom Nav
+            document.body.style.overflow = 'hidden'; // Stop scrolling background
+        }
+
+        function closeDetail() {
+            const detailPage = document.getElementById('detailPage');
+            const bottomNav = document.getElementById('bottomNav');
+            
+            detailPage.style.display = 'none';
+            bottomNav.style.transform = 'translateY(0)'; // Show Bottom Nav
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        // --- Navigation Logic ---
+
+        function showPage(pageId) {
+            lastPage = pageId; // Update last page
+            
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(p => {
+                if(p.id !== 'detailPage') p.classList.remove('active-page');
+                if(p.id !== 'detailPage') setTimeout(() => { if(!p.classList.contains('active-page')) p.style.display = 'none'; }, 100);
+            });
+
+            // Show active page
+            const activePage = document.getElementById(pageId + 'Page');
+            activePage.style.display = 'block';
+            setTimeout(() => activePage.classList.add('active-page'), 10);
+            
+            // Header Title Update
+            const titles = {'home': 'Home', 'directory': 'Directory', 'contact': 'Contact'};
+            document.getElementById('headerTitle').innerText = titles[pageId];
+
+            // Nav Styling
             document.querySelectorAll('.nav-item').forEach(btn => {
                 if(btn.id !== 'nav-directory') {
                     btn.classList.remove('text-[#FFD700]', 'scale-110');
@@ -228,7 +354,6 @@
                 }
             });
 
-            // Active Button
             const activeBtn = document.getElementById('nav-' + pageId);
             if (pageId === 'directory') {
                 activeBtn.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30');
@@ -239,7 +364,17 @@
             window.scrollTo(0, 0);
         }
 
+        function filterDirectory() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = directoryData.filter(d => 
+                d.name.toLowerCase().includes(term) || 
+                (d.cat && d.cat.toLowerCase().includes(term))
+            );
+            renderDirectory(filtered);
+        }
+
         loadAllData();
+        showPage('home'); // Init
     </script>
 </body>
 </html>
