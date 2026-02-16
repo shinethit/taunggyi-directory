@@ -117,7 +117,7 @@
                 let fileId = "";
                 if (url.includes('/d/')) fileId = url.split('/d/')[1].split('/')[0];
                 else if (url.includes('id=')) fileId = url.split('id=')[1].split('&')[0];
-                if (fileId) return `https://lh3.googleusercontent.com/d/$${fileId}`;
+                if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
             }
             return url;
         }
@@ -160,14 +160,13 @@
                 const res = await fetch(`${BASE_URL}&gid=${GID_HOME}`);
                 const text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
-                // Sorted Newest First
                 eventsData = json.table.rows.map(r => ({ cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
                 .filter(i => i.title && i.title !== "Title").reverse(); 
                 
                 localStorage.setItem('cache_events', JSON.stringify(eventsData));
                 setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); });
                 renderEvents();
-            } catch (e) {}
+            } catch (e) { console.error("Event error", e); }
         }
 
         async function fetchDirectory() {
@@ -181,7 +180,7 @@
                 localStorage.setItem('cache_dir', JSON.stringify(dirData));
                 setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); });
                 renderDirectory();
-            } catch (e) {}
+            } catch (e) { console.error("Dir error", e); }
         }
 
         async function fetchAdmin() {
@@ -191,7 +190,7 @@
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 localStorage.setItem('cache_admin', JSON.stringify(json.table.rows));
                 renderAdminArea(json.table.rows);
-            } catch (e) {}
+            } catch (e) { console.error("Admin error", e); }
         }
 
         function renderAdminArea(rows) {
@@ -273,7 +272,7 @@
                 content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-2 inline-block">${i.cat}</span></div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Description', i.desc)}${rR('From', i.fromDate)}${rR('To', i.toDate)}${rR('Time', i.time)}${rR('Place', i.place)}${rR('Organizer', i.org)}</div>${i.images.length > 0 ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] mb-3 border-b pb-2 text-sm uppercase">Gallery</h3><div class="gallery-scroll">${i.images.map(img => `<div class="gallery-item"><img src="${fixDriveLink(img)}" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" onclick="window.open(this.src)"></div>`).join('')}</div></div>` : ''}</div>`;
             } else {
                 const i = dirData[index]; document.getElementById('detailHeader').innerText = i.name;
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.img)}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full shadow-sm"><i class="fa fa-pen mr-1"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Description', i.desc)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Address', i.addr)}${rR('Ward', i.ward)}${rR('City', i.city)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}${rP('Phone 3', i.ph3)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${rC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}${rC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><p class="text-xs text-gray-600 leading-relaxed break-words">${i.note}</p></div>` : ''}</div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.img)}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full shadow-sm hover:bg-gray-200"><i class="fa fa-pen mr-1"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Description', i.desc)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rR('Address', i.addr)}${rR('Ward', i.ward)}${rR('City', i.city)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}${rP('Phone 3', i.ph3)}</div><div class="bg-white p-5 rounded-2xl shadow-sm">${rC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${rC('Telegram', i.telegram, 'fab fa-telegram', 'bg-[#229ED9]', 'https://t.me/')}${rC('Email', i.email, 'fa fa-envelope', 'bg-red-500', 'mailto:')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm"><p class="text-xs text-gray-600 leading-relaxed break-words">${i.note}</p></div>` : ''}</div>`;
             }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
