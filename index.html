@@ -24,11 +24,9 @@
         .slide-up { animation: slideUp 0.3s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* Hide Scrollbar for Filters */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Gallery Scroll */
         .gallery-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scroll-snap-type: x mandatory; }
         .gallery-item { flex: 0 0 80%; scroll-snap-align: center; }
     </style>
@@ -58,9 +56,7 @@
     <div class="max-w-4xl mx-auto p-4 mt-1 mb-20 relative">
         
         <section id="homePage" class="page active-page space-y-3">
-            <div class="flex overflow-x-auto gap-2 pb-2 no-scrollbar" id="eventFilters">
-                </div>
-
+            <div class="flex overflow-x-auto gap-2 pb-2 no-scrollbar" id="eventFilters"></div>
             <div id="announcementList" class="space-y-6 pb-4">
                 <div class="text-center text-gray-400 py-10 animate-pulse">Loading events...</div>
             </div>
@@ -74,18 +70,16 @@
                            class="w-full p-2.5 pl-9 rounded-xl shadow-sm border border-[#D4AF37] outline-none focus:ring-2 focus:ring-[#4B0082] text-sm">
                     <i class="fa fa-search absolute left-3 top-3 text-[#D4AF37]"></i>
                 </div>
-                
-                <div class="flex overflow-x-auto gap-2 pb-1 no-scrollbar" id="dirFilters">
-                    </div>
+                <div class="flex overflow-x-auto gap-2 pb-1 no-scrollbar" id="dirFilters"></div>
             </div>
-
             <div id="directoryList" class="space-y-6 mt-2 pb-4">
                 <div class="text-center text-gray-400 py-10">Loading directory...</div>
             </div>
         </section>
 
         <section id="contactPage" class="page">
-            <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-4 relative overflow-hidden">
+            
+            <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-6 relative overflow-hidden">
                  <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
                     <i class="fa fa-file-pen text-8xl text-[#4B0082]"></i>
                 </div>
@@ -96,11 +90,8 @@
                 </a>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl shadow-md border-t-4 border-[#4B0082]">
-                <h2 class="font-bold text-lg text-[#4B0082] mb-4 flex items-center"><i class="fa fa-headset mr-2"></i> Admin Contact</h2>
-                <div id="contactInfo" class="space-y-3">
-                    <div class="text-center text-gray-400">Loading info...</div>
-                </div>
+            <div class="space-y-4" id="contactInfo">
+                <div class="text-center text-gray-400">Loading admin info...</div>
             </div>
         </section>
 
@@ -147,7 +138,7 @@
 
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         let eventsData = [], dirData = [];
-        let activeDirCategory = 'All'; // Filter State
+        let activeDirCategory = 'All'; 
         let activeEventCategory = 'All';
 
         // --- Date & Time ---
@@ -158,7 +149,6 @@
             const ampm = hours >= 12 ? 'PM' : 'AM';
             hours = hours % 12; hours = hours ? hours : 12; 
             document.getElementById('timeClock').innerText = `${hours}:${minutes} ${ampm}`;
-
             const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
             document.getElementById('fullDate').innerText = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} | ${getMmDate(now)}`;
         }
@@ -188,8 +178,7 @@
                     fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, 
                     org: r.c[7]?.v, logo: r.c[8]?.v,
                     images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean)
-                })).filter(i => i.title); // Remove empty rows
-                
+                })).filter(i => i.title); 
                 setupEventFilters();
                 renderGroupedEvents();
             });
@@ -202,27 +191,63 @@
                     ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v,
                     viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v,
                     img: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v
-                })).filter(i => i.name); // Remove empty rows
-
+                })).filter(i => i.name); 
                 setupDirectoryFilters();
                 renderGroupedDirectory();
             });
 
-            // Contact
+            // Contact (Updated Mapping with Admin Note)
             fetchData(GID_CONTACT, (rows) => {
-                document.getElementById('contactInfo').innerHTML = rows.map(r => `
-                    <div class="flex items-center justify-between border-b border-gray-100 last:border-0 py-3">
-                        <div class="flex items-center">
-                            <i class="fa fa-user-circle text-gray-400 mr-3"></i>
-                            <div>
-                                <p class="text-sm font-bold text-gray-700">${r.c[0]?.v || 'Admin'}</p>
-                                <p class="text-xs text-gray-400">Support</p>
-                            </div>
+                document.getElementById('contactInfo').innerHTML = rows.map(r => {
+                    const desc = r.c[0]?.v || 'Admin';
+                    const ph1 = r.c[1]?.v;
+                    const ph2 = r.c[2]?.v;
+                    const viber = r.c[3]?.v;
+                    const tg = r.c[4]?.v;
+                    const email = r.c[5]?.v;
+                    const adminNote = r.c[6]?.v; // Column G
+
+                    return `
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-[#4B0082]">
+                        <h3 class="text-[#4B0082] font-bold text-lg mb-3 flex items-center">
+                            <i class="fa fa-user-shield mr-2"></i> ${desc}
+                        </h3>
+
+                        ${adminNote ? `
+                        <div class="mb-4 bg-yellow-50 border-l-4 border-[#FFD700] p-3 rounded-r-lg">
+                            <p class="text-sm text-gray-700 font-medium leading-relaxed">
+                                <i class="fa fa-bullhorn text-[#D4AF37] mr-2"></i>${adminNote}
+                            </p>
+                        </div>` : ''}
+                        
+                        <div class="grid grid-cols-1 gap-2">
+                            ${ph1 ? `<a href="tel:${ph1}" class="flex items-center justify-between bg-gray-50 p-3 rounded-xl hover:bg-green-50 group transition">
+                                <span class="font-mono text-gray-700 group-hover:text-green-700 font-bold">${ph1}</span>
+                                <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-sm"><i class="fa fa-phone"></i></div>
+                            </a>` : ''}
+                            
+                            ${ph2 ? `<a href="tel:${ph2}" class="flex items-center justify-between bg-gray-50 p-3 rounded-xl hover:bg-green-50 group transition">
+                                <span class="font-mono text-gray-700 group-hover:text-green-700 font-bold">${ph2}</span>
+                                <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-sm"><i class="fa fa-phone"></i></div>
+                            </a>` : ''}
+                            
+                            ${viber ? `<a href="viber://chat?number=${viber}" class="flex items-center justify-between bg-gray-50 p-3 rounded-xl hover:bg-purple-50 group transition">
+                                <span class="font-bold text-gray-700 group-hover:text-[#7360f2]">Viber</span>
+                                <div class="w-8 h-8 rounded-full bg-[#7360f2] text-white flex items-center justify-center shadow-sm"><i class="fab fa-viber"></i></div>
+                            </a>` : ''}
+                            
+                            ${tg ? `<a href="https://t.me/${tg.replace('@','')}" target="_blank" class="flex items-center justify-between bg-gray-50 p-3 rounded-xl hover:bg-blue-50 group transition">
+                                <span class="font-bold text-gray-700 group-hover:text-[#229ED9]">Telegram</span>
+                                <div class="w-8 h-8 rounded-full bg-[#229ED9] text-white flex items-center justify-center shadow-sm"><i class="fab fa-telegram"></i></div>
+                            </a>` : ''}
+                            
+                            ${email ? `<a href="mailto:${email}" class="flex items-center justify-between bg-gray-50 p-3 rounded-xl hover:bg-red-50 group transition">
+                                <span class="text-sm text-gray-700 group-hover:text-red-600 truncate mr-2">${email}</span>
+                                <div class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-sm flex-shrink-0"><i class="fa fa-envelope"></i></div>
+                            </a>` : ''}
                         </div>
-                        <div class="flex gap-2">
-                             ${r.c[1]?.v ? `<a href="tel:${r.c[1].v}" class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><i class="fa fa-phone"></i></a>` : ''}
-                        </div>
-                    </div>`).join('');
+                    </div>`;
+                }).join('');
             });
         }
 
@@ -235,142 +260,62 @@
             } catch (e) { console.error(e); }
         }
 
-        // --- Directory Filters ---
+        // --- Filter Logic ---
         function setupDirectoryFilters() {
             const categories = ['All', ...new Set(dirData.map(d => d.cat))];
-            const filterContainer = document.getElementById('dirFilters');
-            filterContainer.innerHTML = categories.map(cat => `
-                <button onclick="setDirCategory('${cat}')" 
-                    class="dir-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${cat === 'All' ? 'bg-[#4B0082] text-white border-[#4B0082]' : 'bg-white text-gray-600 border-gray-200 hover:border-[#D4AF37]'}" 
-                    id="chip-${cat.replace(/\s/g, '')}">
-                    ${cat}
-                </button>
-            `).join('');
+            document.getElementById('dirFilters').innerHTML = categories.map(cat => `<button onclick="setDirCategory('${cat}')" class="dir-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${cat === 'All' ? 'bg-[#4B0082] text-white border-[#4B0082]' : 'bg-white text-gray-600 border-gray-200 hover:border-[#D4AF37]'}" id="chip-${cat.replace(/\s/g, '')}">${cat}</button>`).join('');
         }
-
         function setDirCategory(cat) {
             activeDirCategory = cat;
-            // Update Chips UI
-            document.querySelectorAll('.dir-chip').forEach(btn => {
-                btn.className = "dir-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-white text-gray-600 border-gray-200 hover:border-[#D4AF37]";
-            });
-            const activeChip = document.getElementById(`chip-${cat.replace(/\s/g, '')}`);
-            if(activeChip) activeChip.className = "dir-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-[#4B0082] text-white border-[#4B0082]";
-            
-            handleSearch(); // Re-render with filter
+            document.querySelectorAll('.dir-chip').forEach(btn => btn.className = "dir-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-white text-gray-600 border-gray-200 hover:border-[#D4AF37]");
+            const active = document.getElementById(`chip-${cat.replace(/\s/g, '')}`);
+            if(active) active.className = "dir-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-[#4B0082] text-white border-[#4B0082]";
+            handleSearch();
         }
-
         function handleSearch() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             renderGroupedDirectory(term, activeDirCategory);
         }
 
-        // --- Event Filters ---
         function setupEventFilters() {
             const categories = ['All', ...new Set(eventsData.map(e => e.cat))];
-            document.getElementById('eventFilters').innerHTML = categories.map(cat => `
-                <button onclick="setEventCategory('${cat}')" 
-                    class="event-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${cat === 'All' ? 'bg-[#D4AF37] text-white border-[#D4AF37]' : 'bg-white text-gray-600 border-gray-200'}" 
-                    id="evChip-${cat.replace(/\s/g, '')}">
-                    ${cat}
-                </button>
-            `).join('');
+            document.getElementById('eventFilters').innerHTML = categories.map(cat => `<button onclick="setEventCategory('${cat}')" class="event-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${cat === 'All' ? 'bg-[#D4AF37] text-white border-[#D4AF37]' : 'bg-white text-gray-600 border-gray-200'}" id="evChip-${cat.replace(/\s/g, '')}">${cat}</button>`).join('');
         }
-
         function setEventCategory(cat) {
             activeEventCategory = cat;
-            document.querySelectorAll('.event-chip').forEach(btn => {
-                btn.className = "event-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-white text-gray-600 border-gray-200";
-            });
+            document.querySelectorAll('.event-chip').forEach(btn => btn.className = "event-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-white text-gray-600 border-gray-200");
             document.getElementById(`evChip-${cat.replace(/\s/g, '')}`).className = "event-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-all bg-[#D4AF37] text-white border-[#D4AF37]";
             renderGroupedEvents(activeEventCategory);
         }
 
-
-        // --- Render Functions (Grouped & Full Text) ---
-
+        // --- Render Functions ---
         function renderGroupedEvents(filterCat = 'All') {
             const list = document.getElementById('announcementList');
             let filtered = eventsData;
             if(filterCat !== 'All') filtered = eventsData.filter(e => e.cat === filterCat);
-            
             if(!filtered.length) { list.innerHTML = '<p class="text-center text-gray-400">No events.</p>'; return; }
-
-            const groups = filtered.reduce((acc, item) => {
-                acc[item.cat] = acc[item.cat] || [];
-                acc[item.cat].push(item);
-                return acc;
-            }, {});
-
+            const groups = filtered.reduce((acc, item) => { acc[item.cat] = acc[item.cat] || []; acc[item.cat].push(item); return acc; }, {});
             list.innerHTML = Object.keys(groups).map(cat => `
-                <div class="mb-4">
-                    <h3 class="font-bold text-[#D4AF37] text-sm uppercase tracking-wider mb-2 border-l-4 border-[#D4AF37] pl-2">${cat}</h3>
-                    <div class="space-y-3">
-                        ${groups[cat].map(item => {
-                            const index = eventsData.indexOf(item);
-                            const displayImg = item.images.length > 0 ? item.images[0] : (item.logo ? item.logo : 'CDST_Logo.png');
-                            return `
-                            <div onclick="openDetail('event', ${index})" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 transition-transform">
-                                <img src="${displayImg}" class="w-20 h-20 rounded-lg object-cover bg-gray-100" onerror="this.src='CDST_Logo.png'">
-                                <div class="flex-1 flex flex-col justify-center">
-                                    <h4 class="font-bold text-[#4B0082] text-md leading-tight">${item.title}</h4>
-                                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">${item.desc || ''}</p>
-                                    <span class="text-[10px] text-[#D4AF37] font-bold mt-2">View Details <i class="fa fa-arrow-right"></i></span>
-                                </div>
-                            </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `).join('');
+                <div class="mb-4"><h3 class="font-bold text-[#D4AF37] text-sm uppercase tracking-wider mb-2 border-l-4 border-[#D4AF37] pl-2">${cat}</h3><div class="space-y-3">${groups[cat].map(item => {
+                    const index = eventsData.indexOf(item);
+                    const displayImg = item.images.length > 0 ? item.images[0] : (item.logo ? item.logo : 'CDST_Logo.png');
+                    return `<div onclick="openDetail('event', ${index})" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 transition-transform"><img src="${displayImg}" class="w-20 h-20 rounded-lg object-cover bg-gray-100" onerror="this.src='CDST_Logo.png'"><div class="flex-1 flex flex-col justify-center"><h4 class="font-bold text-[#4B0082] text-md leading-tight">${item.title}</h4><p class="text-xs text-gray-500 mt-1 leading-relaxed">${item.desc || ''}</p><span class="text-[10px] text-[#D4AF37] font-bold mt-2">View Details <i class="fa fa-arrow-right"></i></span></div></div>`;
+                }).join('')}</div></div>`).join('');
         }
 
         function renderGroupedDirectory(searchTerm = '', category = 'All') {
             const list = document.getElementById('directoryList');
-            
             let filtered = dirData;
             if (category !== 'All') filtered = filtered.filter(d => d.cat === category);
-            if (searchTerm) {
-                filtered = filtered.filter(d => 
-                    d.name.toLowerCase().includes(searchTerm) || 
-                    (d.ward && d.ward.toLowerCase().includes(searchTerm))
-                );
-            }
-
+            if (searchTerm) filtered = filtered.filter(d => d.name.toLowerCase().includes(searchTerm) || (d.ward && d.ward.toLowerCase().includes(searchTerm)));
             if(!filtered.length) { list.innerHTML = '<p class="text-center text-gray-400 mt-10">No results found.</p>'; return; }
-
-            const groups = filtered.reduce((acc, item) => {
-                acc[item.cat] = acc[item.cat] || [];
-                acc[item.cat].push(item);
-                return acc;
-            }, {});
-
+            const groups = filtered.reduce((acc, item) => { acc[item.cat] = acc[item.cat] || []; acc[item.cat].push(item); return acc; }, {});
             list.innerHTML = Object.keys(groups).map(cat => `
-                <div class="mb-5">
-                    <h3 class="font-bold text-[#4B0082] text-sm bg-gray-100 px-3 py-1 rounded-lg inline-block mb-3">${cat} <span class="text-xs text-gray-400 ml-1">(${groups[cat].length})</span></h3>
-                    <div class="grid grid-cols-1 gap-3">
-                        ${groups[cat].map(item => {
-                            const index = dirData.indexOf(item);
-                            const displayImg = item.img ? item.img : 'CDST_Logo.png'; 
-                            return `
-                            <div onclick="openDetail('dir', ${index})" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex gap-3 items-start cursor-pointer active:scale-95 transition-transform">
-                                <img src="${displayImg}" class="w-14 h-14 rounded-lg object-cover bg-gray-50 border border-gray-100" onerror="this.src='CDST_Logo.png'">
-                                <div class="flex-1 overflow-hidden">
-                                    <div class="flex justify-between items-start">
-                                        <h4 class="font-bold text-[#4B0082] text-md leading-tight break-words">${item.name}</h4>
-                                        ${item.type ? `<span class="text-[9px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 whitespace-nowrap ml-1 flex-shrink-0">${item.type}</span>` : ''}
-                                    </div>
-                                    <p class="text-xs text-gray-500 mt-0.5 leading-snug break-words">${item.desc || '-'}</p>
-                                    <div class="flex items-center mt-2 text-xs text-[#D4AF37] font-bold">
-                                        <i class="fa fa-map-pin mr-1"></i> ${item.ward || 'Taunggyi'}
-                                    </div>
-                                </div>
-                            </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `).join('');
+                <div class="mb-5"><h3 class="font-bold text-[#4B0082] text-sm bg-gray-100 px-3 py-1 rounded-lg inline-block mb-3">${cat} <span class="text-xs text-gray-400 ml-1">(${groups[cat].length})</span></h3><div class="grid grid-cols-1 gap-3">${groups[cat].map(item => {
+                    const index = dirData.indexOf(item);
+                    const displayImg = item.img ? item.img : 'CDST_Logo.png'; 
+                    return `<div onclick="openDetail('dir', ${index})" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex gap-3 items-start cursor-pointer active:scale-95 transition-transform"><img src="${displayImg}" class="w-14 h-14 rounded-lg object-cover bg-gray-50 border border-gray-100" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><div class="flex justify-between items-start"><h4 class="font-bold text-[#4B0082] text-md leading-tight break-words">${item.name}</h4>${item.type ? `<span class="text-[9px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 whitespace-nowrap ml-1 flex-shrink-0">${item.type}</span>` : ''}</div><p class="text-xs text-gray-500 mt-0.5 leading-snug break-words">${item.desc || '-'}</p><div class="flex items-center mt-2 text-xs text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${item.ward || 'Taunggyi'}</div></div></div>`;
+                }).join('')}</div></div>`).join('');
         }
 
         // --- Detail View ---
@@ -378,7 +323,6 @@
             const modal = document.getElementById('detailPage');
             const content = document.getElementById('detailContent');
             const header = document.getElementById('detailHeader');
-            
             const renderRow = (l, v) => `<div class="border-b border-gray-100 py-3"><p class="text-xs text-gray-400 mb-1">${l}</p><p class="text-gray-800 font-medium text-sm leading-relaxed">${v || '-'}</p></div>`;
             const renderPhone = (l, v) => v ? `<div class="border-b border-gray-100 py-3 flex justify-between items-center"><div><p class="text-xs text-gray-400 mb-1">${l}</p><p class="text-[#4B0082] font-bold text-sm">${v}</p></div><a href="tel:${v}" class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold"><i class="fa fa-phone"></i> Call</a></div>` : '';
             
@@ -410,7 +354,6 @@
             activePage.style.display = 'block';
             setTimeout(() => activePage.classList.add('active-page'), 10);
             
-            // Nav Highlighting
             const navs = {'home': 'nav-home', 'directory': 'nav-directory', 'contact': 'nav-contact'};
             Object.values(navs).forEach(id => {
                 const btn = document.getElementById(id);
