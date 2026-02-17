@@ -14,8 +14,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-app.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-database.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
@@ -76,9 +76,9 @@
             <div id="adminProfileArea"></div><div id="adminNotesArea" class="space-y-3"></div>
             
             <div class="bg-black/90 p-4 rounded-xl mt-6 text-left">
-                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">NETWORK DIAGNOSTIC:</p>
-                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-24 overflow-y-auto">Waiting...</div>
-                <button onclick="forceCleanReset()" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg shadow-md active:scale-95">FORCE RECONNECT & RESET</button>
+                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">NETWORK STATUS:</p>
+                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-24 overflow-y-auto">Checking connection...</div>
+                <button onclick="forceReboot()" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg shadow-md active:scale-95">FORCE RECONNECT (FIX NO SIGNAL)</button>
             </div>
         </section>
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
@@ -101,7 +101,7 @@
             debugEl.scrollTop = debugEl.scrollHeight;
         }
 
-        // 1. FIREBASE V8 LOGIC (No Modules)
+        // FIREBASE V8 LOGIC
         window.onload = function() {
             try {
                 const firebaseConfig = {
@@ -114,47 +114,33 @@
                     appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf"
                 };
 
-                log("Init Firebase v8...");
                 firebase.initializeApp(firebaseConfig);
                 const db = firebase.database();
 
-                // CONNECTION CHECK
-                const connectedRef = db.ref(".info/connected");
-                connectedRef.on("value", (snap) => {
+                // 1. Connection Listener
+                db.ref(".info/connected").on("value", (snap) => {
                     if (snap.val() === true) {
-                        log("Server Connected: YES", 'success');
+                        log("Server Connected: YES (Syncing...)", 'success');
                     } else {
-                        log("Server Connected: NO (Retrying...)", 'warn');
+                        log("Server Connected: NO (Wait...)", 'warn');
+                        // Force WebSockets specifically for Android compatibility
+                        setTimeout(() => { db.goOnline(); }, 2000); 
                     }
                 });
 
-                // TOTAL VIEWS
+                // 2. View Count
                 const vRef = db.ref('stats/total_views');
-                
-                // Only increment if online
-                if (!sessionStorage.getItem('v25_counted')) {
-                    vRef.transaction(function(current_value) {
-                        return (current_value || 0) + 1;
-                    }, function(error, committed, snapshot) {
-                        if (error) {
-                            log("Inc Failed: " + error.message, 'error');
-                        } else if (committed) {
-                            log("Increment Success!");
-                            sessionStorage.setItem('v25_counted', 'true');
-                        }
-                    });
+                if (!sessionStorage.getItem('v26_counted')) {
+                    vRef.transaction((c) => (c || 0) + 1);
+                    sessionStorage.setItem('v26_counted', 'true');
                 }
-
-                // Listener
-                vRef.on('value', (snapshot) => {
-                    const views = snapshot.val();
-                    log("Live Views: " + views);
-                    document.getElementById('viewCounter').innerText = views ? views.toLocaleString() : "0";
-                }, (errorObject) => {
-                    log("Read Failed: " + errorObject.code, 'error');
+                vRef.on('value', (snap) => {
+                    const v = snap.val();
+                    log("Views Updated: " + v);
+                    document.getElementById('viewCounter').innerText = v ? v.toLocaleString() : "0";
                 });
 
-                // ONLINE USERS
+                // 3. Online Users
                 const onlineRef = db.ref('stats/online_users');
                 const myCon = onlineRef.push();
                 myCon.onDisconnect().remove();
@@ -164,11 +150,11 @@
                 });
 
             } catch (e) {
-                log("CRITICAL ERROR: " + e.message, 'error');
+                log("Error: " + e.message, 'error');
             }
         };
 
-        // 2. STANDARD APP LOGIC
+        // CORE APP LOGIC
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         const REVIEW_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
@@ -187,15 +173,14 @@
         function getStars(r) { if(!r || isNaN(r)) return '<div class="h-3"></div>'; let h = '<div class="flex text-orange-400 text-[8px] gap-0.5 justify-center">'; for(let i=1; i<=5; i++) h += (i <= r) ? '<i class="fa fa-star"></i>' : (i-0.5 <= r) ? '<i class="fa fa-star-half-alt"></i>' : '<i class="far fa-star text-gray-200"></i>'; return h + `<span class="text-gray-400 ml-1 text-[7px]">(${r})</span></div>`; }
 
         async function loadAllData() {
-            log("Loading Sheets...");
             const cE = localStorage.getItem('c_events'), cD = localStorage.getItem('c_dir'), cA = localStorage.getItem('c_admin');
             if(cE) { eventsData = JSON.parse(cE); renderEvents(); } if(cD) { dirData = JSON.parse(cD); renderDirectory(); } if(cA) { adminData = JSON.parse(cA); renderAdminArea(adminData); }
             fetchEvents(); fetchDirectory(); fetchAdmin();
         }
 
-        async function fetchEvents() { try { const res = await fetch(`${BASE_URL}&gid=0`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); eventsData = j.table.rows.map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, from: r.c[3]?.v, to: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) })).filter(i => i.title && i.title !== "Title").reverse(); localStorage.setItem('c_events', JSON.stringify(eventsData)); setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); }); renderEvents(); } catch(e){ log("Event Load Error", 'error'); } }
-        async function fetchDirectory() { try { const res = await fetch(`${BASE_URL}&gid=1267218282`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); dirData = j.table.rows.map((r,idx) => { const n = r.c[0]?.v || ''; const ty = r.c[2]?.v || ''; return { uid: btoa(unescape(encodeURIComponent(n + ty))).replace(/=/g, ''), name: n, cat: r.c[1]?.v, type: ty, desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, viber: r.c[10]?.v, tg: r.c[11]?.v, logo: r.c[13]?.v || 'CDST_Logo.png', rating: r.c[19]?.v, note: r.c[20]?.v, imgs: [r.c[14]?.v, r.c[15]?.v, r.c[16]?.v, r.c[17]?.v, r.c[18]?.v].filter(Boolean) }; }).filter(i => i.name && i.name !== "Name"); localStorage.setItem('c_dir', JSON.stringify(dirData)); setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); renderDirectory(); } catch(e){ log("Dir Load Error", 'error'); } }
-        async function fetchAdmin() { try { const res = await fetch(`${BASE_URL}&gid=626044868`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); adminData = j.table.rows; localStorage.setItem('c_admin', JSON.stringify(adminData)); renderAdminArea(adminData); } catch(e){ log("Admin Load Error", 'error'); } }
+        async function fetchEvents() { try { const res = await fetch(`${BASE_URL}&gid=0`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); eventsData = j.table.rows.map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, from: r.c[3]?.v, to: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) })).filter(i => i.title && i.title !== "Title").reverse(); localStorage.setItem('c_events', JSON.stringify(eventsData)); setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); }); renderEvents(); } catch(e){} }
+        async function fetchDirectory() { try { const res = await fetch(`${BASE_URL}&gid=1267218282`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); dirData = j.table.rows.map((r,idx) => { const n = r.c[0]?.v || ''; const ty = r.c[2]?.v || ''; return { uid: btoa(unescape(encodeURIComponent(n + ty))).replace(/=/g, ''), name: n, cat: r.c[1]?.v, type: ty, desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, viber: r.c[10]?.v, tg: r.c[11]?.v, logo: r.c[13]?.v || 'CDST_Logo.png', rating: r.c[19]?.v, note: r.c[20]?.v, imgs: [r.c[14]?.v, r.c[15]?.v, r.c[16]?.v, r.c[17]?.v, r.c[18]?.v].filter(Boolean) }; }).filter(i => i.name && i.name !== "Name"); localStorage.setItem('c_dir', JSON.stringify(dirData)); setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); renderDirectory(); } catch(e){} }
+        async function fetchAdmin() { try { const res = await fetch(`${BASE_URL}&gid=626044868`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); adminData = j.table.rows; localStorage.setItem('c_admin', JSON.stringify(adminData)); renderAdminArea(adminData); } catch(e){} }
 
         function renderAdminArea(rows) { const p = rows.find(r => r.c[0]?.v && r.c[0].v !== "Description"); if (p) { document.getElementById('adminProfileArea').innerHTML = `<div class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-[#4B0082] mb-6 slide-up"><h3 class="font-bold text-center text-xs text-[#4B0082] mb-4 uppercase">Admin Support</h3><div class="space-y-3">${renderAdminBtn('Phone', p.c[1]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}${renderAdminBtn('Viber', p.c[3]?.v, 'viber://chat?number=', 'fa-viber', 'viber-bg', true)}${renderAdminBtn('Telegram', p.c[4]?.v, 'https://t.me/', 'fa-telegram', 'telegram-bg', true)}</div></div>`; } const n = rows.slice(1).map(r => r.c[6]?.v).filter(Boolean); if(n.length > 0) { document.getElementById('marqueeBar').classList.remove('hidden'); document.getElementById('ticker').innerText = "🚨 " + n.join(" | 🚨 "); } document.getElementById('adminNotesArea').innerHTML = n.map(note => `<div class="bg-yellow-400 border-l-4 border-[#B8860B] p-4 rounded-r-xl shadow-sm slide-up mb-3 uppercase font-bold text-xs">${note}</div>`).join(''); }
         function renderAdminBtn(l, v, p, i, c, isF=false) { if(!v || v === "-") return ''; return `<a href="${p}${v}" class="flex items-center justify-between ${c} text-white p-2.5 rounded-xl text-[9px] font-bold active:scale-95 transition"><span>${l}: ${v}</span><i class="${isF?'fab':'fa'} ${i}"></i></a>`; }
@@ -214,18 +199,17 @@
             else { const i = dirData.find(x => x.uid === uid); if(!i) return; document.getElementById('detailHeader').innerText = i.name; content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-xl object-cover mx-auto mb-3 border border-gray-100 bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125 h-full">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-5 py-2 rounded-full font-bold shadow-sm transition inline-flex items-center gap-2"><i class="fa fa-pen-nib"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Ward', i.ward)}${rR('Address', i.addr)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${rC('Telegram', i.tg, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400"><h3 class="font-bold text-[#4B0082] text-[10px] uppercase mb-2">Note</h3><p class="text-xs text-gray-600 post-content uppercase">${i.note}</p></div>` : ''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`; }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
-        function forceCleanReset() {
-            if (confirm("Reset & Reconnect?")) {
+        
+        function forceReboot() {
+            if(confirm("Fix Connection & Reset?")) {
                 localStorage.clear(); sessionStorage.clear();
+                caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(regs => {
-                        for(let reg of regs) reg.unregister();
-                        window.location.reload(true);
-                    });
+                    navigator.serviceWorker.getRegistrations().then(regs => { for(let r of regs) r.unregister(); window.location.reload(true); });
                 } else { window.location.reload(true); }
             }
         }
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=25'); }); }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=26'); }); }
         loadAllData();
     </script>
 </body>
