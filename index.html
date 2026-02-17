@@ -2,19 +2,19 @@
 <html lang="my" class="notranslate">
 <head>
     <meta charset="UTF-8">
-    <meta name="google" content="notranslate"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cherry Directory</title>
 
     <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="CDST_Logo.png">
     <link rel="icon" type="image/png" sizes="192x192" href="CDST_Logo.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-app.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-database.min.js"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
         body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 110px; background-color: #f8f5ff; }
@@ -45,8 +45,8 @@
             <div class="text-left leading-tight">
                 <h1 class="text-md font-bold tracking-wider text-white uppercase">Cherry Directory</h1>
                 <div class="flex flex-col text-[8px] text-gray-300">
-                    <span id="viewDisplay"><i class="fa fa-eye mr-1"></i><b id="viewCounter" class="text-white">Connecting...</b> Views</span>
-                    <span id="onlineDisplay"><i class="fa fa-circle text-green-400 text-[5px] mr-1 animate-pulse"></i><b id="onlineCounter" class="text-white">1</b> Online <span id="flagList" class="ml-1 text-[10px]"></span></span>
+                    <span id="viewDisplay"><i class="fa fa-eye mr-1"></i><b id="viewCounter" class="text-white">...</b> Views</span>
+                    <span id="onlineDisplay"><i class="fa fa-circle text-green-400 text-[5px] mr-1 animate-pulse"></i><b id="onlineCounter" class="text-white">...</b> Online <span id="flagList" class="ml-1 text-[10px]"></span></span>
                 </div>
             </div>
         </div>
@@ -74,9 +74,9 @@
             <div id="adminProfileArea"></div><div id="adminNotesArea" class="space-y-3"></div>
             
             <div class="bg-black/90 p-4 rounded-xl mt-6 text-left">
-                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">SERVER CONNECTION:</p>
-                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-12 overflow-y-auto">System Start...</div>
-                <button onclick="masterReset()" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg uppercase shadow-md active:scale-95">RESTART CONNECTION</button>
+                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">SYSTEM STATUS:</p>
+                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-20 overflow-y-auto">Loading...</div>
+                <button onclick="window.location.reload(true)" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg uppercase shadow-md active:scale-95">FORCE RELOAD</button>
             </div>
         </section>
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
@@ -91,7 +91,10 @@
         <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact"><i class="fa fa-info-circle text-lg mb-0.5"></i><span class="text-[9px] font-bold">Admin</span></button>
     </nav>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, increment, onDisconnect, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
         const debugEl = document.getElementById('debugLog');
         function log(msg, type='info') {
             const color = type === 'error' ? 'text-red-400' : 'text-green-400';
@@ -99,19 +102,23 @@
             debugEl.scrollTop = debugEl.scrollHeight;
         }
 
-        window.addEventListener('load', async () => {
+        async function startApp() {
             try {
-                // 1. Get Flag First
-                let userFlag = '🏳️';
+                // 1. Get Flag
+                let myFlag = '🏳️';
                 try {
-                    const ipReq = await fetch('https://ipapi.co/json/');
-                    const ipData = await ipReq.json();
-                    if (ipData.country_code) {
-                        userFlag = String.fromCodePoint(...ipData.country_code.toUpperCase().split('').map(c => 127397 + c.charCodeAt()));
+                    log("Checking location...");
+                    const ipRes = await fetch('https://ipapi.co/json/');
+                    const ipData = await ipRes.json();
+                    if(ipData.country_code) {
+                        const codePoints = ipData.country_code.toUpperCase().split('').map(c => 127397 + c.charCodeAt());
+                        myFlag = String.fromCodePoint(...codePoints);
+                        log("Location: " + myFlag);
                     }
                 } catch(e) { log("Loc check skipped"); }
 
                 // 2. Init Firebase
+                log("Init Firebase v10...");
                 const firebaseConfig = {
                     apiKey: "AIzaSyBNcYd3ggUFzI9IX3dzwcpF3a2OvR9_Li4",
                     authDomain: "cherry-directory.firebaseapp.com",
@@ -122,38 +129,32 @@
                     appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf"
                 };
 
-                firebase.initializeApp(firebaseConfig);
-                const db = firebase.database();
+                const app = initializeApp(firebaseConfig);
+                const db = getDatabase(app);
 
-                // 3. Monitor Connection
-                db.ref(".info/connected").on("value", (snap) => {
-                    if (snap.val() === true) {
-                        log("Connected!", 'success');
-                    } else {
-                        log("Connecting...", 'warn');
-                    }
-                });
-
-                // 4. View Count
-                const vRef = db.ref('stats/total_views');
-                if(!sessionStorage.getItem('final_v32')) {
-                    vRef.transaction(c => (c || 0) + 1);
-                    sessionStorage.setItem('final_v32', 'true');
+                // 3. View Counter
+                const vRef = ref(db, 'stats/total_views');
+                if(!sessionStorage.getItem('v33_counted')) {
+                    set(vRef, increment(1));
+                    sessionStorage.setItem('v33_counted', 'true');
+                    log("View Incremented");
                 }
-                vRef.on('value', (s) => {
-                    document.getElementById('viewCounter').innerText = (s.val() || 0).toLocaleString();
+                onValue(vRef, (s) => {
+                    const val = s.val();
+                    document.getElementById('viewCounter').innerText = val ? val.toLocaleString() : "0";
+                    log("Views: " + val);
                 });
 
-                // 5. Online Users (With Flags)
-                const onlineRef = db.ref('stats/online_users');
-                const myCon = onlineRef.push();
-                myCon.onDisconnect().remove();
-                myCon.set({
-                    flag: userFlag,
-                    time: firebase.database.ServerValue.TIMESTAMP
+                // 4. Online Users
+                const onlineRef = ref(db, 'stats/online_users');
+                const myCon = push(onlineRef);
+                onDisconnect(myCon).remove();
+                set(myCon, {
+                    flag: myFlag,
+                    time: serverTimestamp()
                 });
 
-                onlineRef.on('value', (s) => {
+                onValue(onlineRef, (s) => {
                     const users = s.val() || {};
                     const count = Object.keys(users).length;
                     document.getElementById('onlineCounter').innerText = count;
@@ -161,10 +162,15 @@
                     document.getElementById('flagList').innerText = flags;
                 });
 
-            } catch (e) { log("Error: " + e.message, 'error'); }
-        });
+            } catch(e) {
+                log("CRITICAL: " + e.message, 'error');
+            }
+        }
+        startApp();
+    </script>
 
-        // CORE APP LOGIC
+    <script>
+        // APP LOGIC
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         const REVIEW_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
@@ -210,19 +216,7 @@
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
         
-        function masterReset() {
-            if(confirm("RESET CONNECTION?")) {
-                localStorage.clear(); sessionStorage.clear();
-                caches.keys().then(names => Promise.all(names.map(name => caches.delete(name))));
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(registrations => {
-                        for(let registration of registrations) { registration.unregister(); }
-                        window.location.reload(true);
-                    });
-                } else { window.location.reload(true); }
-            }
-        }
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=32'); }); }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=33'); }); }
         loadAllData();
     </script>
 </body>
