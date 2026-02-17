@@ -26,7 +26,7 @@
         .gallery-vertical { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         .gallery-vertical img { width: 100%; border-radius: 12px; object-fit: contain; background: #000; border: 1px solid #eee; }
         .marquee-container { background: #FFD700; color: #37006a; padding: 7px 0; font-weight: bold; overflow: hidden; border-bottom: 2px solid #D4AF37; }
-        .marquee-text { display: inline-block; white-space: nowrap; animation: marquee 35s linear infinite; padding-left: 100%; }
+        .marquee-text { display: inline-block; white-space: nowrap; animation: marquee 30s linear infinite; padding-left: 100%; }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
@@ -68,7 +68,7 @@
         </section>
         <section id="contactPage" class="page space-y-4">
             <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-[#D4AF37] text-center slide-up">
-                <h3 class="font-bold text-[#4B0082] text-sm mb-2">လုပ်ငန်းရှင်များအတွက်</h3>
+                <h3 class="font-bold text-[#4B0082] text-sm mb-2 uppercase">လုပ်ငန်းရှင်များအတွက်</h3>
                 <a href="https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog" target="_blank" class="inline-block gold-gradient text-white text-[11px] font-bold px-8 py-3 rounded-2xl shadow-lg">စာရင်းသွင်းရန်</a>
             </div>
             <div id="adminProfileArea"></div><div id="adminNotesArea" class="space-y-3"></div>
@@ -100,6 +100,7 @@
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+
         let eventsData = [], dirData = [], adminData = [];
         let activeDirCat = 'All', activeEventCat = 'All', groupByKey = 'cat';
 
@@ -110,10 +111,13 @@
         function getStars(r) { if(!r || isNaN(r)) return '<div class="h-3"></div>'; let h = '<div class="flex text-orange-400 text-[8px] gap-0.5 justify-center">'; for(let i=1; i<=5; i++) h += (i <= r) ? '<i class="fa fa-star"></i>' : (i-0.5 <= r) ? '<i class="fa fa-star-half-alt"></i>' : '<i class="far fa-star text-gray-200"></i>'; return h + `<span class="text-gray-400 ml-1 text-[7px]">(${r})</span></div>`; }
 
         async function loadAllData() {
+            // STEP 1: LOAD FROM LOCAL STORAGE IMMEDIATELY
             const cE = localStorage.getItem('c_events'), cD = localStorage.getItem('c_dir'), cA = localStorage.getItem('c_admin');
             if(cE) { eventsData = JSON.parse(cE); renderEvents(); }
             if(cD) { dirData = JSON.parse(cD); renderDirectory(); }
             if(cA) { adminData = JSON.parse(cA); renderAdminArea(adminData); }
+            
+            // STEP 2: SYNC FROM GOOGLE SHEET IN BACKGROUND
             fetchEvents(); fetchDirectory(); fetchAdmin();
         }
 
@@ -132,7 +136,7 @@
         function setupFilters(cid, data, cb) { const vals = ['All', ...new Set(data.map(i => i[groupByKey]).filter(Boolean))]; const cont = document.getElementById(cid); cont.innerHTML = vals.map(v => `<button class="filter-btn flex-shrink-0 px-3 py-1 rounded-lg text-[9px] font-bold border transition-all ${v===(cid==='dirFilters'?activeDirCat:activeEventCat)?'bg-[#D4AF37] text-white':'bg-white text-gray-400 border-gray-100'}">${v}</button>`).join(''); cont.querySelectorAll('button').forEach((btn, idx) => { btn.onclick = () => { cb(vals[idx]); cont.querySelectorAll('button').forEach(b => { b.className = "filter-btn flex-shrink-0 px-3 py-1 rounded-lg text-[9px] font-bold border bg-white text-gray-400 border-gray-100"; }); btn.className = "filter-btn flex-shrink-0 px-3 py-1 rounded-lg text-[9px] font-bold border bg-[#D4AF37] text-white"; }; }); }
         function renderEvents() { const l = document.getElementById('announcementList'); let d = activeEventCat === 'All' ? eventsData : eventsData.filter(e => e.cat === activeEventCat); l.innerHTML = d.map(i => `<div onclick="openDetail('event', '${i.uid}')" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 border border-gray-50"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-gray-50 border shadow-sm" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><h4 class="font-bold text-[#4B0082] text-xs leading-tight mb-1 line-clamp-1">${i.title}</h4><p class="text-[9px] text-gray-500 line-clamp-2">${i.desc || ''}</p></div></div>`).join(''); }
         function renderDirectory() { const l = document.getElementById('directoryList'); const t = document.getElementById('searchInput').value.toLowerCase(); let filtered = dirData.filter(i => (activeDirCat === 'All' || i[groupByKey] === activeDirCat) && (i.name.toLowerCase().includes(t) || (i.ward && i.ward.toLowerCase().includes(t)))); const groups = filtered.reduce((a, i) => { a[i[groupByKey]] = a[i[groupByKey]] || []; a[i[groupByKey]].push(i); return a; }, {}); l.innerHTML = Object.keys(groups).map(g => `<div class="mb-5"><h3 class="font-bold text-[#4B0082] text-[8px] bg-purple-100/50 px-2 py-1 rounded-md inline-block mb-3 uppercase tracking-widest">${g}</h3><div class="grid grid-cols-2 gap-3">${groups[g].map(i => `
-            <div onclick="openDetail('dir', '${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col items-center text-center cursor-pointer active:scale-95 slide-up h-full"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-white mb-3 shadow-sm border border-gray-100" onerror="this.src='CDST_Logo.png'"><h4 class="font-bold text-[#4B0082] text-[10px] leading-tight mb-1.5 line-clamp-2 h-7 w-full uppercase">${i.name}</h4><div class="mb-2">${getStars(i.rating)}</div><div class="flex items-center text-[7px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || '-'}</div></div>`).join('')}</div></div>`).join(''); }
+            <div onclick="openDetail('dir', '${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col items-center text-center cursor-pointer active:scale-95 h-full"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-white mb-3 shadow-sm border border-gray-100" onerror="this.src='CDST_Logo.png'"><h4 class="font-bold text-[#4B0082] text-[10px] leading-tight mb-1.5 line-clamp-2 h-7 w-full uppercase">${i.name}</h4><div class="mb-2">${getStars(i.rating)}</div><div class="flex items-center text-[7px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || '-'}</div></div>`).join('')}</div></div>`).join(''); }
         function handleSearch() { renderDirectory(); }
         function openDetail(type, uid) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
