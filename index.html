@@ -20,7 +20,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
         body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 100px; background-color: #f8f5ff; overflow-x: hidden; }
         .page { display: none; }
-        .active-page { display: block; animation: fadeIn 0.2s; }
+        .active-page { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         #bottomNav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; height: 65px; background: #37006a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(212,175,55,0.3); }
@@ -32,14 +32,15 @@
         .post-content { white-space: pre-wrap; line-height: 1.8; font-size: 13px; color: #333; padding: 10px 0; }
         .post-content ul { list-style-type: disc; padding-left: 20px; margin: 10px 0; }
 
-        /* Detail Logo Fix */
-        .logo-box { width: 4.5rem; height: 4.5rem; border-radius: 1.2rem; background: white; border: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
+        /* Compact Logo Design */
+        .logo-box { width: 3.8rem; height: 3.8rem; border-radius: 1rem; background: white; border: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
         .logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .detail-logo-large { width: 100px; height: 100px; border-radius: 1.8rem; background: white; border: 4px solid white; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin: 0 auto 15px auto; }
+        .detail-logo-large { width: 90px; height: 90px; border-radius: 1.5rem; background: white; border: 4px solid white; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin: 0 auto 15px auto; }
         .detail-logo-large img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        .dir-card { background: white; border-radius: 20px; display: flex; flex-direction: column; height: 100%; min-height: 180px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .dir-card { background: white; border-radius: 20px; display: flex; flex-direction: column; height: 100%; min-height: 170px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .dir-img { width: 3.8rem; height: 3.8rem; border-radius: 1rem; object-fit: cover; border: 1px solid #f0f0f0; margin-bottom: 0.5rem; background: white; }
         .group-header { font-size: 10px; font-weight: 800; color: #37006a; background: #eee5ff; padding: 5px 12px; border-radius: 6px; display: inline-block; margin-top: 15px; border-left: 3px solid #D4AF37; text-transform: uppercase; }
         
         .marquee-container { background: #FFD700; color: #37006a; padding: 6px 0; font-weight: bold; overflow: hidden; border-bottom: 1px solid #D4AF37; }
@@ -103,7 +104,7 @@
 
         <section id="contactPage" class="page space-y-4">
             <div class="bg-white p-5 rounded-[25px] shadow-sm border">
-                <h3 class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-widest">Sync Engine Status</h3>
+                <h3 class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-widest">Database Sync Engine</h3>
                 <div class="flex justify-between text-[10px] font-bold mb-1"><span>Status: Connected</span><span id="loadPercent">100%</span></div>
                 <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden mb-4"><div id="loadBar" class="gold-gradient h-full" style="width: 100%"></div></div>
                 <div class="grid grid-cols-3 gap-2 mt-4 text-[8px] font-bold">
@@ -160,7 +161,7 @@
         let db, eventsData = [], dirData = [], knowData = [], currentPostID = null, chatAdminMode = false;
         let filters = { city: 'All', cat: 'All', type: 'All', ward: 'All' };
 
-        // PERSISTENT STATUS (JS FIXED)
+        // PERSISTENT STATUS UPDATE
         function updateAllSyncStatus() {
             const h = eventsData.length; const k = knowData.length; const d = dirData.length;
             document.getElementById('headerSyncStatus').innerText = `H: ${h} | K: ${k} | D: ${d}`;
@@ -187,7 +188,6 @@
             updateAllSyncStatus();
         }
 
-        // --- FETCHERS (TEXT-BASED HEADER SKIP) ---
         async function fetchEvents() { 
             const res = await fetch(`${BASE_URL}&gid=${GIDS.events}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
             eventsData = j.table.rows.map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v || 'News', title: r.c[1]?.v, logo: r.c[8]?.v, from: r.c[3]?.v, desc: r.c[2]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
@@ -222,7 +222,7 @@
             }
         }
 
-        // --- FILTER ENGINE (4 DROPDOWNS) ---
+        // --- FILTER ENGINE ---
         function initDropdowns() {
             const fill = (id, vals, key) => { const el = document.getElementById(id); el.innerHTML = `<option value="All">${key}: ALL</option>` + vals.map(v => `<option value="${v}">${v}</option>`).join(''); };
             fill('citySelect', [...new Set(dirData.map(x => x.city))], 'CITY');
@@ -236,13 +236,12 @@
             let f = dirData.filter(i => (filters.city === 'All' || i.city === filters.city) && (filters.cat === 'All' || i.cat === filters.cat) && (filters.type === 'All' || i.type === filters.type) && (filters.ward === 'All' || i.ward === filters.ward) && (i.name.toLowerCase().includes(t) || (i.desc && i.desc.toLowerCase().includes(t))));
             const groups = [...new Set(f.map(x => x.cat))];
             document.getElementById('directoryList').innerHTML = groups.map(g => `<div><span class="group-header">${g}</span><div class="grid grid-cols-2 gap-4 mt-3">${f.filter(x=>x.cat===g).map(i => `
-            <div onclick="openDetail('dir', '${i.uid}')" class="dir-card p-4"><div class="flex flex-col items-center text-center flex-grow"><img src="${fixDriveLink(i.logo)}" class="dir-img"><h4 class="font-bold text-[#37006a] text-[11px] leading-tight w-full uppercase mb-2 line-clamp-2">${i.name}</h4><div class="flex text-orange-400 text-[8px] gap-0.5">${getStars(i.rating)}</div></div><div class="text-[8px] text-[#D4AF37] border-t pt-2.5 w-full text-center font-bold uppercase"><i class="fa fa-map-pin mr-1"></i> ${i.city} | ${i.ward}</div></div>`).join('')}</div></div>`).join('');
+            <div onclick="openDetail('dir', '${i.uid}')" class="dir-card p-4"><div class="flex flex-col items-center text-center flex-grow"><div class="logo-box"><img src="${fixDriveLink(i.logo)}" onerror="this.src='CDST_Logo.png'"></div><h4 class="font-bold text-[#37006a] text-[11px] leading-tight w-full uppercase mb-2 line-clamp-2 mt-2">${i.name}</h4><div class="flex text-orange-400 text-[8px] gap-0.5">${getStars(i.rating)}</div></div><div class="text-[8px] text-[#D4AF37] border-t pt-2.5 w-full text-center font-bold uppercase"><i class="fa fa-map-pin mr-1"></i> ${i.city} | ${i.ward}</div></div>`).join('')}</div></div>`).join('');
         }
 
         function renderEvents() { document.getElementById('announcementList').innerHTML = [...eventsData].reverse().map(i => `<div onclick="openDetail('event', '${i.uid}')" class="bg-white rounded-[25px] p-5 shadow-sm border border-gray-100 flex flex-col items-center text-center h-full"><div class="logo-box"><img src="${fixDriveLink(i.logo || 'CDST_Logo.png')}" onerror="this.src='CDST_Logo.png'"></div><h4 class="font-bold text-[#37006a] text-[11px] uppercase mb-auto line-clamp-2 mt-2 leading-relaxed">${i.title}</h4><div class="text-[9px] text-gray-400 border-t pt-3 w-full font-bold uppercase mt-4">${i.from}</div></div>`).join(''); }
         function renderKnowledge() { document.getElementById('knowledgeList').innerHTML = [...knowData].reverse().map(i => `<div onclick="openDetail('know', '${i.id}')" class="bg-white rounded-[25px] p-4 shadow-sm border flex gap-4 items-center active:bg-gray-50 transition"><img src="${fixDriveLink(i.img)}" class="w-16 h-16 rounded-xl object-cover bg-gray-50 flex-shrink-0" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><h4 class="font-bold text-[#37006a] text-[12px] leading-tight line-clamp-2">${i.title}</h4><p class="text-[8px] text-gray-400 mt-1.5">${i.date}</p></div></div>`).join(''); }
 
-        // --- DETAIL MODAL LOGO FIX ---
         function openDetail(type, uid) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
             document.getElementById('bottomNav').style.display = 'none'; 
@@ -260,14 +259,8 @@
             if(type==='dir') {
                 content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-[45px] p-8 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-24 h-24 rounded-[1.8rem] mx-auto mb-4 border-4 border-white shadow-xl bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#37006a] uppercase tracking-wider">${i.name}</h2><div class="flex justify-center mt-3 scale-125">${getStars(i.rating)}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm">${rR('Detail Description', i.desc)}${rR('Location', i.city + ' | ' + i.ward)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Full Address', i.addr)}</div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase tracking-widest">Connect</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}<div class="py-6 flex gap-4">${i.viber?`<a href="viber://chat?number=${i.viber}" class="flex-1 bg-[#7360f2] text-white p-4 rounded-2xl text-[10px] font-bold text-center shadow-lg">VIBER</a>`:''}${i.tg?`<a href="https://t.me/${i.tg}" class="flex-1 bg-[#0088cc] text-white p-4 rounded-2xl text-[10px] font-bold text-center shadow-lg">TELEGRAM</a>`:''}</div></div>${i.note?`<div class="bg-yellow-50 p-8 rounded-[35px] border-l-4 border-yellow-400 font-bold text-[#37006a] text-[11px] uppercase">${i.note}</div>`:''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
             } else {
-                // FIXED DETAIL LOGO FOR HOME TAB
-                content.innerHTML = `<div class="space-y-4 slide-up">
-                    <div class="detail-logo-large"><img src="${fixDriveLink(i.logo || i.img)}" onerror="this.src='CDST_Logo.png'"></div>
-                    <div class="bg-white p-8 rounded-[35px] shadow-sm"><h2 class="text-sm font-bold text-[#37006a] mb-5 leading-relaxed uppercase">${i.title}</h2><div class="post-content">${i.desc||i.content}</div></div>
-                    <div class="gallery-vertical">${i.imgs ? i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('') : ''}</div>
-                </div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo || i.img)}" onerror="this.src='CDST_Logo.png'"></div><div class="bg-white p-8 rounded-[35px] shadow-sm"><h2 class="text-sm font-bold text-[#37006a] mb-5 leading-relaxed uppercase">${i.title}</h2><div class="post-content">${i.desc||i.content}</div></div><div class="gallery-vertical">${i.imgs ? i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('') : ''}</div></div>`;
             }
-            
             document.getElementById('interactiveSection').className = 'block p-6 pb-40 border-t bg-white';
             loadInteractions(uid);
             modal.classList.remove('hidden'); document.body.style.overflow = 'hidden';
@@ -286,8 +279,8 @@
 
         function initChatSystem() { db.ref('shoutbox').limitToLast(30).on('value', s => { const data = s.val() || {}; document.getElementById('chatMessages').innerHTML = Object.entries(data).map(([key, m]) => `<div class="chat-bubble ${m.id===localStorage.getItem('my_chat_id')?'bg-[#37006a] text-white self-end rounded-br-none shadow-md':'bg-white text-gray-800 self-start rounded-bl-none shadow-sm'} relative"><div onclick="deleteChat('${key}')" class="admin-del" style="display:${chatAdminMode?'flex':'none'}">x</div><b class="block text-[7px] opacity-60 mb-1 uppercase tracking-widest">${m.name}</b>${m.text}</div>`).join(''); document.getElementById('chatMessages').scrollTop = 99999; }); }
         function sendGlobalChat() { const n = document.getElementById('chatName').value.trim(); const t = document.getElementById('chatInput').value.trim(); if(!n || !t) return; let id = localStorage.getItem('my_chat_id') || Date.now().toString(); localStorage.setItem('my_chat_id', id); db.ref('shoutbox').push({ name: n, text: t, id: id, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('chatInput').value = ''; }
-        function deleteChat(key) { if(confirm("Delete?")) db.ref(`shoutbox/${key}`).remove(); }
-        function toggleChatAdmin() { if(prompt("Pass:")==="166233") { chatAdminMode = !chatAdminMode; alert("Admin Mode Enabled."); initChatSystem(); } }
+        function deleteChat(key) { if(confirm("Delete?")) db.ref(`(shoutbox/${key}`).remove(); }
+        function toggleChatAdmin() { if(prompt("Pass:")==="166233") { chatAdminMode = !chatAdminMode; alert("Admin Access Granted."); initChatSystem(); } }
         function loadInteractions(pid) { db.ref('likes/'+pid).on('value', s => { const d = s.val()||{like:0,unlike:0}; document.getElementById('likeCount').innerText = d.like||0; document.getElementById('unlikeCount').innerText = d.unlike||0; }); db.ref('comments/'+pid).on('value', s => { if(!s.exists()) { document.getElementById('postCommentList').innerHTML = '<p class="text-[9px] text-center text-gray-400 uppercase font-bold">No discussions yet</p>'; return; } document.getElementById('postCommentList').innerHTML = Object.values(s.val()).map(c => `<div class="bg-gray-50 p-3 rounded-2xl border text-[10px]"><b>${c.name}:</b> ${c.text}</div>`).join(''); }); }
         function handleReaction(type) { db.ref('likes/'+currentPostID+'/'+type).transaction(c => (c||0)+1); }
         function sendPostComment() { const n = document.getElementById('postComName').value.trim(); const t = document.getElementById('postComInput').value.trim(); if(!n||!t) return; db.ref('comments/'+currentPostID).push({ name: n, text: t, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('postComInput').value = ''; }
