@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cherry-v27-rest';
+const CACHE_NAME = 'cherry-v29-pro';
 const ASSETS = [
   './',
   './index.html',
@@ -8,31 +8,25 @@ const ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
-// Install & Cache Assets
 self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
 });
 
-// Clean old caches
 self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(
-    keys.map(k => { if (k !== CACHE_NAME) return caches.delete(k); })
-  )));
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))));
   return self.clients.claim();
 });
 
-// Network First Strategy (အင်တာနက်ရှိရင် အသစ်ယူ၊ မရှိမှ Cache ယူ)
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
   
-  // Firebase Database ကို Cache လုံးဝ မမှတ်စေရ (Direct Pass)
-  if (url.includes('firebaseio.com')) {
+  // 🚨 CRITICAL: Firebase နဲ့ Country API ကို Cache မလုပ်ဘဲ လွှတ်ပေးမယ်
+  if (url.includes('firebase') || url.includes('ipapi') || url.includes('google')) {
     return; 
   }
 
   event.respondWith(
-    fetch(event.request)
-      .catch(() => caches.match(event.request))
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
