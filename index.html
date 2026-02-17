@@ -14,8 +14,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-app.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-database.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
@@ -76,9 +76,9 @@
             <div id="adminProfileArea"></div><div id="adminNotesArea" class="space-y-3"></div>
             
             <div class="bg-black/90 p-4 rounded-xl mt-6 text-left">
-                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">SYSTEM STATUS:</p>
-                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-20 overflow-y-auto">Waiting for init...</div>
-                <button onclick="forceRestart()" class="w-full bg-red-600 text-white text-[9px] font-bold py-2 mt-2 rounded">FORCE RESTART APP</button>
+                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">NETWORK DIAGNOSTIC:</p>
+                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-24 overflow-y-auto">Waiting...</div>
+                <button onclick="forceCleanReset()" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg shadow-md active:scale-95">FORCE RECONNECT & RESET</button>
             </div>
         </section>
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
@@ -96,16 +96,14 @@
     <script>
         const debugEl = document.getElementById('debugLog');
         function log(msg, type='info') {
-            const color = type === 'error' ? 'text-red-400' : 'text-green-400';
+            const color = type === 'error' ? 'text-red-400' : (type === 'warn' ? 'text-yellow-400' : 'text-green-400');
             debugEl.innerHTML += `<div class="${color}">> ${msg}</div>`;
             debugEl.scrollTop = debugEl.scrollHeight;
         }
 
-        // 1. Initialize Firebase (Wrapped in Try-Catch)
-        window.addEventListener('load', () => {
+        // 1. FIREBASE V8 LOGIC (No Modules)
+        window.onload = function() {
             try {
-                if (!firebase) throw new Error("Firebase SDK not loaded");
-                
                 const firebaseConfig = {
                     apiKey: "AIzaSyBNcYd3ggUFzI9IX3dzwcpF3a2OvR9_Li4",
                     authDomain: "cherry-directory.firebaseapp.com",
@@ -116,47 +114,61 @@
                     appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf"
                 };
 
-                log("Initializing Firebase...");
+                log("Init Firebase v8...");
                 firebase.initializeApp(firebaseConfig);
                 const db = firebase.database();
-                
-                log("Connecting to DB...");
-                const vRef = db.ref('stats/total_views');
-                
-                // Increment logic
-                if(!sessionStorage.getItem('v24_counted')) {
-                    vRef.transaction(current => (current || 0) + 1, (error, committed) => {
-                        if (error) log("Inc failed: " + error.message, 'error');
-                        else if (committed) { log("View Counted!"); sessionStorage.setItem('v24_counted', 'true'); }
-                    });
-                } else {
-                    log("Session already counted");
-                }
 
-                // Listen for updates
-                vRef.on('value', (snap) => {
-                    const val = snap.val();
-                    log("Views updated: " + val);
-                    document.getElementById('viewCounter').innerText = val ? val.toLocaleString() : "0";
-                }, (error) => {
-                    log("Listener Error: " + error.message, 'error');
+                // CONNECTION CHECK
+                const connectedRef = db.ref(".info/connected");
+                connectedRef.on("value", (snap) => {
+                    if (snap.val() === true) {
+                        log("Server Connected: YES", 'success');
+                    } else {
+                        log("Server Connected: NO (Retrying...)", 'warn');
+                    }
                 });
 
-                // Online status
-                const oRef = db.ref('stats/online_users');
-                const myCon = oRef.push();
+                // TOTAL VIEWS
+                const vRef = db.ref('stats/total_views');
+                
+                // Only increment if online
+                if (!sessionStorage.getItem('v25_counted')) {
+                    vRef.transaction(function(current_value) {
+                        return (current_value || 0) + 1;
+                    }, function(error, committed, snapshot) {
+                        if (error) {
+                            log("Inc Failed: " + error.message, 'error');
+                        } else if (committed) {
+                            log("Increment Success!");
+                            sessionStorage.setItem('v25_counted', 'true');
+                        }
+                    });
+                }
+
+                // Listener
+                vRef.on('value', (snapshot) => {
+                    const views = snapshot.val();
+                    log("Live Views: " + views);
+                    document.getElementById('viewCounter').innerText = views ? views.toLocaleString() : "0";
+                }, (errorObject) => {
+                    log("Read Failed: " + errorObject.code, 'error');
+                });
+
+                // ONLINE USERS
+                const onlineRef = db.ref('stats/online_users');
+                const myCon = onlineRef.push();
                 myCon.onDisconnect().remove();
                 myCon.set(true);
-                oRef.on('value', (snap) => {
+                onlineRef.on('value', (snap) => {
                     document.getElementById('onlineCounter').innerText = snap.numChildren() || 1;
                 });
 
             } catch (e) {
-                log("CRITICAL: " + e.message, 'error');
+                log("CRITICAL ERROR: " + e.message, 'error');
             }
-        });
+        };
 
-        // 2. Standard App Logic
+        // 2. STANDARD APP LOGIC
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         const REVIEW_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
@@ -175,7 +187,7 @@
         function getStars(r) { if(!r || isNaN(r)) return '<div class="h-3"></div>'; let h = '<div class="flex text-orange-400 text-[8px] gap-0.5 justify-center">'; for(let i=1; i<=5; i++) h += (i <= r) ? '<i class="fa fa-star"></i>' : (i-0.5 <= r) ? '<i class="fa fa-star-half-alt"></i>' : '<i class="far fa-star text-gray-200"></i>'; return h + `<span class="text-gray-400 ml-1 text-[7px]">(${r})</span></div>`; }
 
         async function loadAllData() {
-            log("Loading Sheet Data...");
+            log("Loading Sheets...");
             const cE = localStorage.getItem('c_events'), cD = localStorage.getItem('c_dir'), cA = localStorage.getItem('c_admin');
             if(cE) { eventsData = JSON.parse(cE); renderEvents(); } if(cD) { dirData = JSON.parse(cD); renderDirectory(); } if(cA) { adminData = JSON.parse(cA); renderAdminArea(adminData); }
             fetchEvents(); fetchDirectory(); fetchAdmin();
@@ -202,9 +214,8 @@
             else { const i = dirData.find(x => x.uid === uid); if(!i) return; document.getElementById('detailHeader').innerText = i.name; content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-xl object-cover mx-auto mb-3 border border-gray-100 bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125 h-full">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-5 py-2 rounded-full font-bold shadow-sm transition inline-flex items-center gap-2"><i class="fa fa-pen-nib"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Ward', i.ward)}${rR('Address', i.addr)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${rC('Telegram', i.tg, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400"><h3 class="font-bold text-[#4B0082] text-[10px] uppercase mb-2">Note</h3><p class="text-xs text-gray-600 post-content uppercase">${i.note}</p></div>` : ''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`; }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
-        
-        function forceRestart() {
-            if(confirm("Force Restart App?")) {
+        function forceCleanReset() {
+            if (confirm("Reset & Reconnect?")) {
                 localStorage.clear(); sessionStorage.clear();
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(regs => {
@@ -214,7 +225,7 @@
                 } else { window.location.reload(true); }
             }
         }
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=24'); }); }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=25'); }); }
         loadAllData();
     </script>
 </body>
