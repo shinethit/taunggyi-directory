@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="my">
+<html lang="my" class="notranslate">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cherry Directory</title>
 
     <link rel="manifest" href="manifest.json">
@@ -14,8 +14,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-app.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-database.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
@@ -48,7 +48,7 @@
                 <h1 class="text-md font-bold tracking-wider text-white uppercase">Cherry Directory</h1>
                 <div class="flex flex-col text-[8px] text-gray-300">
                     <span id="viewDisplay"><i class="fa fa-eye mr-1"></i><b id="viewCounter" class="text-white">...</b> Views</span>
-                    <span id="onlineDisplay"><i class="fa fa-circle text-green-400 text-[5px] mr-1 animate-pulse"></i><b id="onlineCounter" class="text-white">...</b> Online <span id="flagList" class="ml-1"></span></span>
+                    <span id="onlineDisplay"><i class="fa fa-circle text-green-400 text-[5px] mr-1 animate-pulse"></i><b id="onlineCounter" class="text-white">1</b> Online <span id="flagList" class="ml-1 text-[10px]"></span></span>
                 </div>
             </div>
         </div>
@@ -76,9 +76,9 @@
             <div id="adminProfileArea"></div><div id="adminNotesArea" class="space-y-3"></div>
             
             <div class="bg-black/90 p-4 rounded-xl mt-6 text-left">
-                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">LIVE STATUS:</p>
-                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-16 overflow-y-auto">Init...</div>
-                <button onclick="nuclearWipe()" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg uppercase shadow-md active:scale-95">RESET APP (FIX ALL)</button>
+                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">HYBRID STATUS:</p>
+                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-20 overflow-y-auto">Starting...</div>
+                <button onclick="nuclearWipe()" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg uppercase shadow-md active:scale-95">RESET ALL (FIX BUG)</button>
             </div>
         </section>
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
@@ -94,6 +94,7 @@
     </nav>
 
     <script>
+        const DB_URL = "https://cherry-directory-default-rtdb.firebaseio.com";
         const debugEl = document.getElementById('debugLog');
         function log(msg, type='info') {
             const color = type === 'error' ? 'text-red-400' : 'text-green-400';
@@ -101,26 +102,49 @@
             debugEl.scrollTop = debugEl.scrollHeight;
         }
 
-        window.addEventListener('load', async () => {
+        // STEP 1: REST API (Direct HTTP) - Works on ALL Androids
+        async function fetchViewCountHTTP() {
             try {
-                // 1. Get Country (Free API)
-                let userCountry = '🏳️'; // Default flag
+                log("HTTP: Fetching views...");
+                let res = await fetch(`${DB_URL}/stats/total_views.json`);
+                let count = await res.json();
+                
+                if (count) {
+                    document.getElementById('viewCounter').innerText = count.toLocaleString();
+                    log("HTTP: Views Loaded (" + count + ")");
+                }
+
+                // Increment via HTTP (Once per session)
+                if (!sessionStorage.getItem('http_counted')) {
+                    const newCount = (count || 0) + 1;
+                    await fetch(`${DB_URL}/stats/total_views.json`, {
+                        method: 'PUT',
+                        body: JSON.stringify(newCount)
+                    });
+                    document.getElementById('viewCounter').innerText = newCount.toLocaleString();
+                    sessionStorage.setItem('http_counted', 'true');
+                    log("HTTP: Views Incremented");
+                }
+            } catch (e) {
+                log("HTTP Err: " + e.message, 'error');
+            }
+        }
+
+        // STEP 2: FIREBASE SDK (Realtime Online Users + Flags)
+        async function initFirebaseSDK() {
+            try {
+                // 1. Get Country Flag
+                let flag = "🏳️";
                 try {
-                    log("Checking location...");
                     const ipRes = await fetch('https://ipapi.co/json/');
                     const ipData = await ipRes.json();
                     if(ipData.country_code) {
-                        // Convert country code to Flag Emoji
-                        const codePoints = ipData.country_code
-                            .toUpperCase()
-                            .split('')
-                            .map(char =>  127397 + char.charCodeAt());
-                        userCountry = String.fromCodePoint(...codePoints);
-                        log("Location: " + userCountry);
+                        const codePoints = ipData.country_code.toUpperCase().split('').map(c => 127397 + c.charCodeAt());
+                        flag = String.fromCodePoint(...codePoints);
                     }
-                } catch(e) { log("Loc check skipped"); }
+                } catch(e) {}
 
-                // 2. Firebase Init
+                // 2. Init Firebase
                 const firebaseConfig = {
                     apiKey: "AIzaSyBNcYd3ggUFzI9IX3dzwcpF3a2OvR9_Li4",
                     authDomain: "cherry-directory.firebaseapp.com",
@@ -130,52 +154,44 @@
                     messagingSenderId: "61677443166",
                     appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf"
                 };
-
-                firebase.initializeApp(firebaseConfig);
+                
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
                 const db = firebase.database();
 
-                // 3. Connection Monitor
-                db.ref(".info/connected").on("value", (snap) => {
-                    if (snap.val() === true) log("Server: CONNECTED", 'success');
-                    else log("Server: Connecting...", 'warn');
-                });
-
-                // 4. Total Views (Increment only once)
-                const vRef = db.ref('stats/total_views');
-                if(!sessionStorage.getItem('v29_counted')) {
-                    vRef.transaction((c) => (c || 0) + 1);
-                    sessionStorage.setItem('v29_counted', 'true');
-                }
-                vRef.on('value', (s) => {
-                    document.getElementById('viewCounter').innerText = (s.val() || 0).toLocaleString();
-                });
-
-                // 5. Online Users + Country Flags
+                // 3. Online Presence
                 const onlineRef = db.ref('stats/online_users');
-                const myCon = onlineRef.push();
+                const myRef = onlineRef.push();
                 
-                // Add myself with Country Flag
-                myCon.onDisconnect().remove();
-                myCon.set({
-                    time: firebase.database.ServerValue.TIMESTAMP,
-                    country: userCountry
+                myRef.onDisconnect().remove();
+                myRef.set({
+                    flag: flag,
+                    time: firebase.database.ServerValue.TIMESTAMP
                 });
 
-                // Read all online users
-                onlineRef.on('value', (s) => {
-                    const users = s.val() || {};
+                // 4. Watch Online Users
+                onlineRef.on('value', (snapshot) => {
+                    const users = snapshot.val() || {}; // Handle null safely
                     const count = Object.keys(users).length;
                     document.getElementById('onlineCounter').innerText = count;
-
-                    // Extract unique flags
-                    const flags = [...new Set(Object.values(users).map(u => u.country || '🏳️'))].slice(0, 3).join(' ');
+                    
+                    // Show Flags
+                    const flags = [...new Set(Object.values(users).map(u => u.flag || '🏳️'))].slice(0, 5).join(' ');
                     document.getElementById('flagList').innerText = flags;
+                    log("SDK: " + count + " Online");
                 });
 
-            } catch (e) { log("ERR: " + e.message, 'error'); }
-        });
+            } catch (e) {
+                log("SDK Err: " + e.message, 'error');
+            }
+        }
 
-        // CORE APP LOGIC
+        // Start Engines
+        fetchViewCountHTTP(); // Instant Numbers
+        initFirebaseSDK();    // Fancy Features
+    </script>
+
+    <script>
+        // STANDARD APP LOGIC
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         const REVIEW_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
@@ -194,6 +210,7 @@
         function getStars(r) { if(!r || isNaN(r)) return '<div class="h-3"></div>'; let h = '<div class="flex text-orange-400 text-[8px] gap-0.5 justify-center">'; for(let i=1; i<=5; i++) h += (i <= r) ? '<i class="fa fa-star"></i>' : (i-0.5 <= r) ? '<i class="fa fa-star-half-alt"></i>' : '<i class="far fa-star text-gray-200"></i>'; return h + `<span class="text-gray-400 ml-1 text-[7px]">(${r})</span></div>`; }
 
         async function loadAllData() {
+            log("Loading Sheets...");
             const cE = localStorage.getItem('c_events'), cD = localStorage.getItem('c_dir'), cA = localStorage.getItem('c_admin');
             if(cE) { eventsData = JSON.parse(cE); renderEvents(); } if(cD) { dirData = JSON.parse(cD); renderDirectory(); } if(cA) { adminData = JSON.parse(cA); renderAdminArea(adminData); }
             fetchEvents(); fetchDirectory(); fetchAdmin();
@@ -233,7 +250,7 @@
                 } else { window.location.reload(true); }
             }
         }
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=29'); }); }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=30'); }); }
         loadAllData();
     </script>
 </body>
