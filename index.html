@@ -12,7 +12,9 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -33,11 +35,11 @@
         .post-content { white-space: pre-wrap; line-height: 1.8; font-size: 13px; color: #333; padding: 10px 0; }
         .post-content ul { list-style-type: disc; padding-left: 20px; margin: 10px 0; }
 
-        /* Detail Logo Fix */
+        /* Logo Square Fix */
         .logo-box { width: 3.8rem; height: 3.8rem; border-radius: 1.2rem; background: white; border: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
         .logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .detail-logo-large { width: 100px; height: 100px; border-radius: 1.8rem; background: white; border: 4px solid white; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin: 0 auto 15px auto; }
+        .detail-logo-large { width: 95px; height: 95px; border-radius: 1.6rem; background: white; border: 4px solid white; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin: 0 auto 15px auto; }
         .detail-logo-large img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
         .dir-card { background: white; border-radius: 20px; display: flex; flex-direction: column; height: 100%; min-height: 180px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
@@ -67,7 +69,7 @@
             <div class="text-left leading-tight">
                 <div class="flex flex-col">
                     <h1 class="text-md font-bold tracking-widest uppercase">Cherry Directory</h1>
-                    <span id="headerSyncStatus" class="text-[7px] text-green-400 font-bold uppercase mt-0.5">READY</span>
+                    <span id="headerSyncStatus" class="text-[7px] text-green-400 font-bold uppercase tracking-tighter mt-0.5">READY</span>
                 </div>
                 <div class="flex gap-3 text-[8px] text-gray-300 mt-1">
                     <span><i class="fa fa-eye mr-1"></i> <b id="viewCounter">...</b></span>
@@ -79,9 +81,7 @@
 
     <div class="max-w-4xl mx-auto p-4">
         <section id="homePage" class="page active-page"><div id="announcementList" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-10"></div></section>
-        
         <section id="knowledgePage" class="page"><h3 class="text-[#37006a] font-bold text-xs uppercase mb-3 border-b pb-2">Knowledge Sharing</h3><div id="knowledgeList" class="space-y-4 pb-10"></div></section>
-
         <section id="directoryPage" class="page">
             <div class="sticky top-0 z-50 bg-[#f8f5ff]/95 backdrop-blur-md py-3 space-y-2">
                 <div class="relative"><input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="ဆိုင်အမည်၊ ရပ်ကွက် ရှာရန်..." class="w-full p-3 pl-10 rounded-2xl border border-gray-200 text-xs shadow-sm outline-none focus:border-[#D4AF37]"><i class="fa fa-search absolute left-4 top-3.5 text-gray-300 text-xs"></i></div>
@@ -94,42 +94,36 @@
             </div>
             <div id="directoryList" class="pb-10"></div>
         </section>
-
         <section id="chatPage" class="page">
             <div class="bg-white rounded-[30px] shadow-sm border h-[60vh] flex flex-col overflow-hidden">
                 <div class="bg-[#37006a] p-4 text-white font-bold text-[10px] flex justify-between px-6 items-center uppercase tracking-widest"><span>Public Shoutbox</span><span id="chatAdminBadge" class="hidden bg-red-500 px-3 py-1 rounded-full">ADMIN</span></div>
                 <div id="chatMessages" class="flex-1 overflow-y-auto p-5 flex flex-col space-y-3 bg-[#fcfaff]"></div>
-                <div class="p-4 bg-white border-t flex gap-2 relative z-[2000]"><input type="text" id="chatName" placeholder="Name" class="w-1/4 p-2.5 rounded-xl border text-[11px] outline-none bg-gray-50"><input type="text" id="chatInput" placeholder="Message..." class="flex-1 p-2.5 rounded-xl border text-[11px] outline-none bg-gray-50"><button onclick="sendGlobalChat()" class="bg-[#37006a] text-white w-12 rounded-xl flex items-center justify-center active:scale-90 shadow-md"><i class="fa fa-paper-plane text-sm"></i></button></div>
+                <div class="p-4 bg-white border-t flex gap-2 relative z-[2000]"><input type="text" id="chatName" placeholder="Name" class="w-1/4 p-2.5 rounded-xl border text-[11px] outline-none bg-gray-50"><input type="text" id="chatInput" placeholder="Message..." class="flex-1 p-2.5 rounded-xl border text-[11px] outline-none bg-gray-50"><button onclick="sendGlobalChat()" class="bg-[#37006a] text-white w-12 rounded-xl flex items-center justify-center active:scale-90 shadow-md"><i class="fa fa-paper-plane"></i></button></div>
             </div>
         </section>
-
         <section id="contactPage" class="page space-y-4">
             <div class="bg-white p-5 rounded-[25px] shadow-sm border">
-                <h3 class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-widest">Sync Engine Status</h3>
-                <div class="flex justify-between text-[10px] font-bold mb-1"><span>Status: Connected</span><span id="loadPercent">100%</span></div>
-                <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden mb-4"><div id="loadBar" class="gold-gradient h-full" style="width: 100%"></div></div>
+                <h3 class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-widest">Sync Status</h3>
                 <div class="grid grid-cols-3 gap-2 text-[8px] font-bold">
                     <div class="bg-purple-50 p-2 rounded-lg border text-center">Home: <span id="admin-home-count">0</span></div>
                     <div class="bg-purple-50 p-2 rounded-lg border text-center">Knowledge: <span id="admin-know-count">0</span></div>
                     <div class="bg-purple-50 p-2 rounded-lg border text-center">Directory: <span id="admin-dir-count">0</span></div>
                 </div>
             </div>
-
+            
             <div class="bg-white p-5 rounded-[25px] shadow-sm border">
                 <h3 class="text-[10px] font-bold text-gray-400 mb-4 uppercase tracking-widest">Category Distribution</h3>
                 <div class="w-full max-w-[280px] mx-auto">
                     <canvas id="categoryChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="bg-white p-7 rounded-[35px] shadow-sm border-l-4 border-[#D4AF37] text-center">
                 <h3 class="font-bold text-[#37006a] text-sm mb-3 uppercase tracking-wider">လုပ်ငန်းရှင်များအတွက်</h3>
                 <a href="https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog" target="_blank" class="inline-block gold-gradient text-white text-[10px] font-bold px-10 py-4 rounded-2xl shadow-lg active:scale-95 transition">စာရင်းသွင်းရန်</a>
             </div>
-
             <div id="adminNotesArea" class="space-y-3"></div>
             <div id="adminProfileArea"></div>
-
             <div class="p-4 grid grid-cols-2 gap-3">
                 <button onclick="toggleChatAdmin()" class="bg-gray-100 text-[#37006a] p-4 rounded-2xl text-[9px] font-bold uppercase flex flex-col items-center gap-1"><i class="fa fa-shield-alt text-lg"></i> Admin Control</button>
                 <button onclick="localStorage.clear(); window.location.reload(true);" class="bg-red-50 text-red-500 p-4 rounded-2xl text-[9px] font-bold uppercase flex flex-col items-center gap-1"><i class="fa fa-sync text-lg"></i> Reset App</button>
@@ -138,18 +132,17 @@
 
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[10001] overflow-y-auto hidden">
             <div class="sticky top-0 bg-white/95 backdrop-blur-md p-4 shadow-sm z-50 flex items-center border-b">
-                <button onclick="closeDetail()" class="w-10 h-10 rounded-full bg-gray-50 text-[#37006a] flex items-center justify-center shadow-sm"><i class="fa fa-arrow-left"></i></button>
+                <button onclick="closeDetail()" class="w-10 h-10 rounded-full bg-gray-100 text-[#37006a] flex items-center justify-center shadow-sm"><i class="fa fa-arrow-left"></i></button>
                 <span class="ml-4 font-bold text-[#37006a] truncate text-xs uppercase flex-1" id="detailHeader">Details</span>
             </div>
             <div id="detailContent" class="p-6 max-w-2xl mx-auto pb-10"></div>
-            
             <div id="interactiveSection" class="p-6 pb-40 border-t bg-white">
                 <div class="flex gap-4 mb-6 border-b pb-4">
                     <button onclick="handleReaction('like')" class="reaction-btn text-blue-600"><i class="fa fa-thumbs-up"></i> <span id="likeCount">0</span> Like</button>
                     <button onclick="handleReaction('unlike')" class="reaction-btn text-red-600"><i class="fa fa-thumbs-down"></i> <span id="unlikeCount">0</span> Unlike</button>
                 </div>
                 <div id="postCommentList" class="space-y-4 mb-6"></div>
-                <div class="flex gap-2"><input type="text" id="postComName" placeholder="Name" class="w-1/3 p-3 rounded-xl border text-[11px] bg-gray-50 outline-none"><input type="text" id="postComInput" placeholder="Comment..." class="flex-1 p-3 rounded-xl border text-[11px] bg-gray-50 outline-none"><button onclick="sendPostComment()" class="bg-[#37006a] text-white w-12 rounded-xl flex items-center justify-center shadow-md"><i class="fa fa-paper-plane"></i></button></div>
+                <div class="flex gap-2"><input type="text" id="postComName" placeholder="Name" class="w-1/3 p-3 rounded-xl border text-[11px] bg-gray-50 outline-none"><input type="text" id="postComInput" placeholder="Comment..." class="flex-1 p-3 rounded-xl border text-[11px] bg-gray-50 outline-none"><button onclick="sendPostComment()" class="bg-[#37006a] text-white w-12 rounded-xl flex items-center justify-center shadow-md"><i class="fa fa-paper-plane text-sm"></i></button></div>
             </div>
         </section>
     </div>
@@ -170,16 +163,17 @@
         let filters = { city: 'All', cat: 'All', type: 'All', ward: 'All' };
         let statsChart = null;
 
+        // Persistent Sync Logic
         function updateAllSyncStatus() {
             const h = eventsData.length, k = knowData.length, d = dirData.length;
             document.getElementById('headerSyncStatus').innerText = `H: ${h} | K: ${k} | D: ${d}`;
             document.getElementById('admin-home-count').innerText = h;
             document.getElementById('admin-know-count').innerText = k;
             document.getElementById('admin-dir-count').innerText = d;
-            renderCategoryChart(); // Render chart after data sync
+            renderCategoryChart();
         }
 
-        // CHART BY TYPE/CATEGORY
+        // IMPROVED CHART WITH DATALABELS
         function renderCategoryChart() {
             if (!dirData.length) return;
             const counts = {};
@@ -191,17 +185,26 @@
             if (statsChart) statsChart.destroy();
             statsChart = new Chart(ctx, {
                 type: 'doughnut',
+                plugins: [ChartDataLabels], // REGISTER PLUGIN
                 data: {
                     labels: labels,
                     datasets: [{
                         data: data,
                         backgroundColor: ['#37006a', '#D4AF37', '#9333ea', '#fbbf24', '#7c3aed', '#ec4899', '#10b981'],
-                        borderWidth: 0
+                        borderWidth: 1,
+                        borderColor: '#fff'
                     }]
                 },
                 options: { 
                     responsive: true,
-                    plugins: { legend: { position: 'bottom', labels: { font: { size: 8 } } } }
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { font: { size: 8 } } },
+                        datalabels: { // DATA LABELS CONFIG
+                            color: '#fff',
+                            font: { weight: 'bold', size: 10 },
+                            formatter: (value) => value
+                        }
+                    }
                 }
             });
         }
@@ -224,21 +227,15 @@
             updateAllSyncStatus();
         }
 
-        // --- FETCHERS (IMPROVED METADATA MAPPING) ---
+        // --- FETCH LOGIC ---
         async function fetchEvents() { 
             const res = await fetch(`${BASE_URL}&gid=${GIDS.events}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
             eventsData = j.table.rows.map((r,idx) => ({ 
                 uid: 'ev-'+idx, 
-                cat: r.c[0]?.v || 'News', 
-                title: r.c[1]?.v, 
-                desc: r.c[2]?.v, 
-                fromDate: r.c[3]?.v || '-', 
-                toDate: r.c[4]?.v || '-', 
-                time: r.c[5]?.v || '-', 
-                place: r.c[6]?.v || '-', 
-                org: r.c[7]?.v || '-', 
-                logo: r.c[8]?.v, 
-                imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) 
+                cat: r.c[0]?.v || 'News', title: r.c[1]?.v, desc: r.c[2]?.v, 
+                fromDate: r.c[3]?.v || '-', toDate: r.c[4]?.v || '-', 
+                time: r.c[5]?.v || '-', place: r.c[6]?.v || '-', org: r.c[7]?.v || '-', 
+                logo: r.c[8]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) 
             }))
             .filter(i => i.title && !["title", "ခေါင်းစဉ်"].includes(i.title.toString().toLowerCase().trim()));
             renderEvents(); 
@@ -262,7 +259,7 @@
             const res = await fetch(`${BASE_URL}&gid=${GIDS.admin}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
             const rows = j.table.rows;
             const p = rows.find(r => r.c[1]?.v && !["description", "ခေါင်းစဉ်"].includes(r.c[0]?.v?.toString()?.toLowerCase()));
-            if (p) document.getElementById('adminProfileArea').innerHTML = `<div class="bg-white p-6 rounded-[25px] shadow-sm border-t-4 border-[#37006a] mb-6"><h3 class="font-bold text-center text-[11px] text-[#37006a] mb-4 uppercase">Support</h3><div class="space-y-3">${p.c[1]?.v ? `<a href="tel:${p.c[1].v}" class="flex items-center justify-between bg-green-500 text-white p-3 rounded-2xl text-[9px] font-bold"><span>Call Direct</span><i class="fa fa-phone-alt"></i></a>`:''}${p.c[3]?.v ? `<a href="viber://chat?number=${p.c[3].v}" class="flex items-center justify-between bg-[#7360f2] text-white p-3 rounded-2xl text-[10px] font-bold"><span>Viber Chat</span><i class="fab fa-viber"></i></a>`:''}</div></div>`;
+            if (p) document.getElementById('adminProfileArea').innerHTML = `<div class="bg-white p-6 rounded-[25px] shadow-sm border-t-4 border-[#37006a] mb-6"><h3 class="font-bold text-center text-[11px] text-[#37006a] mb-4 uppercase">Support Center</h3><div class="space-y-3">${p.c[1]?.v ? `<a href="tel:${p.c[1].v}" class="flex items-center justify-between bg-green-500 text-white p-3 rounded-2xl text-[9px] font-bold"><span>Call Direct</span><i class="fa fa-phone-alt"></i></a>`:''}${p.c[3]?.v ? `<a href="viber://chat?number=${p.c[3].v}" class="flex items-center justify-between bg-[#7360f2] text-white p-3 rounded-2xl text-[10px] font-bold"><span>Viber Chat</span><i class="fab fa-viber"></i></a>`:''}</div></div>`;
             const notes = rows.slice(1).map(r => r.c[6]?.v).filter(Boolean);
             if(notes.length > 0) {
                 document.getElementById('marqueeBar').classList.remove('hidden');
@@ -290,11 +287,10 @@
         function renderEvents() { document.getElementById('announcementList').innerHTML = [...eventsData].reverse().map(i => `<div onclick="openDetail('event', '${i.uid}')" class="bg-white rounded-[25px] p-5 shadow-sm border border-gray-100 flex flex-col items-center text-center h-full"><div class="logo-box"><img src="${fixDriveLink(i.logo || 'CDST_Logo.png')}" onerror="this.src='CDST_Logo.png'"></div><h4 class="font-bold text-[#37006a] text-[11px] uppercase mb-auto line-clamp-2 mt-2 leading-relaxed">${i.title}</h4><div class="text-[9px] text-gray-400 border-t pt-3 w-full font-bold uppercase mt-4">${i.fromDate}</div></div>`).join(''); }
         function renderKnowledge() { document.getElementById('knowledgeList').innerHTML = [...knowData].reverse().map(i => `<div onclick="openDetail('know', '${i.id}')" class="bg-white rounded-[25px] p-4 shadow-sm border flex gap-4 items-center active:bg-gray-50 transition"><img src="${fixDriveLink(i.img)}" class="w-16 h-16 rounded-xl object-cover bg-gray-50 flex-shrink-0" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><h4 class="font-bold text-[#37006a] text-[12px] leading-tight line-clamp-2">${i.title}</h4><p class="text-[8px] text-gray-400 mt-1.5">${i.date}</p></div></div>`).join(''); }
 
-        // --- IMPROVED DETAIL MODAL (EVENT METADATA) ---
         function openDetail(type, uid) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
             document.getElementById('bottomNav').style.display = 'none'; 
-            const rR = (l, v) => `<div class="border-b border-gray-50 py-4"><p class="text-[8px] text-gray-400 mb-1 uppercase font-bold tracking-widest">${l}</p><div class="text-[#37006a] post-content">${v || '-'}</div></div>`;
+            const rR = (l, v) => `<div class="border-b border-gray-100 py-4"><p class="text-[8px] text-gray-400 mb-1 uppercase font-bold tracking-widest">${l}</p><div class="text-[#37006a] post-content">${v || '-'}</div></div>`;
             const rP = (l, v) => `<div class="border-b border-gray-100 py-4 flex justify-between items-center"><div><p class="text-[8px] text-gray-400 font-bold uppercase">${l}</p><p class="text-[#37006a] font-bold text-sm font-mono">${v || '-'}</p></div>${v?`<a href="tel:${v}" class="bg-green-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"><i class="fa fa-phone"></i></a>`:''}</div>`;
             let i;
             if(type==='event') i = eventsData.find(x => x.uid === uid);
@@ -308,7 +304,6 @@
             if(type==='dir') {
                 content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-[45px] p-8 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-24 h-24 rounded-[1.8rem] mx-auto mb-4 border-4 border-white shadow-xl bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#37006a] uppercase tracking-wider">${i.name}</h2><div class="flex justify-center mt-3 scale-125">${getStars(i.rating)}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm">${rR('Detail Description', i.desc)}${rR('Location', i.city + ' | ' + i.ward)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Full Address', i.addr)}</div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase tracking-widest">Connect</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}<div class="py-6 flex gap-4">${i.viber?`<a href="viber://chat?number=${i.viber}" class="flex-1 bg-[#7360f2] text-white p-4 rounded-2xl text-[10px] font-bold text-center shadow-lg">VIBER</a>`:''}${i.tg?`<a href="https://t.me/${i.tg}" class="flex-1 bg-[#0088cc] text-white p-4 rounded-2xl text-[10px] font-bold text-center shadow-lg">TELEGRAM</a>`:''}</div></div>${i.note?`<div class="bg-yellow-50 p-8 rounded-[35px] border-l-4 border-yellow-400 font-bold text-[#37006a] text-[11px] uppercase">${i.note}</div>`:''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
             } else if(type==='event') {
-                // FIXED DETAIL FOR EVENTS
                 content.innerHTML = `<div class="space-y-4 slide-up">
                     <div class="detail-logo-large"><img src="${fixDriveLink(i.logo || 'CDST_Logo.png')}" onerror="this.src='CDST_Logo.png'"></div>
                     <div class="bg-white p-8 rounded-[35px] shadow-sm">
@@ -348,7 +343,7 @@
         function initChatSystem() { db.ref('shoutbox').limitToLast(30).on('value', s => { const data = s.val() || {}; document.getElementById('chatMessages').innerHTML = Object.entries(data).map(([key, m]) => `<div class="chat-bubble ${m.id===localStorage.getItem('my_chat_id')?'bg-[#37006a] text-white self-end rounded-br-none shadow-md':'bg-white text-gray-800 self-start rounded-bl-none shadow-sm'} relative"><div onclick="deleteChat('${key}')" class="admin-del" style="display:${chatAdminMode?'flex':'none'}">x</div><b class="block text-[7px] opacity-60 mb-1 uppercase tracking-widest">${m.name}</b>${m.text}</div>`).join(''); document.getElementById('chatMessages').scrollTop = 99999; }); }
         function sendGlobalChat() { const n = document.getElementById('chatName').value.trim(); const t = document.getElementById('chatInput').value.trim(); if(!n || !t) return; let id = localStorage.getItem('my_chat_id') || Date.now().toString(); localStorage.setItem('my_chat_id', id); db.ref('shoutbox').push({ name: n, text: t, id: id, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('chatInput').value = ''; }
         function deleteChat(key) { if(confirm("Delete?")) db.ref(`shoutbox/${key}`).remove(); }
-        function toggleChatAdmin() { if(prompt("Pass:")==="166233") { chatAdminMode = !chatAdminMode; alert("Admin Access Granted."); initChatSystem(); } }
+        function toggleChatAdmin() { if(prompt("Pass:")==="166233") { chatAdminMode = !chatAdminMode; alert("Admin Access Enabled."); initChatSystem(); } }
         function loadInteractions(pid) { db.ref('likes/'+pid).on('value', s => { const d = s.val()||{like:0,unlike:0}; document.getElementById('likeCount').innerText = d.like||0; document.getElementById('unlikeCount').innerText = d.unlike||0; }); db.ref('comments/'+pid).on('value', s => { if(!s.exists()) { document.getElementById('postCommentList').innerHTML = '<p class="text-[9px] text-center text-gray-400 uppercase font-bold">No discussions yet</p>'; return; } document.getElementById('postCommentList').innerHTML = Object.values(s.val()).map(c => `<div class="bg-gray-50 p-4 rounded-[20px] border text-[10px]"><b>${c.name}:</b> ${c.text}</div>`).join(''); }); }
         function handleReaction(type) { db.ref('likes/'+currentPostID+'/'+type).transaction(c => (c||0)+1); }
         function sendPostComment() { const n = document.getElementById('postComName').value.trim(); const t = document.getElementById('postComInput').value.trim(); if(!n||!t) return; db.ref('comments/'+currentPostID).push({ name: n, text: t, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('postComInput').value = ''; }
