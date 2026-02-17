@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cherry-v19';
+const CACHE_NAME = 'cherry-v20';
 const ASSETS = [
   './',
   './index.html',
@@ -13,9 +13,17 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))));
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.map(k => {
+        if (k !== CACHE_NAME) return caches.delete(k);
+      })
+    ))
+  );
+  return self.clients.claim();
 });
 
+// Network First strategy for logic updates
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
