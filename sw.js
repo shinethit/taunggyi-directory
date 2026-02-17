@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cherry-v22'; // Version တိုးလိုက်ပါပြီ
+const CACHE_NAME = 'cherry-v23';
 const ASSETS = [
   './',
   './index.html',
@@ -9,16 +9,12 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
   self.skipWaiting();
+  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
 });
 
 self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.map(k => { if (k !== CACHE_NAME) return caches.delete(k); })
-    ))
-  );
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))));
   return self.clients.claim();
 });
 
