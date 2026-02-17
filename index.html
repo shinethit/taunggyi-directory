@@ -25,9 +25,9 @@
         .telegram-bg { background-color: #229ED9; }
         .post-content { white-space: pre-wrap; line-height: 1.7; word-break: break-word; }
         
-        /* Gallery Stacking Below Text */
+        /* Premium Layout Fixes */
         .gallery-vertical { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .gallery-vertical img { width: 100%; border-radius: 12px; object-fit: contain; background: #000; border: 1px solid #eee; }
+        .gallery-vertical img { width: 100%; border-radius: 12px; object-fit: contain; background: #000; border: 1px solid #eee; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
 
         .marquee-container { background: #FFD700; color: #37006a; padding: 7px 0; font-weight: bold; overflow: hidden; border-bottom: 2px solid #D4AF37; }
         .marquee-text { display: inline-block; white-space: nowrap; animation: marquee 30s linear infinite; padding-left: 100%; }
@@ -41,7 +41,7 @@
 </head>
 <body>
 
-    <div id="marqueeBar" class="marquee-container hidden"><div id="ticker" class="marquee-text text-[11px] uppercase"></div></div>
+    <div id="marqueeBar" class="marquee-container hidden"><div id="ticker" class="marquee-text text-[11px] uppercase tracking-widest"></div></div>
 
     <header class="purple-gradient text-white shadow-lg rounded-b-[20px] border-b-2 border-[#D4AF37] relative z-0">
         <div class="bg-black/20 px-4 py-1 flex justify-between items-center text-[9px] font-mono text-[#FFD700]">
@@ -73,7 +73,7 @@
                     <i class="fa fa-search absolute left-3 top-3 text-[#D4AF37]"></i>
                 </div>
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                    <span class="text-[8px] font-bold text-gray-400 uppercase flex-shrink-0">Sort By:</span>
+                    <span class="text-[8px] font-bold text-gray-400 uppercase flex-shrink-0">Filter By:</span>
                     <button onclick="setGrouping('cat')" id="btnGroup-cat" class="bg-[#37006a] text-white px-3 py-1.5 rounded-lg text-[9px] font-bold border border-[#37006a]">Category</button>
                     <button onclick="setGrouping('type')" id="btnGroup-type" class="bg-white text-gray-500 px-3 py-1.5 rounded-lg text-[9px] font-bold border border-gray-200">Type</button>
                     <button onclick="setGrouping('ward')" id="btnGroup-ward" class="bg-white text-gray-500 px-3 py-1.5 rounded-lg text-[9px] font-bold border border-gray-200">Ward</button>
@@ -84,11 +84,6 @@
         </section>
 
         <section id="contactPage" class="page space-y-4">
-            <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 relative overflow-hidden text-center slide-up">
-                <h3 class="font-bold text-[#4B0082] text-sm mb-1 uppercase tracking-tighter">Register Business</h3>
-                <p class="text-[10px] text-gray-600 mb-3">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
-                <a id="regBtn" target="_blank" class="inline-block gold-gradient text-white text-[10px] font-bold px-6 py-2 rounded-xl shadow active:scale-95 transition">JOIN NOW</a>
-            </div>
             <div id="adminProfileArea"></div>
             <div id="adminNotesArea" class="space-y-3"></div>
         </section>
@@ -102,7 +97,7 @@
         </section>
     </div>
 
-    <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50 transition-all duration-300">
+    <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50">
         <button onclick="showPage('home')" class="nav-item flex flex-col items-center p-2 w-16 text-[#FFD700]" id="nav-home"><i class="fa fa-home text-lg mb-0.5"></i><span class="text-[9px] font-bold">Home</span></button>
         <button onclick="showPage('directory')" class="nav-item flex flex-col items-center p-2 w-16 relative" id="nav-directory"><div class="bg-[#D4AF37] text-[#37006a] w-10 h-10 rounded-full flex items-center justify-center -mt-6 shadow border-4 border-[#f8f5ff]"><i class="fa fa-search text-lg font-bold"></i></div><span class="text-[9px] font-bold mt-1">Search</span></button>
         <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact"><i class="fa fa-info-circle text-lg mb-0.5"></i><span class="text-[9px] font-bold">Admin</span></button>
@@ -199,7 +194,7 @@
             }
             const n = rows.slice(1).map(r => r.c[6]?.v).filter(Boolean);
             if(n.length > 0) { document.getElementById('marqueeBar').classList.remove('hidden'); document.getElementById('ticker').innerText = "🚨 " + n.join(" | 🚨 "); }
-            document.getElementById('adminNotesArea').innerHTML = n.map(note => `<div class="bg-yellow-400 border-l-4 border-[#B8860B] p-4 rounded-r-xl shadow-sm slide-up mb-3"><p class="text-xs text-[#37006a] font-bold post-content">${note}</p></div>`).join('');
+            document.getElementById('adminNotesArea').innerHTML = n.map(note => `<div class="bg-yellow-400 border-l-4 border-[#B8860B] p-4 rounded-r-xl shadow-sm slide-up mb-3"><p class="text-xs text-[#37006a] font-bold post-content uppercase">${note}</p></div>`).join('');
         }
 
         function renderAdminBtn(l, v, p, i, c, isF=false) {
@@ -244,11 +239,11 @@
 
             if(type === 'event') {
                 const i = eventsData.find(x => x.uid === uid); document.getElementById('detailHeader').innerText = "Event Details";
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white p-5 rounded-2xl shadow-sm border-b-4 border-[#D4AF37] flex items-center gap-4"><img src="${fixDriveLink(i.logo)}" class="w-14 h-14 rounded-xl object-cover border shadow-sm" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><h2 class="text-sm font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[8px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full mt-1 inline-block uppercase">${i.cat}</span></div></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-[10px] uppercase">Information</h3>${rR('Description', i.desc)}${rR('Organizer', i.org)}${rR('Location', i.place)}${rR('Date', i.from + ' to ' + i.to)}</div><div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white p-5 rounded-2xl shadow-sm border-b-4 border-[#D4AF37] flex items-center gap-4"><img src="${fixDriveLink(i.logo)}" class="w-14 h-14 rounded-xl object-cover border shadow-sm" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><h2 class="text-sm font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[8px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full mt-1 inline-block uppercase">${i.cat}</span></div></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-[10px] uppercase tracking-widest">Information</h3>${rR('Description', i.desc)}${rR('Organizer', i.org)}${rR('Location', i.place)}${rR('Date', i.from + ' to ' + i.to)}</div><div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
             } else {
                 const i = dirData.find(x => x.uid === uid); document.getElementById('detailHeader').innerText = i.name;
                 content.innerHTML = `<div class="space-y-4 slide-up">
-                    <div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 border shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-4 py-2 rounded-full font-bold">Write Review</a></div>
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-xl object-cover mx-auto mb-3 border shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-4 py-2 rounded-full font-bold">Write Review</a></div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Ward', i.ward)}${rR('Address', i.addr)}</div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${rC('Telegram', i.tg, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>
