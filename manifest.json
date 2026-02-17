@@ -1,7 +1,7 @@
 {
   "name": "Cherry Directory",
   "short_name": "Cherry",
-  "start_url": ".",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#37006a",
   "theme_color": "#37006a",
