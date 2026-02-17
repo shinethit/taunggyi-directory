@@ -1,4 +1,4 @@
-// SERVICE WORKER KILLER (Version 62)
+// SERVICE WORKER KILLER (Version 71)
 self.addEventListener('install', (e) => self.skipWaiting());
 self.addEventListener('activate', (e) => {
     e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
