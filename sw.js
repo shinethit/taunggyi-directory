@@ -1,13 +1,12 @@
-// SERVICE WORKER KILL SWITCH
+// SERVICE WORKER KILL SWITCH - VERSION 32
+// ဒီကောင်က အရင် Cache တွေကို အကုန်ဖျက်ပြီး သူ့ကိုယ်သူ အနားယူပါလိမ့်မယ်
 self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
-  // ရှိသမျှ Cache တွေကို အကုန်ဖျက်မယ်
   e.waitUntil(
     caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
   );
-  // Service Worker ကိုယ်တိုင် Unregister လုပ်မယ်
   self.registration.unregister();
 });
