@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cherry-v24';
+const CACHE_NAME = 'cherry-v25';
 const ASSETS = [
   './',
   './index.html',
@@ -19,15 +19,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Network First Strategy (For HTML) - အင်တာနက်ရှိရင် အသစ်ယူ၊ မရှိမှ ဖုန်းထဲကယူ
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match('./index.html'))
-    );
-  } else {
-    // Cache First Strategy (For Images/CSS) - မြန်အောင် ဖုန်းထဲကယူ
-    event.respondWith(
-      caches.match(event.request).then(res => res || fetch(event.request))
-    );
-  }
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
 });
