@@ -13,8 +13,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-app.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-database.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
@@ -24,7 +24,7 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
-        .post-content { white-space: pre-wrap; line-height: 1.8; word-break: break-word; } /* စာကြောင်းအကွာအဝေး တိုးထားသည် */
+        .post-content { white-space: pre-wrap; line-height: 1.8; word-break: break-word; }
         .gallery-vertical img { width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid #eee; }
         .marquee-container { background: #FFD700; color: #37006a; padding: 7px 0; font-weight: bold; overflow: hidden; border-bottom: 2px solid #D4AF37; }
         .marquee-text { display: inline-block; white-space: nowrap; animation: marquee 30s linear infinite; padding-left: 100%; }
@@ -46,8 +46,8 @@
             <div class="text-left leading-tight">
                 <h1 class="text-md font-bold tracking-wider text-white uppercase">Cherry Directory</h1>
                 <div class="flex flex-col text-[8px] text-gray-300">
-                    <span id="viewDisplay"><i class="fa fa-eye mr-1"></i> <b id="viewCounter" class="text-white">...</b> Views</span>
-                    <span id="onlineDisplay"><i class="fa fa-circle text-green-400 text-[5px] mr-1 animate-pulse"></i> <b id="onlineCounter" class="text-white">1</b> Online <span id="flagList" class="ml-1 text-[10px]"></span></span>
+                    <span id="viewDisplay"><i class="fa fa-eye mr-1"></i> <b id="viewCounter">...</b> Views</span>
+                    <span id="onlineDisplay"><i class="fa fa-circle text-green-400 text-[5px] mr-1 animate-pulse"></i> <b id="onlineCounter">1</b> Online</span>
                 </div>
             </div>
         </div>
@@ -75,9 +75,9 @@
             <div id="adminProfileArea"></div><div id="adminNotesArea" class="space-y-3"></div>
             
             <div class="bg-black/90 p-4 rounded-xl mt-6 text-left">
-                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">SERVER STATUS:</p>
-                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-12 overflow-y-auto">Checking...</div>
-                <button onclick="window.location.reload(true)" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg uppercase shadow-md active:scale-95">REFRESH APP</button>
+                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">DATA STATUS:</p>
+                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-12 overflow-y-auto">Init...</div>
+                <button onclick="localStorage.clear(); window.location.reload(true);" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg uppercase shadow-md active:scale-95">FULL RESET</button>
             </div>
         </section>
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
@@ -100,125 +100,41 @@
             debugEl.scrollTop = debugEl.scrollHeight;
         }
 
-        window.onload = async function() {
-            // 1. REMOVE SERVICE WORKER (CRITICAL STEP)
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        registration.unregister();
-                        log("Service Worker Deleted", 'warn');
-                    }
-                });
-            }
-
-            try {
-                // 2. GET FLAG
-                let userFlag = '🏳️';
-                try {
-                    const ipReq = await fetch('https://ipapi.co/json/');
-                    const ipData = await ipReq.json();
-                    if(ipData.country_code) {
-                        userFlag = String.fromCodePoint(...ipData.country_code.toUpperCase().split('').map(c => 127397 + c.charCodeAt()));
-                    }
-                } catch(e) { log("Loc skipped"); }
-
-                // 3. FIREBASE INIT
-                const firebaseConfig = {
-                    apiKey: "AIzaSyBNcYd3ggUFzI9IX3dzwcpF3a2OvR9_Li4",
-                    authDomain: "cherry-directory.firebaseapp.com",
-                    databaseURL: "https://cherry-directory-default-rtdb.firebaseio.com",
-                    projectId: "cherry-directory",
-                    storageBucket: "cherry-directory.firebasestorage.app",
-                    messagingSenderId: "61677443166",
-                    appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf"
-                };
-
-                firebase.initializeApp(firebaseConfig);
-                const db = firebase.database();
-
-                // 4. CONNECTION CHECK
-                db.ref(".info/connected").on("value", (snap) => {
-                    if (snap.val() === true) {
-                        log("Connected to Server!", 'success');
-                    } else {
-                        log("Connecting...", 'warn');
-                    }
-                });
-
-                // 5. TOTAL VIEWS
-                const vRef = db.ref('stats/total_views');
-                // Increment only once per session
-                if(!sessionStorage.getItem('v34_counted')) {
-                    vRef.transaction((c) => (c || 0) + 1, (error, committed) => {
-                        if(error) log("Inc Error: " + error.message, 'error');
-                        else if(committed) sessionStorage.setItem('v34_counted', 'true');
-                    });
-                }
-                vRef.on('value', (s) => {
-                    const val = s.val();
-                    document.getElementById('viewCounter').innerText = val ? val.toLocaleString() : "0";
-                });
-
-                // 6. ONLINE USERS
-                const onlineRef = db.ref('stats/online_users');
-                const myCon = onlineRef.push();
-                myCon.onDisconnect().remove();
-                myCon.set({
-                    flag: userFlag,
-                    time: firebase.database.ServerValue.TIMESTAMP
-                });
-
-                onlineRef.on('value', (s) => {
-                    const users = s.val() || {};
-                    const count = Object.keys(users).length;
-                    document.getElementById('onlineCounter').innerText = count;
-                    const flags = [...new Set(Object.values(users).map(u => u.flag || '🏳️'))].slice(0, 5).join(' ');
-                    document.getElementById('flagList').innerText = flags;
-                });
-
-            } catch (e) { log("System Error: " + e.message, 'error'); }
-        };
-
-        // APP LOGIC
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         const REVIEW_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
         let eventsData = [], dirData = [], adminData = [];
         let activeDirCat = 'All', activeEventCat = 'All', groupByKey = 'cat';
 
-        function showPage(p) {
-            document.querySelectorAll('.page').forEach(page => { page.classList.remove('active-page'); page.style.display = 'none'; });
-            const active = document.getElementById(p + 'Page'); active.style.display = 'block'; setTimeout(() => active.classList.add('active-page'), 10); window.scrollTo(0,0);
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('text-[#FFD700]')); document.getElementById('nav-' + p).classList.add('text-[#FFD700]');
-        }
-        function closeDetail() { document.getElementById('detailPage').style.display = 'none'; document.body.style.overflow = 'auto'; document.getElementById('bottomNav').style.transform = 'translateY(0)'; }
         function fixDriveLink(u) { if (!u || u === "" || u === "-") return 'CDST_Logo.png'; const m = u.match(/(?:id=|\/d\/|folders\/)([a-zA-Z0-9_-]{25,})/); return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : u; }
-        function updateTime() { const now = new Date(); let h = now.getHours(), m = now.getMinutes().toString().padStart(2, '0'); const ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; document.getElementById('timeClock').innerText = `${h}:${m} ${ampm}`; const mo = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; const dMm = ["တနင်္ဂနွေ","တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ","စနေ"]; document.getElementById('fullDate').innerText = `${now.getDate()} ${mo[now.getMonth()]} ${now.getFullYear()} | ${dMm[now.getDay()]}`; }
-        setInterval(updateTime, 1000); updateTime();
         function getStars(r) { if(!r || isNaN(r)) return '<div class="h-3"></div>'; let h = '<div class="flex text-orange-400 text-[8px] gap-0.5 justify-center">'; for(let i=1; i<=5; i++) h += (i <= r) ? '<i class="fa fa-star"></i>' : (i-0.5 <= r) ? '<i class="fa fa-star-half-alt"></i>' : '<i class="far fa-star text-gray-200"></i>'; return h + `<span class="text-gray-400 ml-1 text-[7px]">(${r})</span></div>`; }
 
+        // IMMEDIATE LOAD FUNCTION
         async function loadAllData() {
+            log("Checking Cache...");
+            // 1. Load from Cache FIRST (Instant)
             const cE = localStorage.getItem('c_events'), cD = localStorage.getItem('c_dir'), cA = localStorage.getItem('c_admin');
-            if(cE) { eventsData = JSON.parse(cE); renderEvents(); } if(cD) { dirData = JSON.parse(cD); renderDirectory(); } if(cA) { adminData = JSON.parse(cA); renderAdminArea(adminData); }
-            fetchEvents(); fetchDirectory(); fetchAdmin();
+            if(cE) { eventsData = JSON.parse(cE); renderEvents(); log("Events Loaded (Cache)"); }
+            if(cD) { dirData = JSON.parse(cD); renderDirectory(); log("Directory Loaded (Cache)"); }
+            if(cA) { adminData = JSON.parse(cA); renderAdminArea(adminData); }
+
+            // 2. Then Fetch Network
+            log("Fetching Network...");
+            await Promise.all([fetchEvents(), fetchDirectory(), fetchAdmin()]);
         }
 
-        async function fetchEvents() { try { const res = await fetch(`${BASE_URL}&gid=0`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); eventsData = j.table.rows.map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, from: r.c[3]?.v, to: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) })).filter(i => i.title && i.title !== "Title").reverse(); localStorage.setItem('c_events', JSON.stringify(eventsData)); setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); }); renderEvents(); } catch(e){} }
-        
-        // UPDATED RENDER DIRECTORY: IMPROVED SPACING
-        function renderDirectory() { 
-            const l = document.getElementById('directoryList'); 
-            const t = document.getElementById('searchInput').value.toLowerCase(); 
-            let filtered = dirData.filter(i => (activeDirCat === 'All' || i[groupByKey] === activeDirCat) && (i.name.toLowerCase().includes(t) || (i.ward && i.ward.toLowerCase().includes(t)))); 
-            const groups = filtered.reduce((a, i) => { a[i[groupByKey]] = a[i[groupByKey]] || []; a[i[groupByKey]].push(i); return a; }, {}); 
-            l.innerHTML = Object.keys(groups).map(g => `<div class="mb-5"><h3 class="font-bold text-[#4B0082] text-[8px] bg-purple-100/50 px-2 py-1 rounded-md inline-block mb-3 uppercase tracking-widest">${g}</h3><div class="grid grid-cols-2 gap-3">${groups[g].map(i => `
-            <div onclick="openDetail('dir', '${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col items-center text-center cursor-pointer active:scale-95 h-full">
-                <img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-white mb-3 shadow-sm border border-gray-100" onerror="this.src='CDST_Logo.png'">
-                <h4 class="font-bold text-[#4B0082] text-[11px] leading-6 mb-2 line-clamp-2 h-11 w-full uppercase">${i.name}</h4>
-                <div class="mb-2 h-full">${getStars(i.rating)}</div>
-                <div class="flex items-center text-[7px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || '-'}</div>
-            </div>`).join('')}</div></div>`).join(''); 
-        }
+        async function fetchEvents() { try { const res = await fetch(`${BASE_URL}&gid=0`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); eventsData = j.table.rows.map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, from: r.c[3]?.v, to: r.c[4]?.v, time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) })).filter(i => i.title && i.title !== "Title").reverse(); localStorage.setItem('c_events', JSON.stringify(eventsData)); setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); }); renderEvents(); log("Events Updated"); } catch(e){ log("Event Net Err", 'error'); } }
+        async function fetchDirectory() { try { const res = await fetch(`${BASE_URL}&gid=1267218282`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); dirData = j.table.rows.map((r,idx) => { const n = r.c[0]?.v || ''; const ty = r.c[2]?.v || ''; return { uid: btoa(unescape(encodeURIComponent(n + ty))).replace(/=/g, ''), name: n, cat: r.c[1]?.v, type: ty, desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, viber: r.c[10]?.v, tg: r.c[11]?.v, logo: r.c[13]?.v || 'CDST_Logo.png', rating: r.c[19]?.v, note: r.c[20]?.v, imgs: [r.c[14]?.v, r.c[15]?.v, r.c[16]?.v, r.c[17]?.v, r.c[18]?.v].filter(Boolean) }; }).filter(i => i.name && i.name !== "Name"); localStorage.setItem('c_dir', JSON.stringify(dirData)); setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); renderDirectory(); log("Directory Updated"); } catch(e){ log("Dir Net Err", 'error'); } }
+        async function fetchAdmin() { try { const res = await fetch(`${BASE_URL}&gid=626044868`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); adminData = j.table.rows; localStorage.setItem('c_admin', JSON.stringify(adminData)); renderAdminArea(adminData); } catch(e){} }
+
+        // UI RENDERERS
+        function renderAdminArea(rows) { const p = rows.find(r => r.c[0]?.v && r.c[0].v !== "Description"); if (p) { document.getElementById('adminProfileArea').innerHTML = `<div class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-[#4B0082] mb-6 slide-up"><h3 class="font-bold text-center text-xs text-[#4B0082] mb-4 uppercase">Admin Support</h3><div class="space-y-3">${renderAdminBtn('Phone', p.c[1]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}${renderAdminBtn('Viber', p.c[3]?.v, 'viber://chat?number=', 'fa-viber', 'viber-bg', true)}${renderAdminBtn('Telegram', p.c[4]?.v, 'https://t.me/', 'fa-telegram', 'telegram-bg', true)}</div></div>`; } const n = rows.slice(1).map(r => r.c[6]?.v).filter(Boolean); if(n.length > 0) { document.getElementById('marqueeBar').classList.remove('hidden'); document.getElementById('ticker').innerText = "🚨 " + n.join(" | 🚨 "); } document.getElementById('adminNotesArea').innerHTML = n.map(note => `<div class="bg-yellow-400 border-l-4 border-[#B8860B] p-4 rounded-r-xl shadow-sm slide-up mb-3 uppercase font-bold text-xs">${note}</div>`).join(''); }
+        function renderAdminBtn(l, v, p, i, c, isF=false) { if(!v || v === "-") return ''; return `<a href="${p}${v}" class="flex items-center justify-between ${c} text-white p-2.5 rounded-xl text-[9px] font-bold active:scale-95 transition"><span>${l}: ${v}</span><i class="${isF?'fab':'fa'} ${i}"></i></a>`; }
+        function setGrouping(key) { groupByKey = key; ['cat', 'type', 'ward'].forEach(k => { document.getElementById('btnGroup-'+k).className = (k === key) ? "bg-[#37006a] text-white px-3 py-1.5 rounded-lg text-[9px] font-bold border" : "bg-white text-gray-500 px-3 py-1.5 rounded-lg text-[9px] font-bold border border-gray-200"; }); setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); handleSearch(); }
+        function setupFilters(cid, data, cb) { const vals = ['All', ...new Set(data.map(i => i[groupByKey]).filter(Boolean))]; const cont = document.getElementById(cid); cont.innerHTML = vals.map(v => `<button class="filter-btn flex-shrink-0 px-3 py-1 rounded-lg text-[9px] font-bold border transition-all ${v===(cid==='dirFilters'?activeDirCat:activeEventCat)?'bg-[#D4AF37] text-white':'bg-white text-gray-400 border-gray-100'}">${v}</button>`).join(''); cont.querySelectorAll('button').forEach((btn, idx) => { btn.onclick = () => { cb(vals[idx]); cont.querySelectorAll('button').forEach(b => { b.className = "filter-btn flex-shrink-0 px-3 py-1 rounded-lg text-[9px] font-bold border bg-white text-gray-400 border-gray-100"; }); btn.className = "filter-btn flex-shrink-0 px-3 py-1 rounded-lg text-[9px] font-bold border bg-[#D4AF37] text-white"; }; }); }
+        function renderEvents() { const l = document.getElementById('announcementList'); let d = activeEventCat === 'All' ? eventsData : eventsData.filter(e => e.cat === activeEventCat); l.innerHTML = d.map(i => `<div onclick="openDetail('event', '${i.uid}')" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 border border-gray-50 h-full"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-gray-50 border shadow-sm" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><h4 class="font-bold text-[#4B0082] text-xs leading-tight mb-1 line-clamp-1">${i.title}</h4><p class="text-[9px] text-gray-500 line-clamp-2">${i.desc || ''}</p></div></div>`).join(''); }
+        function renderDirectory() { const l = document.getElementById('directoryList'); const t = document.getElementById('searchInput').value.toLowerCase(); let filtered = dirData.filter(i => (activeDirCat === 'All' || i[groupByKey] === activeDirCat) && (i.name.toLowerCase().includes(t) || (i.ward && i.ward.toLowerCase().includes(t)))); const groups = filtered.reduce((a, i) => { a[i[groupByKey]] = a[i[groupByKey]] || []; a[i[groupByKey]].push(i); return a; }, {}); l.innerHTML = Object.keys(groups).map(g => `<div class="mb-5"><h3 class="font-bold text-[#4B0082] text-[8px] bg-purple-100/50 px-2 py-1 rounded-md inline-block mb-3 uppercase tracking-widest">${g}</h3><div class="grid grid-cols-2 gap-3">${groups[g].map(i => `
+            <div onclick="openDetail('dir', '${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col items-center text-center cursor-pointer active:scale-95 h-full"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-white mb-3 shadow-sm border border-gray-100" onerror="this.src='CDST_Logo.png'"><h4 class="font-bold text-[#4B0082] text-[11px] leading-6 mb-2 line-clamp-2 h-11 w-full uppercase">${i.name}</h4><div class="mb-2 h-full">${getStars(i.rating)}</div><div class="flex items-center text-[7px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || '-'}</div></div>`).join('')}</div></div>`).join(''); }
         function handleSearch() { renderDirectory(); }
         function openDetail(type, uid) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
@@ -229,9 +145,34 @@
             else { const i = dirData.find(x => x.uid === uid); if(!i) return; document.getElementById('detailHeader').innerText = i.name; content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-xl object-cover mx-auto mb-3 border border-gray-100 bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125 h-full">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-5 py-2 rounded-full font-bold shadow-sm transition inline-flex items-center gap-2"><i class="fa fa-pen-nib"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Ward', i.ward)}${rR('Address', i.addr)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${rC('Telegram', i.tg, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400"><h3 class="font-bold text-[#4B0082] text-[10px] uppercase mb-2">Note</h3><p class="text-xs text-gray-600 post-content uppercase">${i.note}</p></div>` : ''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`; }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
-        
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=34'); }); }
-        loadAllData();
+        function closeDetail() { document.getElementById('detailPage').style.display = 'none'; document.body.style.overflow = 'auto'; document.getElementById('bottomNav').style.transform = 'translateY(0)'; }
+        function showPage(p) { document.querySelectorAll('.page').forEach(page => { page.classList.remove('active-page'); setTimeout(() => { if(!page.classList.contains('active-page')) page.style.display = 'none'; }, 100); }); const active = document.getElementById(p + 'Page'); active.style.display = 'block'; setTimeout(() => active.classList.add('active-page'), 10); window.scrollTo(0,0); document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('text-[#FFD700]')); document.getElementById('nav-' + p).classList.add('text-[#FFD700]'); }
+        function updateTime() { const now = new Date(); let h = now.getHours(), m = now.getMinutes().toString().padStart(2, '0'); const ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; document.getElementById('timeClock').innerText = `${h}:${m} ${ampm}`; const mo = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; const dMm = ["တနင်္ဂနွေ","တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ","စနေ"]; document.getElementById('fullDate').innerText = `${now.getDate()} ${mo[now.getMonth()]} ${now.getFullYear()} | ${dMm[now.getDay()]}`; }
+        setInterval(updateTime, 1000); updateTime();
+
+        // 2. FIREBASE (SAFE LOAD)
+        window.addEventListener('load', () => {
+            loadAllData(); // Trigger Data Load IMMEDIATELY
+            
+            // REMOVE SW
+            if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
+
+            try {
+                const firebaseConfig = { apiKey: "AIzaSyBNcYd3ggUFzI9IX3dzwcpF3a2OvR9_Li4", authDomain: "cherry-directory.firebaseapp.com", databaseURL: "https://cherry-directory-default-rtdb.firebaseio.com", projectId: "cherry-directory", storageBucket: "cherry-directory.firebasestorage.app", messagingSenderId: "61677443166", appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf" };
+                firebase.initializeApp(firebaseConfig);
+                const db = firebase.database();
+
+                db.ref(".info/connected").on("value", (s) => log(s.val() ? "Online" : "Offline"));
+                
+                const vRef = db.ref('stats/total_views');
+                if(!sessionStorage.getItem('v35_c')) { vRef.transaction(c => (c||0)+1); sessionStorage.setItem('v35_c','1'); }
+                vRef.on('value', s => document.getElementById('viewCounter').innerText = (s.val()||0).toLocaleString());
+
+                const oRef = db.ref('stats/online_users');
+                const m = oRef.push(); m.onDisconnect().remove(); m.set(true);
+                oRef.on('value', s => document.getElementById('onlineCounter').innerText = s.numChildren()||1);
+            } catch(e) { log("FB Err", 'error'); }
+        });
     </script>
 </body>
 </html>
