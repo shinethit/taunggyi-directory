@@ -7,7 +7,6 @@
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Cherry Directory">
     <link rel="apple-touch-icon" href="CDST_Logo.png">
     <link rel="icon" type="image/png" sizes="192x192" href="CDST_Logo.png">
 
@@ -25,7 +24,6 @@
         .telegram-bg { background-color: #229ED9; }
         .post-content { white-space: pre-wrap; line-height: 1.7; word-break: break-word; }
         
-        /* Gallery Stacking at the Bottom */
         .gallery-vertical { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         .gallery-vertical img { width: 100%; border-radius: 12px; object-fit: contain; background: #000; border: 1px solid #eee; }
 
@@ -87,7 +85,7 @@
             <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 text-center slide-up">
                 <h3 class="font-bold text-[#4B0082] text-sm mb-2 uppercase tracking-tighter">လုပ်ငန်းရှင်များအတွက်</h3>
                 <p class="text-[10px] text-gray-600 mb-4 leading-relaxed">မိမိတို့ လုပ်ငန်းအချက်အလက်များကို Cherry Directory တွင် အခမဲ့ ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog" target="_blank" class="inline-block gold-gradient text-white text-[11px] font-bold px-8 py-3 rounded-2xl shadow-lg transition uppercase">စာရင်းသွင်းရန်</a>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog" target="_blank" class="inline-block gold-gradient text-white text-[11px] font-bold px-8 py-3 rounded-2xl shadow-lg active:scale-95 transition uppercase">စာရင်းသွင်းရန်</a>
             </div>
             <div id="adminProfileArea"></div>
             <div id="adminNotesArea" class="space-y-3"></div>
@@ -102,7 +100,7 @@
         </section>
     </div>
 
-    <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50">
+    <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50 transition-all duration-300">
         <button onclick="showPage('home')" class="nav-item flex flex-col items-center p-2 w-16 text-[#FFD700]" id="nav-home"><i class="fa fa-home text-lg mb-0.5"></i><span class="text-[9px] font-bold">Home</span></button>
         <button onclick="showPage('directory')" class="nav-item flex flex-col items-center p-2 w-16 relative" id="nav-directory"><div class="bg-[#D4AF37] text-[#37006a] w-10 h-10 rounded-full flex items-center justify-center -mt-6 shadow border-4 border-[#f8f5ff]"><i class="fa fa-search text-lg font-bold"></i></div><span class="text-[9px] font-bold mt-1">Search</span></button>
         <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact"><i class="fa fa-info-circle text-lg mb-0.5"></i><span class="text-[9px] font-bold">Admin</span></button>
@@ -113,6 +111,7 @@
 
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+        const REVIEW_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
 
         let eventsData = [], dirData = [], adminData = [];
         let activeDirCat = 'All', activeEventCat = 'All', groupByKey = 'cat';
@@ -135,8 +134,8 @@
         setInterval(updateTime, 1000); updateTime();
 
         function getStars(r) {
-            if(!r || isNaN(r)) return '';
-            let h = '<div class="flex text-orange-400 text-[7px] gap-0.5">';
+            if(!r || isNaN(r)) return '<div class="h-3"></div>';
+            let h = '<div class="flex text-orange-400 text-[8px] gap-0.5 justify-center">';
             for(let i=1; i<=5; i++) h += (i <= r) ? '<i class="fa fa-star"></i>' : (i-0.5 <= r) ? '<i class="fa fa-star-half-alt"></i>' : '<i class="far fa-star text-gray-200"></i>';
             return h + `<span class="text-gray-400 ml-1 text-[7px]">(${r})</span></div>`;
         }
@@ -168,12 +167,17 @@
             try {
                 const res = await fetch(`${BASE_URL}&gid=1267218282`);
                 const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2));
-                dirData = j.table.rows.map((r,idx) => ({ 
-                    uid: 'dir-'+idx, name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, 
-                    ward: r.c[5]?.v, city: r.c[6]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, viber: r.c[10]?.v, tg: r.c[11]?.v, 
-                    email: r.c[12]?.v, logo: r.c[13]?.v || 'CDST_Logo.png', rating: r.c[19]?.v, note: r.c[20]?.v, 
-                    imgs: [r.c[14]?.v, r.c[15]?.v, r.c[16]?.v, r.c[17]?.v, r.c[18]?.v].filter(Boolean)
-                })).filter(i => i.name && i.name !== "Name");
+                dirData = j.table.rows.map((r,idx) => {
+                    const name = r.c[0]?.v || '';
+                    const type = r.c[2]?.v || '';
+                    return {
+                        uid: btoa(name + type).replace(/=/g, ''), // Safe Unique ID
+                        name: name, cat: r.c[1]?.v, type: type, desc: r.c[3]?.v, addr: r.c[4]?.v, 
+                        ward: r.c[5]?.v, city: r.c[6]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, viber: r.c[10]?.v, tg: r.c[11]?.v, 
+                        email: r.c[12]?.v, logo: r.c[13]?.v || 'CDST_Logo.png', rating: r.c[19]?.v, note: r.c[20]?.v, 
+                        imgs: [r.c[14]?.v, r.c[15]?.v, r.c[16]?.v, r.c[17]?.v, r.c[18]?.v].filter(Boolean)
+                    };
+                }).filter(i => i.name && i.name !== "Name");
                 localStorage.setItem('c_dir', JSON.stringify(dirData));
                 setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); renderDirectory();
             } catch (e) {}
@@ -230,13 +234,12 @@
             const t = document.getElementById('searchInput').value.toLowerCase();
             let filtered = dirData.filter(i => (activeDirCat === 'All' || i[groupByKey] === activeDirCat) && (i.name.toLowerCase().includes(t) || (i.ward && i.ward.toLowerCase().includes(t))));
             const groups = filtered.reduce((a, i) => { a[i[groupByKey]] = a[i[groupByKey]] || []; a[i[groupByKey]].push(i); return a; }, {});
+            
             l.innerHTML = Object.keys(groups).map(g => `<div class="mb-5"><h3 class="font-bold text-[#4B0082] text-[8px] bg-purple-100/50 px-2 py-1 rounded-md inline-block mb-3 uppercase tracking-widest">${g}</h3><div class="grid grid-cols-2 gap-3">${groups[g].map(i => `
-                <div onclick="handleCardClick('${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col items-center text-center cursor-pointer active:scale-95 slide-up"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-white mb-3 shadow-sm border border-gray-100" onerror="this.src='CDST_Logo.png'"><h4 class="font-bold text-[#4B0082] text-[10px] leading-tight mb-1.5 line-clamp-2 h-7 w-full uppercase">${i.name}</h4><div class="mb-2">${getStars(i.rating)}</div><div class="flex items-center text-[7px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || '-'}</div></div>`).join('')}</div></div>`).join('');
+                <div onclick="openDetail('dir', '${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col items-center text-center cursor-pointer active:scale-95 slide-up h-full"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-white mb-3 shadow-sm border border-gray-100" onerror="this.src='CDST_Logo.png'"><h4 class="font-bold text-[#4B0082] text-[10px] leading-tight mb-1.5 line-clamp-2 h-7 w-full uppercase">${i.name}</h4><div class="mb-2">${getStars(i.rating)}</div><div class="flex items-center text-[7px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || '-'}</div></div>`).join('')}</div></div>`).join('');
         }
 
         function handleSearch() { renderDirectory(); }
-
-        function handleCardClick(uid) { openDetail('dir', uid); }
 
         function openDetail(type, uid) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
@@ -245,13 +248,14 @@
             const rC = (l, v, i, c, lp) => v ? `<div class="border-b border-gray-50 py-2.5 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i class="${i}"></i></div><div><p class="text-[9px] text-gray-400 font-bold uppercase">${l}</p><p class="text-xs font-bold text-gray-700">${v}</p></div></div><a href="${lp}${v}" target="_blank" class="${c} text-white px-3 py-1.5 rounded-lg text-[9px] font-bold shadow active:scale-90">CHAT</a></div>` : '';
 
             if(type === 'event') {
-                const i = eventsData.find(x => x.uid === uid); document.getElementById('detailHeader').innerText = "Post Details";
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white p-5 rounded-2xl shadow-sm border-b-4 border-[#D4AF37] flex items-center gap-4"><img src="${fixDriveLink(i.logo)}" class="w-14 h-14 rounded-xl object-cover border shadow-sm" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><h2 class="text-sm font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[8px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full mt-1 inline-block uppercase">${i.cat}</span></div></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-[10px] uppercase">Information</h3>${rR('Description', i.desc)}${rR('Organizer', i.org)}${rR('Location', i.place)}${rR('Date', i.from + ' to ' + i.to)}</div><div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
+                const i = eventsData.find(x => x.uid === uid); if(!i) return;
+                document.getElementById('detailHeader').innerText = "Event Details";
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white p-5 rounded-2xl shadow-sm border-b-4 border-[#D4AF37] flex items-center gap-4"><img src="${fixDriveLink(i.logo)}" class="w-14 h-14 rounded-xl object-cover border shadow-sm" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><h2 class="text-sm font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[8px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full mt-1 inline-block uppercase">${i.cat}</span></div></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-[10px] uppercase tracking-widest">Information</h3>${rR('Description', i.desc)}${rR('Organizer', i.org)}${rR('Location', i.place)}${rR('Date', i.from + ' to ' + i.to)}</div><div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
             } else {
                 const i = dirData.find(x => x.uid === uid); if(!i) return;
                 document.getElementById('detailHeader').innerText = i.name;
                 content.innerHTML = `<div class="space-y-4 slide-up">
-                    <div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-xl object-cover mx-auto mb-3 border border-gray-100 bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-5 py-2 rounded-full font-bold shadow-sm active:scale-95 transition inline-flex items-center gap-2"><i class="fa fa-pen-nib"></i> Write Review</a></div>
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 border border-gray-100 bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-5 py-2 rounded-full font-bold shadow-sm active:scale-95 transition inline-flex items-center gap-2"><i class="fa fa-pen-nib"></i> Write Review</a></div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Ward', i.ward)}${rR('Address', i.addr)}</div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${rC('Telegram', i.tg, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>
