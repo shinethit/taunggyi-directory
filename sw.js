@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cherry-v29-pro';
+const CACHE_NAME = 'cherry-v30-hybrid';
 const ASSETS = [
   './',
   './index.html',
@@ -21,9 +21,9 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
   
-  // 🚨 CRITICAL: Firebase နဲ့ Country API ကို Cache မလုပ်ဘဲ လွှတ်ပေးမယ်
-  if (url.includes('firebase') || url.includes('ipapi') || url.includes('google')) {
-    return; 
+  // 🚨 NETWORK ONLY: Firebase, IP API, Google Fonts
+  if (url.includes('firebase') || url.includes('ipapi') || url.includes('json')) {
+    return; // Don't cache these
   }
 
   event.respondWith(
