@@ -33,7 +33,6 @@
         .dir-img { width: 4rem; height: 4rem; border-radius: 0.75rem; object-fit: cover; border: 1px solid #eee; margin-bottom: 0.5rem; background: white; }
         .chat-bubble { max-width: 85%; padding: 10px; border-radius: 12px; margin-bottom: 8px; font-size: 11px; position: relative; }
         .admin-del { position: absolute; top: -5px; right: -5px; background: red; color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; align-items: center; justify-content: center; cursor: pointer; display: none; }
-        .gallery-vertical img { width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -51,7 +50,7 @@
                 <h1 class="text-md font-bold tracking-wider text-white uppercase">Cherry Directory</h1>
                 <div class="flex flex-col text-[8px] text-gray-300">
                     <span id="viewDisplay"><i class="fa fa-eye mr-1"></i> <b id="viewCounter">...</b> Views</span>
-                    <span id="onlineDisplay"><i class="fa fa-circle text-green-400 text-[5px] animate-pulse"></i> <b id="onlineCounter">1</b> Online <span id="flagList" class="ml-1 text-[10px] text-white"></span></span>
+                    <span id="onlineDisplay"><i class="fa fa-circle text-green-400 text-[5px] animate-pulse"></i> <b id="onlineCounter">1</b> Online <span id="flagList" class="ml-1"></span></span>
                 </div>
             </div>
         </div>
@@ -59,27 +58,34 @@
 
     <div class="max-w-4xl mx-auto p-4 mt-1 mb-20 relative">
         <section id="homePage" class="page active-page space-y-3"><div id="announcementList" class="grid grid-cols-2 gap-3 pb-4"></div></section>
-        <section id="knowledgePage" class="page space-y-3"><h3 class="text-[#4B0082] font-bold text-sm uppercase border-b-2 border-[#D4AF37] pb-2">Knowledge Sharing</h3><div id="knowledgeList" class="space-y-4 pb-4"></div></section>
+        
+        <section id="knowledgePage" class="page space-y-3">
+            <h3 class="text-[#4B0082] font-bold text-sm uppercase border-b-2 border-[#D4AF37] pb-2">Knowledge Sharing</h3>
+            <div id="knowledgeList" class="space-y-4 pb-4"></div>
+        </section>
+
         <section id="directoryPage" class="page">
             <div class="sticky top-0 z-30 bg-[#f8f5ff]/95 backdrop-blur-sm py-2 space-y-3">
-                <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="ရှာရန်..." class="w-full p-2 pl-4 rounded-xl border border-[#D4AF37] text-xs h-10 shadow-sm outline-none">
+                <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="ဆိုင်အမည်ရှာရန်..." class="w-full p-2 pl-4 rounded-xl border border-[#D4AF37] text-xs h-10 shadow-sm outline-none">
                 <div class="flex overflow-x-auto gap-2 pb-1 no-scrollbar border-t pt-2" id="dirFilters"></div>
             </div>
             <div id="directoryList" class="space-y-6 mt-2 pb-4"></div>
         </section>
+
         <section id="chatPage" class="page">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 h-[70vh] flex flex-col overflow-hidden relative">
-                <div class="bg-[#37006a] p-3 text-white text-center font-bold text-xs flex justify-between items-center"><span>Public Shoutbox</span><span id="chatAdminBadge" class="hidden text-[9px] bg-red-500 px-2 rounded font-mono">ADMIN</span></div>
+                <div class="bg-[#37006a] p-3 text-white text-center font-bold text-xs flex justify-between items-center uppercase"><span>Public Shoutbox</span><span id="chatAdminBadge" class="hidden text-[9px] bg-red-500 px-2 rounded">ADMIN</span></div>
                 <div id="chatMessages" class="flex-1 overflow-y-auto p-4 flex flex-col bg-[#f8f5ff] pb-10"></div>
                 <div class="p-2 bg-white border-t flex gap-2">
-                    <input type="text" id="chatName" placeholder="Name" class="w-1/4 p-2 rounded-lg border text-xs outline-none bg-gray-50">
-                    <input type="text" id="chatInput" placeholder="Message..." class="flex-1 p-2 rounded-lg border text-xs outline-none bg-gray-50">
+                    <input type="text" id="chatName" placeholder="Name" class="w-1/4 p-2 rounded-lg border text-xs outline-none">
+                    <input type="text" id="chatInput" placeholder="Message..." class="flex-1 p-2 rounded-lg border text-xs outline-none">
                     <button onclick="sendGlobalChat()" class="bg-[#37006a] text-white w-10 h-9 rounded-lg flex items-center justify-center active:scale-90"><i class="fa fa-paper-plane"></i></button>
                 </div>
             </div>
         </section>
+
         <section id="contactPage" class="page space-y-4">
-            <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 text-center">
+            <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 text-center slide-up">
                 <h3 class="font-bold text-[#4B0082] text-sm mb-2 uppercase">လုပ်ငန်းရှင်များအတွက်</h3>
                 <a href="https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog" target="_blank" class="inline-block gold-gradient text-white text-[11px] font-bold px-8 py-3 rounded-2xl shadow-lg">စာရင်းသွင်းရန်</a>
             </div>
@@ -87,9 +93,10 @@
             <div class="bg-white p-4 rounded-xl shadow-sm border">
                 <div class="grid grid-cols-2 gap-3">
                     <button onclick="toggleChatAdmin()" class="bg-gray-100 text-[#37006a] p-3 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 active:bg-gray-200"><i class="fa fa-shield-alt text-lg"></i> Chat Admin</button>
-                    <button onclick="localStorage.clear(); window.location.reload(true);" class="bg-red-50 text-red-500 p-3 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 active:bg-red-100"><i class="fa fa-trash text-lg"></i> Clear All</button>
+                    <button onclick="localStorage.clear(); window.location.reload(true);" class="bg-red-50 text-red-500 p-3 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 active:bg-red-100"><i class="fa fa-sync text-lg"></i> Clear All</button>
                 </div>
             </div>
+            <div class="bg-black/90 p-4 rounded-xl text-[9px] font-mono text-green-400" id="debugLog">System Stable.</div>
         </section>
 
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
@@ -102,8 +109,8 @@
                 <h3 class="font-bold text-[#4B0082] text-xs mb-3 uppercase">Comments</h3>
                 <div id="postCommentList" class="space-y-3 mb-4"></div>
                 <div class="flex gap-2">
-                    <input type="text" id="postComName" placeholder="Name" class="w-1/3 p-2 rounded-lg border text-xs bg-gray-50">
-                    <input type="text" id="postComInput" placeholder="Comment..." class="flex-1 p-2 rounded-lg border text-xs bg-gray-50">
+                    <input type="text" id="postComName" placeholder="Name" class="w-1/3 p-2 rounded-lg border text-xs">
+                    <input type="text" id="postComInput" placeholder="Comment..." class="flex-1 p-2 rounded-lg border text-xs">
                     <button onclick="sendPostComment()" class="bg-[#37006a] text-white w-10 h-9 rounded-lg flex items-center justify-center"><i class="fa fa-paper-plane"></i></button>
                 </div>
             </div>
@@ -121,7 +128,7 @@
     <script>
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const GIDS = { events: '0', dir: '1267218282', admin: '626044868', know: '1899326424' };
-        const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx:json`;
+        const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         let db, eventsData = [], dirData = [], knowData = [], activeDirCat = 'All', currentPostID = null, chatAdminMode = false;
 
         window.onload = async function() {
@@ -130,10 +137,10 @@
                 firebase.initializeApp(firebaseConfig); db = firebase.database(); window.db = db;
                 db.ref('stats/total_views').on('value', s => document.getElementById('viewCounter').innerText = (s.val()||0).toLocaleString());
                 
-                // --- MULTI-SOURCE FLAG ENGINE ---
-                let userFlag = localStorage.getItem('user_flag') || '🏳️';
+                // --- FLAG ENGINE (Optimized) ---
+                let userFlag = '🏳️';
                 async function fetchFlag() {
-                    const apis = ['https://get.geojs.io/v1/ip/country.json', 'https://ipwho.is/', 'https://ipapi.co/json/'];
+                    const apis = ['https://get.geojs.io/v1/ip/country.json', 'https://ipwho.is/'];
                     for(let api of apis) {
                         try {
                             const res = await fetch(api);
@@ -141,12 +148,11 @@
                             const code = data.country || data.country_code;
                             if(code) {
                                 userFlag = String.fromCodePoint(...code.toUpperCase().split('').map(c => 127397 + c.charCodeAt()));
-                                localStorage.setItem('user_flag', userFlag);
                                 break;
                             }
                         } catch(e){}
                     }
-                    const m = db.ref('stats/online_users').push(); m.onDisconnect().remove(); m.set({ flag: userFlag, time: firebase.database.ServerValue.TIMESTAMP });
+                    db.ref('stats/online_users').push().onDisconnect().remove().set({ flag: userFlag, time: firebase.database.ServerValue.TIMESTAMP });
                 }
                 fetchFlag();
 
@@ -156,48 +162,58 @@
                 });
                 initChatSystem();
             } catch(e){}
+            
+            // Independent Loading
             fetchEvents(); fetchDirectory(); fetchKnowledge(); fetchAdmin();
         };
 
-        // --- FETCHERS (TEXT-BASED FILTERING - NO SLICE) ---
+        // --- FETCH WITH TEXT-BASED HEADER SKIP ---
         async function fetchEvents() { 
-            const res = await fetch(`${BASE_URL}&gid=${GIDS.events}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
-            eventsData = j.table.rows.map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, logo: r.c[8]?.v, from: r.c[3]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
-                .filter(i => i.title && !["title", "ခေါင်းစဉ်"].includes(i.title.toString().toLowerCase().trim()));
-            renderEvents(); 
+            try {
+                const res = await fetch(`${BASE_URL}&gid=${GIDS.events}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
+                eventsData = j.table.rows.map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, logo: r.c[8]?.v, from: r.c[3]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
+                    .filter(i => i.title && !["title", "ခေါင်းစဉ်"].includes(i.title.toString().toLowerCase().trim()));
+                renderEvents(); 
+            } catch(e){ log("Events Fetch Fail"); }
         }
 
         async function fetchDirectory() { 
-            const res = await fetch(`${BASE_URL}&gid=${GIDS.dir}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
-            dirData = j.table.rows.map((r,idx) => ({ uid: 'dr-'+idx, name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, viber: r.c[10]?.v, tg: r.c[11]?.v, logo: r.c[13]?.v || 'CDST_Logo.png', rating: r.c[19]?.v, note: r.c[20]?.v, imgs: [r.c[14]?.v, r.c[15]?.v, r.c[16]?.v, r.c[17]?.v, r.c[18]?.v].filter(Boolean) }))
-                .filter(i => i.name && !["name", "အမည်"].includes(i.name.toString().toLowerCase().trim()));
-            setupFilters(dirData); renderDirectory(); 
+            try {
+                const res = await fetch(`${BASE_URL}&gid=${GIDS.dir}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
+                dirData = j.table.rows.map((r,idx) => ({ uid: 'dr-'+idx, name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, viber: r.c[10]?.v, tg: r.c[11]?.v, logo: r.c[13]?.v || 'CDST_Logo.png', rating: r.c[19]?.v, note: r.c[20]?.v, imgs: [r.c[14]?.v, r.c[15]?.v, r.c[16]?.v, r.c[17]?.v, r.c[18]?.v].filter(Boolean) }))
+                    .filter(i => i.name && !["name", "အမည်"].includes(i.name.toString().toLowerCase().trim()));
+                setupFilters(dirData); renderDirectory(); 
+            } catch(e){ log("Dir Fetch Fail"); }
         }
 
         async function fetchKnowledge() { 
-            const res = await fetch(`${BASE_URL}&gid=${GIDS.know}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
-            knowData = j.table.rows.map((r, idx) => ({ id: 'kn-'+idx, date: r.c[1]?.v, author: r.c[2]?.v, title: r.c[3]?.v, content: r.c[4]?.v, cat: r.c[5]?.v, img: r.c[6]?.v, imgs: [r.c[6]?.v, r.c[7]?.v, r.c[8]?.v, r.c[9]?.v, r.c[10]?.v].filter(Boolean) }))
-                .filter(i => i.title && !["title", "unique id", "ခေါင်းစဉ်"].includes(i.title.toString().toLowerCase().trim()));
-            renderKnowledge(); 
+            try {
+                const res = await fetch(`${BASE_URL}&gid=${GIDS.know}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
+                knowData = j.table.rows.map((r, idx) => ({ id: 'kn-'+idx, date: r.c[1]?.v, author: r.c[2]?.v, title: r.c[3]?.v, content: r.c[4]?.v, cat: r.c[5]?.v, img: r.c[6]?.v, imgs: [r.c[6]?.v, r.c[7]?.v, r.c[8]?.v, r.c[9]?.v, r.c[10]?.v].filter(Boolean) }))
+                    .filter(i => i.title && !["title", "ခေါင်းစဉ်", "unique id"].includes(i.title.toString().toLowerCase().trim()));
+                renderKnowledge(); 
+            } catch(e){ log("Know Fetch Fail"); }
         }
 
         async function fetchAdmin() { 
-            const res = await fetch(`${BASE_URL}&gid=${GIDS.admin}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
-            const rows = j.table.rows;
-            const p = rows.find(r => r.c[0]?.v && !["description", "အကြောင်းအရာ"].includes(r.c[0].v.toString().toLowerCase()));
-            if (p) {
-                document.getElementById('adminProfileArea').innerHTML = `<div class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-[#4B0082] mb-6 slide-up"><h3 class="font-bold text-center text-[10px] text-[#4B0082] mb-4 uppercase">Admin Support</h3><div class="space-y-3">
-                    ${p.c[1]?.v ? `<a href="tel:${p.c[1].v}" class="flex items-center justify-between bg-green-500 text-white p-2.5 rounded-xl text-[9px] font-bold"><span>Phone: ${p.c[1].v}</span><i class="fa fa-phone-alt"></i></a>`:''}
-                    ${p.c[3]?.v ? `<a href="viber://chat?number=${p.c[3].v}" class="flex items-center justify-between bg-[#7360f2] text-white p-2.5 rounded-xl text-[9px] font-bold"><span>Viber</span><i class="fab fa-viber"></i></a>`:''}
-                    ${p.c[4]?.v ? `<a href="https://t.me/${p.c[4].v}" class="flex items-center justify-between bg-[#0088cc] text-white p-2.5 rounded-xl text-[9px] font-bold"><span>Telegram</span><i class="fab fa-telegram"></i></a>`:''}
-                </div></div>`;
-            }
-            const notes = rows.slice(1).map(r => r.c[6]?.v).filter(Boolean);
-            if(notes.length > 0) {
-                document.getElementById('marqueeBar').classList.remove('hidden');
-                document.getElementById('ticker').innerText = "🚨 " + notes.join(" | 🚨 ");
-                document.getElementById('adminNotesArea').innerHTML = notes.map(n => `<div class="bg-yellow-400 border-l-4 border-[#B8860B] p-4 rounded-r-xl shadow-sm mb-3 uppercase font-bold text-xs">${n}</div>`).join('');
-            }
+            try {
+                const res = await fetch(`${BASE_URL}&gid=${GIDS.admin}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
+                const rows = j.table.rows;
+                const p = rows.find(r => r.c[0]?.v && !["description", "အကြောင်းအရာ"].includes(r.c[0].v.toString().toLowerCase()));
+                if (p) {
+                    document.getElementById('adminProfileArea').innerHTML = `<div class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-[#4B0082] mb-6 slide-up"><h3 class="font-bold text-center text-[10px] text-[#4B0082] mb-4 uppercase">Admin Support</h3><div class="space-y-3">
+                        ${p.c[1]?.v ? `<a href="tel:${p.c[1].v}" class="flex items-center justify-between bg-green-500 text-white p-2.5 rounded-xl text-[9px] font-bold"><span>Phone: ${p.c[1].v}</span><i class="fa fa-phone-alt"></i></a>`:''}
+                        ${p.c[3]?.v ? `<a href="viber://chat?number=${p.c[3].v}" class="flex items-center justify-between bg-[#7360f2] text-white p-2.5 rounded-xl text-[9px] font-bold"><span>Viber</span><i class="fab fa-viber"></i></a>`:''}
+                        ${p.c[4]?.v ? `<a href="https://t.me/${p.c[4].v}" class="flex items-center justify-between bg-[#0088cc] text-white p-2.5 rounded-xl text-[9px] font-bold"><span>Telegram</span><i class="fab fa-telegram"></i></a>`:''}
+                    </div></div>`;
+                }
+                const notes = rows.slice(1).map(r => r.c[6]?.v).filter(Boolean);
+                if(notes.length > 0) {
+                    document.getElementById('marqueeBar').classList.remove('hidden');
+                    document.getElementById('ticker').innerText = "🚨 " + notes.join(" | 🚨 ");
+                    document.getElementById('adminNotesArea').innerHTML = notes.map(n => `<div class="bg-yellow-400 border-l-4 border-[#B8860B] p-4 rounded-r-xl shadow-sm mb-3 uppercase font-bold text-xs">${n}</div>`).join('');
+                }
+            } catch(e){}
         }
 
         // --- RENDERERS ---
@@ -206,4 +222,68 @@
             const t = document.getElementById('searchInput').value.toLowerCase();
             let filtered = dirData.filter(i => (activeDirCat === 'All' || i.cat === activeDirCat) && (i.name.toLowerCase().includes(t) || (i.ward && i.ward.toLowerCase().includes(t))));
             const cats = [...new Set(filtered.map(x=>x.cat))];
-            document.getElementById('directoryList').innerHTML = cats.map(g => `<div class="mb-5"><h3 class="font-bold text-[#4B0082] text-[8px] bg-purple-100/50 px-2 py-1 rounded-md inline-block mb-3 uppercase tracking-
+            document.getElementById('directoryList').innerHTML = cats.map(g => `<div class="mb-5"><h3 class="font-bold text-[#4B0082] text-[8px] bg-purple-100/50 px-2 py-1 rounded-md inline-block mb-3 uppercase tracking-widest">${g}</h3><div class="grid grid-cols-2 gap-3">${filtered.filter(x=>x.cat===g).map(i => `<div onclick="openDetail('dir', '${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 cursor-pointer active:scale-95 dir-card"><div class="flex flex-col items-center text-center flex-grow"><img src="${fixDriveLink(i.logo)}" class="dir-img"><h4 class="font-bold text-[#4B0082] text-[10px] leading-6 w-full uppercase mb-2 line-clamp-2">${i.name}</h4><div class="flex text-orange-400 text-[8px] gap-0.5 justify-center">${getStars(i.rating)}</div></div><div class="flex items-center justify-center text-[7px] text-[#D4AF37] font-bold pt-2 border-t w-full"><i class="fa fa-map-pin mr-1"></i> ${i.ward || '-'}</div></div>`).join('')}</div></div>`).join('');
+        }
+        function renderKnowledge() { document.getElementById('knowledgeList').innerHTML = [...knowData].reverse().map(i => `<div onclick="openDetail('know', '${i.id}')" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer active:scale-95 flex gap-3"><img src="${fixDriveLink(i.img)}" class="w-16 h-16 rounded-xl object-cover bg-gray-50 flex-shrink-0" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><span class="text-[8px] bg-purple-100 text-[#4B0082] px-2 py-0.5 rounded-full font-bold mb-1 inline-block">${i.cat}</span><h4 class="font-bold text-[#4B0082] text-[11px] leading-relaxed line-clamp-2">${i.title}</h4></div></div>`).join(''); }
+
+        // --- PREMIUM CONTACT TEMPLATE ---
+        function openDetail(type, uid) {
+            const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
+            const rR = (l, v) => `<div class="border-b border-gray-50 py-3"><p class="text-[9px] text-gray-400 mb-0.5 uppercase font-bold tracking-widest">${l}</p><div class="text-gray-800 font-medium text-xs post-content">${v || '-'}</div></div>`;
+            const rP = (l, v) => `<div class="border-b border-gray-50 py-2.5 flex justify-between items-center"><div><p class="text-[9px] text-gray-400 font-bold uppercase">${l}</p><p class="text-[#4B0082] font-bold text-xs font-mono">${v || '-'}</p></div>${v?`<a href="tel:${v}" class="bg-green-500 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow"><i class="fa fa-phone"></i></a>`:''}</div>`;
+            const rC = (l, v, i, c, lp) => `<div class="border-b border-gray-50 py-2.5 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i class="${i}"></i></div><div><p class="text-[9px] text-gray-400 font-bold uppercase">${l}</p><p class="text-xs font-bold text-gray-700">${v || '-'}</p></div></div>${v?`<a href="${lp}${v}" class="${c} text-white px-3 py-1.5 rounded-lg text-[9px] font-bold shadow">CHAT</a>`:''}</div>`;
+            
+            let i;
+            if(type==='event') i = eventsData.find(x => x.uid === uid);
+            else if(type==='know') i = knowData.find(x => x.id === uid);
+            else i = dirData.find(x => x.uid === uid);
+            if(!i) return;
+
+            document.getElementById('detailHeader').innerText = i.title || i.name;
+            if(type==='dir') {
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-xl mx-auto mb-3 border bg-white shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 scale-125">${getStars(i.rating)}</div></div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase">Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Ward', i.ward)}${rR('Address', i.addr)}</div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase">Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase">Digital</h3>${rC('Viber', i.viber, 'fab fa-viber', 'bg-[#7360f2]', 'viber://chat?number=')}${rC('Telegram', i.tg, 'fab fa-telegram', 'bg-[#0088cc]', 'https://t.me/')}</div>
+                ${i.note?`<div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400 font-bold uppercase text-[10px] text-[#4B0082]"><p class="post-content">${i.note}</p></div>`:''}
+                <div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
+            } else {
+                content.innerHTML = `<div class="space-y-4 slide-up"><img src="${fixDriveLink(i.logo||i.img)}" class="w-full h-48 rounded-2xl object-cover border" onerror="this.src='CDST_Logo.png'"><div class="bg-white p-5 rounded-2xl shadow-sm"><h2 class="text-sm font-bold text-[#4B0082] mb-3">${i.title}</h2><div class="post-content text-xs text-gray-700">${i.desc||i.content}</div></div><div class="gallery-vertical">${i.imgs.slice(1).map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
+            }
+
+            document.getElementById('postCommentSection').className = (type === 'know') ? 'block p-5 pb-24 border-t bg-white' : 'hidden';
+            currentPostID = uid; if(type==='know') loadPostComments(uid);
+            modal.classList.remove('hidden');
+        }
+
+        // --- CORE SYSTEMS ---
+        function showPage(p) { 
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page')); 
+            document.getElementById(p + 'Page').classList.add('active-page');
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('text-[#FFD700]'));
+            document.getElementById('nav-' + p).classList.add('text-[#FFD700]');
+            document.getElementById('marqueeBar').style.display = (p === 'home' || p === 'knowledge') ? 'block' : 'none';
+        }
+        function closeDetail() { document.getElementById('detailPage').classList.add('hidden'); }
+        function handleSearch() { renderDirectory(); }
+        function setupFilters(data) { const vals = ['All', ...new Set(data.map(i => i.cat).filter(Boolean))]; document.getElementById('dirFilters').innerHTML = vals.map(v => `<button onclick="activeDirCat='${v}'; renderDirectory()" class="flex-shrink-0 px-3 py-1 bg-white border rounded-lg text-[9px] font-bold shadow-sm">${v}</button>`).join(''); }
+        function fixDriveLink(u) { if (!u || u === "" || u === "-") return 'CDST_Logo.png'; const m = u.match(/(?:id=|\/d\/|folders\/)([a-zA-Z0-9_-]{25,})/); return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : u; }
+        function getStars(r) { let h = ''; for(let i=1; i<=5; i++) h += (i <= r) ? '<i class="fa fa-star text-orange-400"></i>' : '<i class="far fa-star text-gray-200"></i>'; return h; }
+
+        function initChatSystem() {
+            db.ref('shoutbox').limitToLast(30).on('value', s => {
+                const data = s.val() || {};
+                document.getElementById('chatMessages').innerHTML = Object.entries(data).map(([key, m]) => `<div class="chat-bubble ${m.id===localStorage.getItem('my_chat_id')?'bg-[#37006a] text-white self-end':'bg-white text-gray-800 self-start'} relative shadow-sm"><div onclick="deleteChat('${key}')" class="admin-del" id="del-${key}" style="display:${chatAdminMode?'flex':'none'}">x</div><b class="block text-[8px] opacity-50">${m.name}</b>${m.text}</div>`).join('');
+                document.getElementById('chatMessages').scrollTop = 99999;
+            });
+        }
+        function sendGlobalChat() { const n = document.getElementById('chatName').value; const t = document.getElementById('chatInput').value; if(!n || !t) return; let id = localStorage.getItem('my_chat_id') || Date.now().toString(); localStorage.setItem('my_chat_id', id); db.ref('shoutbox').push({ name: n, text: t, id: id }); document.getElementById('chatInput').value = ''; }
+        function deleteChat(key) { if(confirm("Delete?")) db.ref(`shoutbox/${key}`).remove(); }
+        function toggleChatAdmin() { if(prompt("Pass:")==="166233") { chatAdminMode = !chatAdminMode; alert("Admin: " + chatAdminMode); initChatSystem(); } }
+        function loadPostComments(pid) { db.ref('comments/' + pid).on('value', (s) => { if(!s.exists()) { document.getElementById('postCommentList').innerHTML = '<p class="text-[9px] text-center text-gray-400">No comments yet.</p>'; return; } document.getElementById('postCommentList').innerHTML = Object.values(s.val()).map(c => `<div class="bg-gray-50 p-2 rounded-lg border text-[10px]"><b>${c.name}:</b> ${c.text}</div>`).join(''); }); }
+        function sendPostComment() { const n = document.getElementById('postComName').value; const t = document.getElementById('postComInput').value; if(!n||!t) return; db.ref('comments/' + currentPostID).push({ name: n, text: t, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('postComInput').value = ''; }
+
+        setInterval(() => { const now = new Date(); document.getElementById('timeClock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); document.getElementById('fullDate').innerText = now.toDateString(); }, 1000);
+    </script>
+</body>
+</html>
