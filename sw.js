@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cherry-v8';
+const CACHE_NAME = 'cherry-v9';
 const ASSETS = [
   '/',
   '/index.html',
