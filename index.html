@@ -20,91 +20,85 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
-        body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 100px; background-color: #f8f5ff; overflow-x: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        
+        body { font-family: 'Pyidaungsu', 'Inter', sans-serif; padding-bottom: 100px; background-color: #fafafa; }
         .page { display: none; }
-        .active-page { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .active-page { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
         #bottomNav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; height: 65px; background: #37006a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(212,175,55,0.3); }
-        .search-circle { width: 55px; height: 55px; background: linear-gradient(135deg, #4b0082 0%, #37006a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -25px; border: 4px solid #f8f5ff; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: #FFD700; font-size: 20px; transition: 0.2s; }
+        .search-circle { width: 55px; height: 55px; background: linear-gradient(135deg, #4b0082 0%, #37006a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -25px; border: 4px solid #fafafa; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: #FFD700; font-size: 20px; transition: 0.2s; }
 
-        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
-        
-        .post-content { white-space: pre-wrap; line-height: 1.8; font-size: 13px; color: #333; padding: 10px 0; }
-        .post-content ul { list-style-type: disc; padding-left: 20px; margin: 10px 0; }
+        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
 
+        /* Header Analytics Badge */
+        .h-badge { background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; display: flex; align-items: center; gap: 4px; font-size: 6px; font-weight: 800; text-transform: uppercase; color: #fff; }
+        .header-trend-box { width: 60px; height: 28px; }
+
+        .post-content { white-space: pre-wrap; line-height: 1.8; font-size: 13px; color: #333; }
+        .group-header { font-size: 10px; font-weight: 800; color: #37006a; background: #eee5ff; padding: 5px 12px; border-radius: 6px; display: inline-block; margin-top: 15px; border-left: 3px solid #D4AF37; text-transform: uppercase; }
         .logo-box { width: 3.8rem; height: 3.8rem; border-radius: 1.1rem; background: white; border: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
         .logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        
-        .detail-logo-large { width: 90px; height: 90px; border-radius: 1.5rem; background: white; border: 4px solid white; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin: 0 auto 15px auto; }
-        .detail-logo-large img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-        .group-header { font-size: 10px; font-weight: 800; color: #37006a; background: #eee5ff; padding: 5px 12px; border-radius: 6px; display: inline-block; margin-top: 15px; border-left: 3px solid #D4AF37; text-transform: uppercase; }
-        .dir-card { background: white; border-radius: 20px; display: flex; flex-direction: column; height: 100%; min-height: 170px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        
-        .marquee-container { background: #FFD700; color: #37006a; padding: 6px 0; font-weight: bold; overflow: hidden; border-bottom: 1px solid #D4AF37; }
-        .marquee-text { display: inline-block; white-space: nowrap; animation: marquee 35s linear infinite; }
-        @keyframes marquee { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
-        
-        select { -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 0.8em; }
-        .gallery-vertical img { width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid #eee; }
-        .reaction-btn { padding: 8px 15px; border-radius: 12px; background: #f0f2f5; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
-        
-        /* Dashboard Styling */
-        .stat-card { background: white; padding: 15px; border-radius: 15px; border: 1px solid #f0f0f0; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .chart-wrapper { position: relative; margin: auto; height: 230px; width: 100%; max-width: 320px; }
     </style>
 </head>
 <body>
-
-    <div id="marqueeBar" class="marquee-container hidden"><div id="ticker" class="marquee-text text-[10px] uppercase"></div></div>
 
     <header class="purple-gradient text-white shadow-md rounded-b-[30px] border-b-2 border-[#D4AF37]">
         <div class="bg-black/10 px-4 py-1.5 flex justify-between items-center text-[9px] font-mono text-[#FFD700]">
             <span id="fullDate">LOADING...</span>
             <span id="timeClock" class="font-bold text-white uppercase">--:-- --</span>
         </div>
-        <div class="flex items-center gap-3 p-4">
-            <img src="CDST_Logo.png" class="w-11 h-11 rounded-xl border border-[#FFD700]/30 shadow-md">
-            <div class="text-left leading-tight">
-                <div class="flex flex-col">
+        
+        <div class="p-4 flex items-start justify-between">
+            <div class="flex items-center gap-3">
+                <img src="CDST_Logo.png" class="w-11 h-11 rounded-xl border border-[#FFD700]/30 shadow-md">
+                <div class="text-left leading-tight">
                     <h1 class="text-md font-bold tracking-widest uppercase">Cherry Directory</h1>
-                    <span id="headerSyncStatus" class="text-[6px] text-green-400 font-bold uppercase tracking-tighter mt-0.5 whitespace-nowrap overflow-hidden">READY | 100% SYNC</span>
+                    <div class="flex gap-1.5 mt-1">
+                        <span class="h-badge"><i class="fa fa-globe-asia text-[5px] text-blue-400"></i> <span id="h-country">...</span></span>
+                        <span class="h-badge"><i class="fa fa-mobile-alt text-[5px] text-green-400"></i> <span id="h-device">...</span></span>
+                    </div>
                 </div>
-                <div class="flex gap-3 text-[8px] text-gray-300 mt-1">
-                    <span><i class="fa fa-eye mr-1"></i> <b id="viewCounter">...</b></span>
-                    <span><i class="fa fa-circle text-green-400 text-[5px] mr-1 animate-pulse"></i> <b id="onlineCounter">1</b> Online</span>
+            </div>
+
+            <div class="flex flex-col items-end gap-1">
+                <div class="header-trend-box"><canvas id="headerTrend"></canvas></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[6px] text-gray-300 font-bold uppercase tracking-wider">Unique Visitors</span>
+                    <b id="h-visitors" class="text-[11px] font-black text-white font-mono">0</b>
                 </div>
             </div>
         </div>
+        <div class="px-4 pb-3 text-center"><span id="headerSyncStatus" class="text-[6px] text-green-400 font-bold uppercase tracking-widest opacity-80">READY | 100% SYNC</span></div>
     </header>
 
     <div class="max-w-4xl mx-auto p-4">
         <section id="homePage" class="page active-page">
-            <div class="sticky top-0 z-50 bg-[#f8f5ff]/95 backdrop-blur-md py-3 flex items-center justify-between">
+            <div class="sticky top-0 z-50 bg-[#fafafa]/95 backdrop-blur-md py-3 flex items-center justify-between">
                 <h3 class="text-[#37006a] font-bold text-xs uppercase">News & Events</h3>
-                <select id="homeCatSelect" onchange="renderEvents()" class="p-2 rounded-xl border text-[9px] font-bold bg-white text-[#37006a] outline-none shadow-sm min-w-[120px]"></select>
+                <select id="homeCatSelect" onchange="renderEvents()" class="p-2 rounded-xl border text-[9px] font-bold outline-none shadow-sm min-w-[120px]"></select>
             </div>
             <div id="announcementList" class="pb-10"></div>
         </section>
         
         <section id="knowledgePage" class="page">
-            <div class="sticky top-0 z-50 bg-[#f8f5ff]/95 backdrop-blur-md py-3 flex items-center justify-between">
-                <h3 class="text-[#37006a] font-bold text-xs uppercase">Knowledge Sharing</h3>
-                <select id="knowCatSelect" onchange="renderKnowledge()" class="p-2 rounded-xl border text-[9px] font-bold bg-white text-[#37006a] outline-none shadow-sm min-w-[120px]"></select>
+            <div class="sticky top-0 z-50 bg-[#fafafa]/95 backdrop-blur-md py-3 flex items-center justify-between">
+                <h3 class="text-[#37006a] font-bold text-xs uppercase">Knowledge Library</h3>
+                <select id="knowCatSelect" onchange="renderKnowledge()" class="p-2 rounded-xl border text-[9px] font-bold outline-none shadow-sm min-w-[120px]"></select>
             </div>
             <div id="knowledgeList" class="pb-10"></div>
         </section>
 
         <section id="directoryPage" class="page">
-            <div class="sticky top-0 z-50 bg-[#f8f5ff]/95 backdrop-blur-md py-3 space-y-2">
-                <div class="relative"><input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="ဆိုင်အမည်၊ ရပ်ကွက် ရှာရန်..." class="w-full p-3 pl-10 rounded-2xl border border-gray-200 text-xs shadow-sm outline-none focus:border-[#D4AF37]"><i class="fa fa-search absolute left-4 top-3.5 text-gray-300 text-xs"></i></div>
+            <div class="sticky top-0 z-50 bg-[#fafafa]/95 backdrop-blur-md py-3 space-y-2">
+                <div class="relative"><input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="ဆိုင်အမည်၊ ရပ်ကွက် ရှာရန်..." class="w-full p-3 pl-10 rounded-2xl border border-gray-200 text-xs shadow-sm outline-none"><i class="fa fa-search absolute left-4 top-3.5 text-gray-300 text-xs"></i></div>
                 <div class="grid grid-cols-2 gap-2">
-                    <select id="citySelect" onchange="updateFilters('city')" class="p-2.5 rounded-xl border text-[9px] font-bold bg-white text-[#37006a] outline-none shadow-sm"></select>
-                    <select id="catSelect" onchange="updateFilters('cat')" class="p-2.5 rounded-xl border text-[9px] font-bold bg-white text-[#37006a] outline-none shadow-sm"></select>
-                    <select id="typeSelect" onchange="updateFilters('type')" class="p-2.5 rounded-xl border text-[9px] font-bold bg-white text-[#37006a] outline-none shadow-sm"></select>
-                    <select id="wardSelect" onchange="updateFilters('ward')" class="p-2.5 rounded-xl border text-[9px] font-bold bg-white text-[#37006a] outline-none shadow-sm"></select>
+                    <select id="citySelect" onchange="updateFilters('city')" class="p-2.5 rounded-xl border text-[9px] font-bold bg-white outline-none shadow-sm"></select>
+                    <select id="catSelect" onchange="updateFilters('cat')" class="p-2.5 rounded-xl border text-[9px] font-bold bg-white outline-none shadow-sm"></select>
+                    <select id="typeSelect" onchange="updateFilters('type')" class="p-2.5 rounded-xl border text-[9px] font-bold bg-white outline-none shadow-sm"></select>
+                    <select id="wardSelect" onchange="updateFilters('ward')" class="p-2.5 rounded-xl border text-[9px] font-bold bg-white outline-none shadow-sm"></select>
                 </div>
             </div>
             <div id="directoryList" class="pb-10"></div>
@@ -114,41 +108,30 @@
             <div class="bg-white rounded-[30px] shadow-sm border h-[60vh] flex flex-col overflow-hidden">
                 <div class="bg-[#37006a] p-4 text-white font-bold text-[10px] flex justify-between px-6 items-center uppercase tracking-widest"><span>Public Shoutbox</span><span id="chatAdminBadge" class="hidden bg-red-500 px-3 py-1 rounded-full">ADMIN</span></div>
                 <div id="chatMessages" class="flex-1 overflow-y-auto p-5 flex flex-col space-y-3 bg-[#fcfaff]"></div>
-                <div class="p-4 bg-white border-t flex gap-2 relative z-[2000]"><input type="text" id="chatName" placeholder="Name" class="w-1/4 p-2.5 rounded-xl border text-[11px] outline-none bg-gray-50"><input type="text" id="chatInput" placeholder="Message..." class="flex-1 p-2.5 rounded-xl border text-[11px] outline-none bg-gray-50"><button onclick="sendGlobalChat()" class="bg-[#37006a] text-white w-12 rounded-xl flex items-center justify-center active:scale-90 shadow-md"><i class="fa fa-paper-plane text-sm"></i></button></div>
+                <div class="p-4 bg-white border-t flex gap-2"><input type="text" id="chatName" placeholder="Name" class="w-1/4 p-2.5 rounded-xl border text-[11px] outline-none bg-gray-50"><input type="text" id="chatInput" placeholder="Message..." class="flex-1 p-2.5 rounded-xl border text-[11px] outline-none bg-gray-50"><button onclick="sendGlobalChat()" class="bg-[#37006a] text-white w-12 rounded-xl flex items-center justify-center shadow-md"><i class="fa fa-paper-plane"></i></button></div>
             </div>
         </section>
-        
-        <section id="contactPage" class="page space-y-4">
-            <div class="grid grid-cols-2 gap-3">
-                <div class="stat-card"><p class="text-[7px] text-gray-400 uppercase font-bold">Total Visitors</p><h2 class="text-lg font-bold text-[#37006a]" id="v-visitors">1.2k</h2><p class="text-[7px] text-green-500">+12% ↑</p></div>
-                <div class="stat-card"><p class="text-[7px] text-gray-400 uppercase font-bold">Page Views</p><h2 class="text-lg font-bold text-[#37006a]" id="v-views">4.8k</h2><p class="text-[7px] text-green-500">+5% ↑</p></div>
-            </div>
 
-            <div class="bg-white p-5 rounded-[25px] shadow-sm border space-y-12">
-                <div><h3 class="text-[9px] font-bold text-[#37006a] mb-4 uppercase text-center border-b pb-1">City Wise Volume (Column)</h3><div class="chart-wrapper"><canvas id="cityColumnChart"></canvas></div></div>
-                <div><h3 class="text-[9px] font-bold text-[#37006a] mb-4 uppercase text-center border-b pb-1">Work Type Distribution</h3><div class="chart-wrapper"><canvas id="stackedChart"></canvas></div></div>
-                <div><h3 class="text-[9px] font-bold text-[#37006a] mb-4 uppercase text-center border-b pb-1">Taunggyi Records (Pie)</h3><div class="chart-wrapper"><canvas id="tgPieChart"></canvas></div></div>
+        <section id="contactPage" class="page space-y-4">
+            <div class="flex items-center justify-between"><h3 class="text-[10px] font-extrabold text-black uppercase">Analytics Engine</h3><div class="flex items-center text-[8px] font-bold text-[#666]"><span class="animate-pulse w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5"></span>LIVE</div></div>
+            
+            <div class="bg-white p-5 rounded-xl border space-y-10">
+                <div><h4 class="text-[8px] font-bold text-gray-400 uppercase mb-4 text-center">Category Spread</h4><canvas id="categoryChart"></canvas></div>
+                <div><h4 class="text-[8px] font-bold text-gray-400 uppercase mb-4 text-center">City Spread</h4><canvas id="cityChart"></canvas></div>
             </div>
             
-            <div class="bg-white p-7 rounded-[35px] shadow-sm border-l-4 border-[#D4AF37] text-center">
-                <h3 class="font-bold text-[#37006a] text-sm mb-3 uppercase tracking-wider">လုပ်ငန်းရှင်များအတွက်</h3>
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog" target="_blank" class="inline-block gold-gradient text-white text-[10px] font-bold px-10 py-4 rounded-2xl shadow-lg active:scale-95 transition">စာရင်းသွင်းရန်</a>
-            </div>
-            <div id="adminNotesArea" class="space-y-3"></div>
-            <div id="adminProfileArea"></div>
             <div class="p-4 grid grid-cols-2 gap-3">
-                <button onclick="toggleChatAdmin()" class="bg-gray-100 text-[#37006a] p-4 rounded-2xl text-[9px] font-bold uppercase flex flex-col items-center gap-1"><i class="fa fa-shield-alt text-lg"></i> Admin Control</button>
-                <button onclick="localStorage.clear(); window.location.reload(true);" class="bg-red-50 text-red-500 p-4 rounded-2xl text-[9px] font-bold uppercase flex flex-col items-center gap-1"><i class="fa fa-sync text-lg"></i> Reset App</button>
+                <button onclick="toggleChatAdmin()" class="bg-black text-white p-4 rounded-xl text-[9px] font-bold uppercase flex flex-col items-center gap-1 shadow-lg">Admin Control</button>
+                <button onclick="localStorage.clear(); window.location.reload(true);" class="bg-gray-100 text-gray-500 p-4 rounded-xl text-[9px] font-bold uppercase flex flex-col items-center gap-1">Reset App</button>
             </div>
         </section>
 
-        <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[10001] overflow-y-auto hidden">
+        <section id="detailPage" class="fixed inset-0 bg-[#fafafa] z-[10001] overflow-y-auto hidden">
             <div class="sticky top-0 bg-white/95 backdrop-blur-md p-4 shadow-sm z-50 flex items-center border-b">
                 <button onclick="closeDetail()" class="w-10 h-10 rounded-full bg-gray-50 text-[#37006a] flex items-center justify-center shadow-sm"><i class="fa fa-arrow-left"></i></button>
                 <span class="ml-4 font-bold text-[#37006a] truncate text-xs uppercase flex-1" id="detailHeader">Details</span>
             </div>
             <div id="detailContent" class="p-6 max-w-2xl mx-auto pb-10"></div>
-            
             <div id="interactiveSection" class="p-6 pb-40 border-t bg-white">
                 <div class="flex gap-4 mb-6 border-b pb-4">
                     <button onclick="handleReaction('like')" class="reaction-btn text-blue-600"><i class="fa fa-thumbs-up"></i> <span id="likeCount">0</span> Like</button>
@@ -163,7 +146,7 @@
     <nav id="bottomNav">
         <button onclick="showPage('home')" class="nav-item flex flex-col items-center w-12 text-[#FFD700]" id="nav-home"><i class="fa fa-home text-xl mb-1"></i><span class="text-[7px] font-bold">Home</span></button>
         <button onclick="showPage('knowledge')" class="nav-item flex flex-col items-center w-12 text-gray-400" id="nav-knowledge"><i class="fa fa-book-open text-xl mb-1"></i><span class="text-[7px] font-bold">Knowledge</span></button>
-        <div class="relative w-14 h-12 flex justify-center"><button onclick="showPage('directory')" id="nav-directory" class="search-circle"><i class="fa fa-search"></i></button><span class="text-[7px] font-bold text-gray-400 mt-9">Search</span></div>
+        <div class="relative w-14 h-12 flex justify-center"><button onclick="showPage('directory')" id="nav-directory" class="search-circle"><i class="fa fa-search"></i></button><span class="text-[7px] font-bold text-gray-400 mt-9 text-center">Search</span></div>
         <button onclick="showPage('chat')" class="nav-item flex flex-col items-center w-12 text-gray-400" id="nav-chat"><i class="fa fa-comments text-xl mb-1"></i><span class="text-[7px] font-bold">Chat</span></button>
         <button onclick="showPage('contact')" class="nav-item flex flex-col items-center w-12 text-gray-400" id="nav-contact"><i class="fa fa-user-shield text-xl mb-1"></i><span class="text-[7px] font-bold">Admin</span></button>
     </nav>
@@ -174,69 +157,50 @@
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         let db, eventsData = [], dirData = [], knowData = [], currentPostID = null, chatAdminMode = false;
         let filters = { city: 'All', cat: 'All', type: 'All', ward: 'All' };
-        let activeCharts = { city: null, stacked: null, tg: null };
+        let activeCharts = { cat: null, city: null, trend: null };
 
-        function updateAllSyncStatus() {
-            const h = eventsData.length, k = knowData.length, d = dirData.length;
-            document.getElementById('headerSyncStatus').innerText = `Home Events: ${h} | Knowledge Library: ${k} | Directory Records: ${d} | 100% Sync`;
-            document.getElementById('admin-home-count').innerText = h;
-            document.getElementById('admin-know-count').innerText = k;
-            document.getElementById('admin-dir-count').innerText = d;
-            renderAnalyticsDashboard();
-        }
-
-        async function fetchVercelStats() {
+        // HEADER ANALYTICS LOGIC
+        async function fetchAnalytics() {
             try {
                 const res = await fetch('/api/stats');
-                const data = await res.json();
-                document.getElementById('v-visitors').innerText = data.visitors.toLocaleString();
-                document.getElementById('v-views').innerText = data.pageViews.toLocaleString();
+                const d = await res.json();
+                document.getElementById('h-visitors').innerText = d.visitors.toLocaleString();
+                document.getElementById('h-country').innerText = d.topCountry;
+                document.getElementById('h-device').innerText = d.topDevice;
+
+                // Header Trend Sparkline
+                const ctx = document.getElementById('headerTrend').getContext('2d');
+                if (activeCharts.trend) activeCharts.trend.destroy();
+                activeCharts.trend = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: d.trend, datasets: [{ data: d.trend, borderColor: '#FFD700', borderWidth: 2, fill: false, tension: 0.4, pointRadius: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+                });
             } catch(e) {}
         }
 
-        function renderAnalyticsDashboard() {
+        function updateSyncStatus() {
+            const h = eventsData.length, k = knowData.length, d = dirData.length;
+            document.getElementById('headerSyncStatus').innerText = `Home Events: ${h} | Knowledge: ${k} | Directory: ${d} | 100% Sync`;
+            renderBusinessCharts();
+        }
+
+        function renderBusinessCharts() {
             if (!dirData.length) return;
             Chart.register(ChartDataLabels);
-            const cityCounts = {}; const categories = [...new Set(dirData.map(i => i.cat))];
-            const cityCatMatrix = {}; 
-            dirData.forEach(i => { 
-                cityCounts[i.city] = (cityCounts[i.city] || 0) + 1; 
-                if(!cityCatMatrix[i.city]) cityCatMatrix[i.city] = {};
-                cityCatMatrix[i.city][i.cat] = (cityCatMatrix[i.city][i.cat] || 0) + 1;
-            });
-            const cities = Object.keys(cityCounts);
-
-            // City Column Chart
-            const ctx1 = document.getElementById('cityColumnChart').getContext('2d');
-            if(activeCharts.city) activeCharts.city.destroy();
-            activeCharts.city = new Chart(ctx1, {
-                type: 'bar', data: { labels: cities, datasets: [{ data: Object.values(cityCounts), backgroundColor: '#37006a', borderRadius: 4 }] },
-                options: { responsive: true, plugins: { datalabels: { color: '#fff', font: { weight: 'bold', size: 9 }, formatter: v => v }, legend: { display: false } }, scales: { y: { display: false }, x: { ticks: { font: { size: 7 } } } } }
-            });
-
-            // Stacked Chart
-            const ctx2 = document.getElementById('stackedChart').getContext('2d');
-            const stackedDatasets = categories.map((cat, idx) => ({
-                label: cat, data: cities.map(city => cityCatMatrix[city][cat] || 0),
-                backgroundColor: ['#37006a', '#D4AF37', '#9333ea', '#fbbf24', '#7c3aed', '#ec4899', '#10b981'][idx % 7]
-            }));
-            if(activeCharts.stacked) activeCharts.stacked.destroy();
-            activeCharts.stacked = new Chart(ctx2, {
-                type: 'bar', data: { labels: cities, datasets: stackedDatasets },
-                options: { responsive: true, plugins: { datalabels: { display: false }, legend: { position: 'bottom', labels: { font: { size: 6 } } } }, scales: { x: { stacked: true, ticks: { font: { size: 7 } } }, y: { stacked: true, display: false } } }
-            });
-
-            // Taunggyi Pie Chart
-            const tgData = dirData.filter(i => (i.city||"").toLowerCase().includes('taunggyi') || (i.city||"").includes('တောင်ကြီး'));
-            const tgCatCounts = {}; tgData.forEach(i => tgCatCounts[i.cat] = (tgCatCounts[i.cat] || 0) + 1);
-            const ctx3 = document.getElementById('tgPieChart').getContext('2d');
-            if(activeCharts.tg) activeCharts.tg.destroy();
-            if(Object.keys(tgCatCounts).length > 0) {
-                activeCharts.tg = new Chart(ctx3, {
-                    type: 'pie', data: { labels: Object.keys(tgCatCounts), datasets: [{ data: Object.values(tgCatCounts), backgroundColor: ['#37006a', '#D4AF37', '#9333ea', '#fbbf24', '#7c3aed'] }] },
-                    options: { responsive: true, plugins: { datalabels: { color: '#fff', font: { weight: 'bold', size: 9 }, formatter: v => v }, legend: { position: 'bottom', labels: { font: { size: 7 } } } } }
+            const draw = (id, dataObj, chartKey) => {
+                const labels = Object.keys(dataObj); const counts = Object.values(dataObj);
+                const ctx = document.getElementById(id).getContext('2d');
+                if (activeCharts[chartKey]) activeCharts[chartKey].destroy();
+                activeCharts[chartKey] = new Chart(ctx, {
+                    type: 'doughnut', plugins: [ChartDataLabels],
+                    data: { labels, datasets: [{ data: counts, backgroundColor: ['#000', '#444', '#888', '#bbb', '#ddd'], borderWidth: 1, borderColor: '#fff' }] },
+                    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 7, family: 'Inter' } } }, datalabels: { color: '#fff', font: { weight: 'bold', size: 9 }, formatter: v => v } } }
                 });
-            }
+            };
+            const catCounts = {}, cityCounts = {};
+            dirData.forEach(i => { catCounts[i.cat] = (catCounts[i.cat]||0)+1; cityCounts[i.city] = (cityCounts[i.city]||0)+1; });
+            draw('categoryChart', catCounts, 'cat'); draw('cityChart', cityCounts, 'city');
         }
 
         window.onload = async function() {
@@ -244,21 +208,18 @@
                 const config = { apiKey: "AIzaSyBNcYd3ggUFzI9IX3dzwcpF3a2OvR9_Li4", authDomain: "cherry-directory.firebaseapp.com", databaseURL: "https://cherry-directory-default-rtdb.firebaseio.com", projectId: "cherry-directory", storageBucket: "cherry-directory.firebasestorage.app", messagingSenderId: "61677443166", appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf" };
                 if(!firebase.apps.length) firebase.initializeApp(config);
                 db = firebase.database();
-                db.ref('stats/total_views').on('value', s => document.getElementById('viewCounter').innerText = (s.val()||0).toLocaleString());
-                db.ref('stats/online_users').on('value', s => document.getElementById('onlineCounter').innerText = s.numChildren()||1);
-                db.ref('stats/online_users').push().onDisconnect().remove().set({ t: Date.now() });
                 initChatSystem();
             } catch(e){}
-            loadAll(); fetchVercelStats();
-            setInterval(() => { if(navigator.onLine) { loadAll(); fetchVercelStats(); } }, 900000);
+            loadAll(); fetchAnalytics();
+            setInterval(() => { if(navigator.onLine) { loadAll(); fetchAnalytics(); } }, 900000);
         };
 
         async function loadAll() {
             await fetchEvents(); await fetchDirectory(); await fetchKnowledge(); await fetchAdmin();
-            updateAllSyncStatus();
+            updateSyncStatus();
         }
 
-        // --- FETCHERS ---
+        // --- FETCH LOGIC ---
         async function fetchEvents() { 
             const res = await fetch(`${BASE_URL}&gid=${GIDS.events}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
             eventsData = j.table.rows.map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v || 'News', title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v || '-', toDate: r.c[4]?.v || '-', time: r.c[5]?.v || '-', place: r.c[6]?.v || '-', org: r.c[7]?.v || '-', logo: r.c[8]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
@@ -286,10 +247,8 @@
 
         async function fetchAdmin() { 
             const res = await fetch(`${BASE_URL}&gid=${GIDS.admin}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
-            const p = j.table.rows.find(r => r.c[1]?.v && !["description", "ခေါင်းစဉ်"].includes(r.c[0]?.v?.toString()?.toLowerCase()));
-            if (p) document.getElementById('adminProfileArea').innerHTML = `<div class="bg-white p-6 rounded-[25px] shadow-sm border-t-4 border-[#37006a] mb-6"><h3 class="font-bold text-center text-[11px] text-[#37006a] mb-4 uppercase">Support</h3><div class="space-y-3">${p.c[1]?.v ? `<a href="tel:${p.c[1].v}" class="flex items-center justify-between bg-green-500 text-white p-3 rounded-2xl text-[9px] font-bold"><span>Call Support</span><i class="fa fa-phone-alt"></i></a>`:''}${p.c[3]?.v ? `<a href="viber://chat?number=${p.c[3].v}" class="flex items-center justify-between bg-[#7360f2] text-white p-3 rounded-2xl text-[10px] font-bold"><span>Viber</span><i class="fab fa-viber"></i></a>`:''}</div></div>`;
             const notes = j.table.rows.slice(1).map(r => r.c[6]?.v).filter(Boolean);
-            if(notes.length > 0) { document.getElementById('marqueeBar').classList.remove('hidden'); document.getElementById('ticker').innerText = "🚨 " + notes.join(" | 🚨 "); document.getElementById('adminNotesArea').innerHTML = notes.map(n => `<div class="bg-yellow-400 border-l-4 border-[#B8860B] p-5 rounded-2xl shadow-sm mb-3 uppercase font-bold text-[10px] text-[#37006a] tracking-tight leading-relaxed">${n}</div>`).join(''); }
+            if(notes.length > 0) { document.getElementById('marqueeBar').classList.remove('hidden'); document.getElementById('ticker').innerText = "🚨 " + notes.join(" | 🚨 "); }
         }
 
         function initDropdowns() {
@@ -302,7 +261,7 @@
             const t = document.getElementById('searchInput').value.toLowerCase();
             let f = dirData.filter(i => (filters.city === 'All' || i.city === filters.city) && (filters.cat === 'All' || i.cat === filters.cat) && (filters.type === 'All' || i.type === filters.type) && (filters.ward === 'All' || i.ward === filters.ward) && (i.name.toLowerCase().includes(t) || (i.desc && i.desc.toLowerCase().includes(t))));
             const groups = [...new Set(f.map(x => x.cat))];
-            document.getElementById('directoryList').innerHTML = groups.map(g => `<div><span class="group-header">${g}</span><div class="grid grid-cols-2 gap-4 mt-3">${f.filter(x=>x.cat===g).map(i => `<div onclick="openDetail('dir', '${i.uid}')" class="dir-card p-4"><div class="flex flex-col items-center text-center flex-grow"><div class="logo-box"><img src="${fixDriveLink(i.logo)}" onerror="this.src='CDST_Logo.png'"></div><h4 class="font-bold text-[#37006a] text-[11px] leading-tight w-full uppercase mb-2 line-clamp-2 mt-2">${i.name}</h4><div class="flex text-orange-400 text-[8px] gap-0.5">${getStars(i.rating)}</div></div><div class="text-[8px] text-[#D4AF37] border-t pt-2.5 w-full text-center font-bold uppercase"><i class="fa fa-map-pin mr-1"></i> ${i.city} | ${i.ward}</div></div>`).join('')}</div></div>`).join('');
+            document.getElementById('directoryList').innerHTML = groups.map(g => `<div><span class="group-header">${g}</span><div class="grid grid-cols-2 gap-4 mt-3">${f.filter(x=>x.cat===g).map(i => `<div onclick="openDetail('dir', '${i.uid}')" class="dir-card p-4"><div class="flex flex-col items-center text-center flex-grow"><div class="logo-box"><img src="${fixDriveLink(i.logo)}" onerror="this.src='CDST_Logo.png'"></div><h4 class="font-bold text-[#37006a] text-[11px] leading-tight w-full uppercase mb-2 line-clamp-2 mt-2">${i.name}</h4><div class="flex text-orange-400 text-[8px] gap-0.5">${getStars(i.rating)}</div></div><div class="text-[8px] text-[#D4AF37] border-t pt-2.5 w-full text-center font-bold uppercase"><i class="fa fa-map-pin mr-1 text-[7px]"></i> ${i.city} | ${i.ward}</div></div>`).join('')}</div></div>`).join('');
         }
 
         function renderEvents() { 
@@ -323,8 +282,8 @@
         function openDetail(type, uid) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
             document.getElementById('bottomNav').style.display = 'none'; 
-            const rR = (l, v, icon) => `<div class="border-b border-gray-100 py-4 flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-[#37006a] text-xs shadow-inner"><i class="fa ${icon}"></i></div><div class="flex-1"><p class="text-[8px] text-gray-400 mb-0.5 uppercase font-bold tracking-widest">${l}</p><div class="text-[#37006a] post-content" style="padding:0">${v || '-'}</div></div></div>`;
-            const rP = (l, v) => `<div class="border-b border-gray-100 py-4 flex justify-between items-center"><div><p class="text-[8px] text-gray-400 font-bold uppercase">${l}</p><p class="text-[#37006a] font-bold text-sm font-mono">${v || '-'}</p></div>${v?`<a href="tel:${v}" class="bg-green-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"><i class="fa fa-phone"></i></a>`:''}</div>`;
+            const rR = (l, v, icon) => `<div class="border-b border-gray-100 py-4 flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-black text-xs shadow-inner"><i class="fa ${icon}"></i></div><div class="flex-1"><p class="text-[8px] text-gray-400 mb-0.5 uppercase font-bold tracking-widest">${l}</p><div class="text-black font-bold text-xs" style="padding:0">${v || '-'}</div></div></div>`;
+            const rP = (l, v) => `<div class="border-b border-gray-100 py-4 flex justify-between items-center"><div><p class="text-[8px] text-gray-400 font-bold uppercase">${l}</p><p class="text-black font-bold text-sm font-mono">${v || '-'}</p></div>${v?`<a href="tel:${v}" class="bg-black text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"><i class="fa fa-phone"></i></a>`:''}</div>`;
             let i;
             if(type==='event') i = eventsData.find(x => x.uid === uid);
             else if(type==='know') i = knowData.find(x => x.id === uid);
@@ -333,11 +292,11 @@
             currentPostID = uid; document.getElementById('detailHeader').innerText = i.title || i.name;
 
             if(type==='dir') {
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-[45px] p-8 shadow-sm border-b-4 border-[#D4AF37] text-center"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo)}" onerror="this.src='CDST_Logo.png'"></div><h2 class="text-sm font-bold text-[#37006a] uppercase tracking-wider">${i.name}</h2><div class="flex justify-center mt-3 scale-125">${getStars(i.rating)}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm">${rR('Detail', i.desc, 'fa-info-circle')}${rR('Location', i.city + ' | ' + i.ward, 'fa-map-marker-alt')}${rR('Category', i.cat, 'fa-tag')}${rR('Type', i.type, 'fa-list')}${rR('Address', i.addr, 'fa-home')}</div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase tracking-widest">Connect</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}<div class="py-6 flex gap-4">${i.viber?`<a href="viber://chat?number=${i.viber}" class="flex-1 bg-[#7360f2] text-white p-4 rounded-2xl text-[10px] font-bold text-center">VIBER</a>`:''}${i.tg?`<a href="https://t.me/${i.tg}" class="flex-1 bg-[#0088cc] text-white p-4 rounded-2xl text-[10px] font-bold text-center">TELEGRAM</a>`:''}</div></div>${i.note?`<div class="bg-yellow-50 p-8 rounded-[35px] border-l-4 border-yellow-400 font-bold text-[#37006a] text-[11px] uppercase shadow-sm">${i.note}</div>`:''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-[45px] p-8 shadow-sm border-b-4 border-black text-center"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo)}" onerror="this.src='CDST_Logo.png'"></div><h2 class="text-sm font-bold text-black uppercase tracking-wider">${i.name}</h2><div class="flex justify-center mt-3 scale-125">${getStars(i.rating)}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm">${rR('Detail', i.desc, 'fa-info-circle')}${rR('Location', i.city + ' | ' + i.ward, 'fa-map-marker-alt')}${rR('Address', i.addr, 'fa-home')}</div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[9px] border-b pb-2 mb-2 uppercase">Connect</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}<div class="py-6 flex gap-4">${i.viber?`<a href="viber://chat?number=${i.viber}" class="flex-1 bg-black text-white p-4 rounded-xl text-[10px] font-bold text-center">VIBER</a>`:''}${i.tg?`<a href="https://t.me/${i.tg}" class="flex-1 bg-black text-white p-4 rounded-xl text-[10px] font-bold text-center">TELEGRAM</a>`:''}</div></div>${i.note?`<div class="bg-yellow-50 p-8 rounded-[35px] border-l-4 border-black font-bold text-[11px] uppercase">${i.note}</div>`:''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
             } else if(type==='event') {
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo || 'CDST_Logo.png')}" onerror="this.src='CDST_Logo.png'"></div><div class="bg-white p-8 rounded-[35px] shadow-sm"><h2 class="text-sm font-bold text-[#37006a] mb-5 uppercase leading-relaxed">${i.title}</h2><div class="post-content">${i.desc||'-'}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase tracking-widest">Event Info</h3>${rR('Start Date', i.fromDate, 'fa-calendar')}${rR('End Date', i.toDate, 'fa-calendar-check')}${rR('Time', i.time, 'fa-clock')}${rR('Venue', i.place, 'fa-map-pin')}${rR('Organized By', i.org, 'fa-user-tie')}</div><div class="gallery-vertical">${i.imgs ? i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('') : ''}</div></div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo || 'CDST_Logo.png')}" onerror="this.src='CDST_Logo.png'"></div><div class="bg-white p-8 rounded-[25px] shadow-sm"><h2 class="text-sm font-bold text-black mb-5 uppercase leading-relaxed">${i.title}</h2><div class="post-content">${i.desc||'-'}</div></div><div class="bg-white p-7 rounded-[25px] shadow-sm"><h3 class="font-bold text-[9px] border-b pb-2 mb-2 uppercase">Event Info</h3>${rR('Start', i.fromDate, 'fa-calendar')}${rR('End', i.toDate, 'fa-calendar-check')}${rR('Time', i.time, 'fa-clock')}${rR('Venue', i.place, 'fa-map-pin')}${rR('Organized By', i.org, 'fa-user-tie')}</div><div class="gallery-vertical">${i.imgs ? i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('') : ''}</div></div>`;
             } else {
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo || i.img)}" onerror="this.src='CDST_Logo.png'"></div><div class="bg-white p-8 rounded-[35px] shadow-sm"><h2 class="text-sm font-bold text-[#37006a] mb-5 leading-relaxed uppercase">${i.title}</h2><div class="post-content">${i.content}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase tracking-widest">Sharing Info</h3>${rR('Posted Date', i.date, 'fa-calendar')}${rR('Author', i.author, 'fa-user-edit')}${rR('Category', i.cat, 'fa-tag')}</div><div class="gallery-vertical">${i.imgs ? i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('') : ''}</div></div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo || i.img)}" onerror="this.src='CDST_Logo.png'"></div><div class="bg-white p-8 rounded-[25px] shadow-sm"><h2 class="text-sm font-bold text-black mb-5 uppercase leading-relaxed">${i.title}</h2><div class="post-content">${i.content}</div></div><div class="bg-white p-7 rounded-[25px] shadow-sm"><h3 class="font-bold text-[9px] border-b pb-2 mb-2 uppercase">Sharing Info</h3>${rR('Date', i.date, 'fa-calendar')}${rR('Author', i.author, 'fa-user-edit')}${rR('Category', i.cat, 'fa-tag')}</div><div class="gallery-vertical">${i.imgs ? i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('') : ''}</div></div>`;
             }
             document.getElementById('interactiveSection').className = 'block p-6 pb-40 border-t bg-white';
             loadInteractions(uid); modal.classList.remove('hidden'); document.body.style.overflow = 'hidden';
@@ -347,17 +306,16 @@
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page')); document.getElementById(p + 'Page').classList.add('active-page');
             document.querySelectorAll('.nav-item').forEach(btn => { btn.classList.remove('text-[#FFD700]'); btn.classList.add('text-gray-400'); });
             const activeBtn = document.getElementById('nav-' + p); if(activeBtn) { activeBtn.classList.add('text-[#FFD700]'); activeBtn.classList.remove('text-gray-400'); }
-            document.getElementById('marqueeBar').style.display = (p === 'home' || p === 'knowledge') ? 'block' : 'none'; window.scrollTo(0,0);
+            window.scrollTo(0,0);
         }
         function closeDetail() { document.getElementById('detailPage').classList.add('hidden'); document.body.style.overflow = 'auto'; document.getElementById('bottomNav').style.display = 'flex'; }
         function handleSearch() { renderDirectory(); }
         function fixDriveLink(u) { if (!u || u === "" || u === "-") return 'CDST_Logo.png'; const m = u.match(/(?:id=|\/d\/|folders\/)([a-zA-Z0-9_-]{25,})/); return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : u; }
         function getStars(r) { let h = ''; for(let i=1; i<=5; i++) h += (i <= r) ? '<i class="fa fa-star text-orange-400"></i>' : '<i class="far fa-star text-gray-200"></i>'; return h; }
-        function initChatSystem() { db.ref('shoutbox').limitToLast(30).on('value', s => { const data = s.val() || {}; document.getElementById('chatMessages').innerHTML = Object.entries(data).map(([key, m]) => `<div class="chat-bubble ${m.id===localStorage.getItem('my_chat_id')?'bg-[#37006a] text-white self-end rounded-br-none shadow-md':'bg-white text-gray-800 self-start rounded-bl-none shadow-sm'} relative"><div onclick="deleteChat('${key}')" class="admin-del" style="display:${chatAdminMode?'flex':'none'}">x</div><b class="block text-[7px] opacity-60 mb-1 uppercase tracking-widest">${m.name}</b>${m.text}</div>`).join(''); document.getElementById('chatMessages').scrollTop = 99999; }); }
+        function initChatSystem() { db.ref('shoutbox').limitToLast(30).on('value', s => { const d = s.val() || {}; document.getElementById('chatMessages').innerHTML = Object.entries(d).map(([k, m]) => `<div class="chat-bubble ${m.id===localStorage.getItem('my_chat_id')?'bg-black text-white self-end rounded-br-none':'bg-white text-black self-start rounded-bl-none shadow-sm'} p-3 rounded-xl relative mb-2"><b class="block text-[7px] opacity-60 mb-1 uppercase tracking-widest">${m.name}</b>${m.text}</div>`).join(''); document.getElementById('chatMessages').scrollTop = 99999; }); }
         function sendGlobalChat() { const n = document.getElementById('chatName').value.trim(); const t = document.getElementById('chatInput').value.trim(); if(!n || !t) return; let id = localStorage.getItem('my_chat_id') || Date.now().toString(); localStorage.setItem('my_chat_id', id); db.ref('shoutbox').push({ name: n, text: t, id: id, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('chatInput').value = ''; }
-        function deleteChat(key) { if(confirm("Delete?")) db.ref(`shoutbox/${key}`).remove(); }
         function toggleChatAdmin() { if(prompt("Pass:")==="166233") { chatAdminMode = !chatAdminMode; alert("Admin Access Granted."); initChatSystem(); } }
-        function loadInteractions(pid) { db.ref('likes/'+pid).on('value', s => { const d = s.val()||{like:0,unlike:0}; document.getElementById('likeCount').innerText = d.like||0; document.getElementById('unlikeCount').innerText = d.unlike||0; }); db.ref('comments/'+pid).on('value', s => { if(!s.exists()) { document.getElementById('postCommentList').innerHTML = '<p class="text-[9px] text-center text-gray-400 uppercase font-bold">No discussions yet</p>'; return; } document.getElementById('postCommentList').innerHTML = Object.values(s.val()).map(c => `<div class="bg-gray-50 p-3 rounded-2xl border text-[10px]"><b>${c.name}:</b> ${c.text}</div>`).join(''); }); }
+        function loadInteractions(pid) { db.ref('likes/'+pid).on('value', s => { const d = s.val()||{like:0,unlike:0}; document.getElementById('likeCount').innerText = d.like||0; document.getElementById('unlikeCount').innerText = d.unlike||0; }); db.ref('comments/'+pid).on('value', s => { if(!s.exists()) { document.getElementById('postCommentList').innerHTML = '<p class="text-[9px] text-center text-gray-400 font-bold uppercase tracking-widest">No discussions yet</p>'; return; } document.getElementById('postCommentList').innerHTML = Object.values(s.val()).map(c => `<div class="bg-gray-50 p-3 rounded-xl border text-[10px]"><b>${c.name}:</b> ${c.text}</div>`).join(''); }); }
         function handleReaction(type) { db.ref('likes/'+currentPostID+'/'+type).transaction(c => (c||0)+1); }
         function sendPostComment() { const n = document.getElementById('postComName').value.trim(); const t = document.getElementById('postComInput').value.trim(); if(!n||!t) return; db.ref('comments/'+currentPostID).push({ name: n, text: t, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('postComInput').value = ''; }
         setInterval(() => { const now = new Date(); document.getElementById('timeClock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true}); document.getElementById('fullDate').innerText = now.toLocaleDateString([], {weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'}); }, 1000);
