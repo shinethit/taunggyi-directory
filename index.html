@@ -14,9 +14,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-app.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-database.min.js"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
         body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 110px; background-color: #f8f5ff; }
@@ -48,7 +45,7 @@
                 <h1 class="text-md font-bold tracking-wider text-white uppercase">Cherry Directory</h1>
                 <div class="flex items-center text-[8px] text-gray-300 gap-2">
                     <span id="viewDisplay"><i class="fa fa-eye mr-0.5"></i> <b id="viewCounter">...</b> Views</span>
-                    <span id="onlineDisplay"><i class="fa fa-circle text-green-400 text-[5px] mr-0.5 animate-pulse"></i> <b id="onlineCounter">1</b> Online</span>
+                    <span id="onlineDisplay" class="hidden"><i class="fa fa-circle text-green-400 text-[5px] mr-0.5 animate-pulse"></i> Online</span>
                 </div>
             </div>
         </div>
@@ -76,9 +73,9 @@
             <div id="adminProfileArea"></div><div id="adminNotesArea" class="space-y-3"></div>
             
             <div class="bg-black/90 p-4 rounded-xl mt-6 text-left">
-                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">NETWORK STATUS:</p>
-                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-24 overflow-y-auto">Checking connection...</div>
-                <button onclick="forceReboot()" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg shadow-md active:scale-95">FORCE RECONNECT (FIX NO SIGNAL)</button>
+                <p class="text-[10px] text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">HTTP STATUS (REST API):</p>
+                <div id="debugLog" class="text-[9px] font-mono text-green-400 space-y-1 h-20 overflow-y-auto">Connecting via HTTP...</div>
+                <button onclick="nuclearWipe()" class="w-full bg-red-600 text-white text-[9px] font-bold py-3 mt-3 rounded-lg uppercase shadow-md active:scale-95">RESET EVERYTHING (FIX ALL)</button>
             </div>
         </section>
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
@@ -94,67 +91,56 @@
     </nav>
 
     <script>
+        const DB_URL = "https://cherry-directory-default-rtdb.firebaseio.com/stats/total_views.json";
         const debugEl = document.getElementById('debugLog');
+        
         function log(msg, type='info') {
-            const color = type === 'error' ? 'text-red-400' : (type === 'warn' ? 'text-yellow-400' : 'text-green-400');
+            const color = type === 'error' ? 'text-red-400' : 'text-green-400';
             debugEl.innerHTML += `<div class="${color}">> ${msg}</div>`;
             debugEl.scrollTop = debugEl.scrollHeight;
         }
 
-        // FIREBASE V8 LOGIC
-        window.onload = function() {
+        async function syncViews() {
             try {
-                const firebaseConfig = {
-                    apiKey: "AIzaSyBNcYd3ggUFzI9IX3dzwcpF3a2OvR9_Li4",
-                    authDomain: "cherry-directory.firebaseapp.com",
-                    databaseURL: "https://cherry-directory-default-rtdb.firebaseio.com",
-                    projectId: "cherry-directory",
-                    storageBucket: "cherry-directory.firebasestorage.app",
-                    messagingSenderId: "61677443166",
-                    appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf"
-                };
+                // 1. READ Current Views (GET Request)
+                log("Fetching via HTTP...");
+                let res = await fetch(DB_URL);
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                let currentViews = await res.json() || 0;
+                
+                log("Current Server Views: " + currentViews);
+                document.getElementById('viewCounter').innerText = currentViews.toLocaleString();
 
-                firebase.initializeApp(firebaseConfig);
-                const db = firebase.database();
-
-                // 1. Connection Listener
-                db.ref(".info/connected").on("value", (snap) => {
-                    if (snap.val() === true) {
-                        log("Server Connected: YES (Syncing...)", 'success');
-                    } else {
-                        log("Server Connected: NO (Wait...)", 'warn');
-                        // Force WebSockets specifically for Android compatibility
-                        setTimeout(() => { db.goOnline(); }, 2000); 
-                    }
-                });
-
-                // 2. View Count
-                const vRef = db.ref('stats/total_views');
-                if (!sessionStorage.getItem('v26_counted')) {
-                    vRef.transaction((c) => (c || 0) + 1);
-                    sessionStorage.setItem('v26_counted', 'true');
+                // 2. INCREMENT (PUT Request)
+                // Only increment once per session to avoid loops
+                if (!sessionStorage.getItem('rest_counted')) {
+                    const newViews = currentViews + 1;
+                    log("Incrementing to: " + newViews);
+                    
+                    await fetch(DB_URL, {
+                        method: 'PUT',
+                        body: JSON.stringify(newViews)
+                    });
+                    
+                    document.getElementById('viewCounter').innerText = newViews.toLocaleString();
+                    sessionStorage.setItem('rest_counted', 'true');
+                    log("Success! Updated.");
+                } else {
+                    log("Already counted this session.");
                 }
-                vRef.on('value', (snap) => {
-                    const v = snap.val();
-                    log("Views Updated: " + v);
-                    document.getElementById('viewCounter').innerText = v ? v.toLocaleString() : "0";
-                });
-
-                // 3. Online Users
-                const onlineRef = db.ref('stats/online_users');
-                const myCon = onlineRef.push();
-                myCon.onDisconnect().remove();
-                myCon.set(true);
-                onlineRef.on('value', (snap) => {
-                    document.getElementById('onlineCounter').innerText = snap.numChildren() || 1;
-                });
 
             } catch (e) {
-                log("Error: " + e.message, 'error');
+                log("HTTP Failed: " + e.message, 'error');
+                document.getElementById('viewCounter').innerText = "Err";
             }
-        };
+        }
 
-        // CORE APP LOGIC
+        // Call the REST function immediately
+        syncViews();
+    </script>
+
+    <script>
+        // APP LOGIC
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
         const REVIEW_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
@@ -200,16 +186,19 @@
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
         
-        function forceReboot() {
-            if(confirm("Fix Connection & Reset?")) {
+        function nuclearWipe() {
+            if(confirm("FULL RESET TO FIX EVERYTHING?")) {
                 localStorage.clear(); sessionStorage.clear();
-                caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+                caches.keys().then(names => Promise.all(names.map(name => caches.delete(name))));
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(regs => { for(let r of regs) r.unregister(); window.location.reload(true); });
+                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                        for(let registration of registrations) { registration.unregister(); }
+                        window.location.reload(true);
+                    });
                 } else { window.location.reload(true); }
             }
         }
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=26'); }); }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=27'); }); }
         loadAllData();
     </script>
 </body>
