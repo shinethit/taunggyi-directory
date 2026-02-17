@@ -26,7 +26,6 @@
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* Fixed Navigation Fix */
         #bottomNav { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 99999; }
         
         /* Grouping Styles */
@@ -34,7 +33,7 @@
         .group-type { font-size: 9px; font-weight: 700; color: #37006a; background: #eee5ff; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 15px; margin-left: 5px; text-transform: uppercase; }
         .group-ward { font-size: 8px; font-weight: bold; color: #D4AF37; display: block; margin: 10px 0 5px 10px; text-transform: uppercase; border-left: 2px solid #D4AF37; padding-left: 8px; }
 
-        .dir-card { display: flex; flex-direction: column; height: 100%; min-height: 180px; transition: 0.2s; }
+        .dir-card { display: flex; flex-direction: column; height: 100%; min-height: 180px; }
         .dir-img { width: 4rem; height: 4rem; border-radius: 1rem; object-fit: cover; border: 1px solid #eee; margin-bottom: 0.5rem; background: white; }
         .post-content { white-space: pre-wrap; line-height: 1.8; font-size: 12px; }
         .marquee-container { background: #FFD700; color: #37006a; padding: 8px 0; font-weight: bold; overflow: hidden; border-bottom: 2px solid #D4AF37; }
@@ -54,7 +53,7 @@
         <div class="flex items-center gap-3 p-4">
             <img src="CDST_Logo.png" class="w-11 h-11 rounded-xl border border-[#FFD700] bg-[#37006a]">
             <div class="text-left leading-tight">
-                <h1 class="text-sm font-bold tracking-widest uppercase">Cherry Directory</h1>
+                <h1 class="text-md font-bold tracking-widest uppercase">Cherry Directory</h1>
                 <div class="flex flex-col text-[8px] text-gray-300">
                     <span><i class="fa fa-eye mr-1"></i> <b id="viewCounter">...</b> Views</span>
                     <span><i class="fa fa-circle text-green-400 text-[5px] mr-1 animate-pulse"></i> <b id="onlineCounter">1</b> Online</span>
@@ -66,12 +65,15 @@
     <div class="max-w-4xl mx-auto p-4">
         <section id="homePage" class="page active-page"><div id="announcementList" class="space-y-6 pb-6"></div></section>
         
-        <section id="knowledgePage" class="page"><div id="knowledgeList" class="space-y-6 pb-6"></div></section>
+        <section id="knowledgePage" class="page"><h3 class="text-[#37006a] font-bold text-xs uppercase mb-2">Knowledge Sharing</h3><div id="knowledgeList" class="space-y-6 pb-6"></div></section>
 
         <section id="directoryPage" class="page">
-            <div class="sticky top-0 z-30 bg-[#f8f5ff]/95 backdrop-blur-md py-3 space-y-3">
+            <div class="sticky top-0 z-30 bg-[#f8f5ff]/95 backdrop-blur-md py-3 space-y-2">
                 <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="ဆိုင်အမည်၊ ရပ်ကွက် ရှာရန်..." class="w-full p-3 rounded-2xl border border-[#D4AF37] text-xs shadow-sm outline-none">
-                <div class="flex overflow-x-auto gap-2 pb-1 no-scrollbar border-t pt-2" id="dirFilters"></div>
+                
+                <div class="flex overflow-x-auto gap-2 no-scrollbar border-t pt-2" id="catFilters"></div>
+                <div class="flex overflow-x-auto gap-2 no-scrollbar pt-1" id="typeFilters"></div>
+                <div class="flex overflow-x-auto gap-2 no-scrollbar pt-1" id="wardFilters"></div>
             </div>
             <div id="directoryList" class="pb-6"></div>
         </section>
@@ -99,14 +101,14 @@
             <div class="bg-white p-4 rounded-2xl shadow-sm border">
                 <div class="grid grid-cols-2 gap-3">
                     <button onclick="toggleChatAdmin()" class="bg-gray-100 text-[#37006a] p-3 rounded-xl text-[9px] font-bold flex flex-col items-center gap-1"><i class="fa fa-shield-alt text-base"></i> Chat Admin</button>
-                    <button onclick="localStorage.clear(); window.location.reload(true);" class="bg-red-50 text-red-500 p-3 rounded-xl text-[9px] font-bold flex flex-col items-center gap-1"><i class="fa fa-sync text-base"></i> Reset Cache</button>
+                    <button onclick="localStorage.clear(); window.location.reload(true);" class="bg-red-50 text-red-500 p-3 rounded-xl text-[9px] font-bold flex flex-col items-center gap-1"><i class="fa fa-sync text-base"></i> Reset App</button>
                 </div>
             </div>
         </section>
 
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[10000] overflow-y-auto hidden">
             <div class="sticky top-0 bg-white/95 backdrop-blur-md p-3 shadow-sm z-50 flex items-center border-b">
-                <button onclick="closeDetail()" class="w-9 h-9 rounded-full bg-gray-100 text-[#37006a] flex items-center justify-center"><i class="fa fa-arrow-left"></i></button>
+                <button onclick="closeDetail()" class="w-9 h-9 rounded-full bg-gray-100 text-[#37006a] flex items-center justify-center shadow"><i class="fa fa-arrow-left"></i></button>
                 <span class="ml-3 font-bold text-[#37006a] truncate text-[10px] uppercase flex-1" id="detailHeader">Details</span>
             </div>
             <div id="detailContent" class="p-5 max-w-2xl mx-auto pb-32"></div>
@@ -130,44 +132,26 @@
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const GIDS = { events: '0', dir: '1267218282', admin: '626044868', know: '1899326424' };
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
-        let db, eventsData = [], dirData = [], knowData = [], activeDirCat = 'All', currentPostID = null, chatAdminMode = false;
+        let db, eventsData = [], dirData = [], knowData = [], currentPostID = null, chatAdminMode = false;
+        let activeCat = 'All', activeType = 'All', activeWard = 'All';
 
         window.onload = async function() {
             try {
                 const config = { apiKey: "AIzaSyBNcYd3ggUFzI9IX3dzwcpF3a2OvR9_Li4", authDomain: "cherry-directory.firebaseapp.com", databaseURL: "https://cherry-directory-default-rtdb.firebaseio.com", projectId: "cherry-directory", storageBucket: "cherry-directory.firebasestorage.app", messagingSenderId: "61677443166", appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf" };
-                firebase.initializeApp(config); db = firebase.database(); window.db = db;
-                
+                if(!firebase.apps.length) firebase.initializeApp(config);
+                db = firebase.database(); window.db = db;
                 db.ref('stats/total_views').on('value', s => document.getElementById('viewCounter').innerText = (s.val()||0).toLocaleString());
-                
-                let myPresRef = db.ref('stats/online_users').push();
-                myPresRef.onDisconnect().remove();
-                myPresRef.set({ flag: '🏳️', time: firebase.database.ServerValue.TIMESTAMP });
-
-                async function getFlag() {
-                    const apis = ['https://ipwho.is/', 'https://get.geojs.io/v1/ip/country.json'];
-                    for(let url of apis) {
-                        try {
-                            const res = await fetch(url); const data = await res.json();
-                            const code = data.country || data.country_code;
-                            if(code) { const flag = String.fromCodePoint(...code.toUpperCase().split('').map(c => 127397 + c.charCodeAt())); myPresRef.update({ flag: flag }); break; }
-                        } catch(e){}
-                    }
-                }
-                getFlag();
-
-                db.ref('stats/online_users').on('value', s => {
-                    const u = s.val() || {}; document.getElementById('onlineCounter').innerText = Object.keys(u).length;
-                    document.getElementById('flagList').innerText = [...new Set(Object.values(u).map(x => x.flag || '🏳️'))].slice(0, 5).join(' ');
-                });
+                const m = db.ref('stats/online_users').push(); m.onDisconnect().remove(); m.set({ time: firebase.database.ServerValue.TIMESTAMP });
+                db.ref('stats/online_users').on('value', s => document.getElementById('onlineCounter').innerText = s.numChildren()||1);
                 initChatSystem();
             } catch(e){}
             fetchEvents(); fetchDirectory(); fetchKnowledge(); fetchAdmin();
         };
 
-        // --- FETCHERS WITH STRICT DATA CLEANING ---
+        // --- FETCH & STRICT FILTER ---
         async function fetchEvents() { 
             const res = await fetch(`${BASE_URL}&gid=${GIDS.events}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
-            eventsData = j.table.rows.slice(1).map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v || 'News', title: r.c[1]?.v, desc: r.c[2]?.v, logo: r.c[8]?.v, from: r.c[3]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
+            eventsData = j.table.rows.slice(1).map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v || 'General', title: r.c[1]?.v, logo: r.c[8]?.v, from: r.c[3]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
                 .filter(i => i.title && !["title", "ခေါင်းစဉ်"].includes(i.title.toString().toLowerCase().trim()));
             renderEvents(); 
         }
@@ -176,46 +160,49 @@
             const res = await fetch(`${BASE_URL}&gid=${GIDS.dir}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
             dirData = j.table.rows.slice(1).map((r,idx) => ({ uid: 'dr-'+idx, name: r.c[0]?.v, cat: r.c[1]?.v || 'Misc', type: r.c[2]?.v || 'General', desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v || 'Unknown', ph1: r.c[7]?.v, ph2: r.c[8]?.v, viber: r.c[10]?.v, tg: r.c[11]?.v, logo: r.c[13]?.v || 'CDST_Logo.png', rating: r.c[19]?.v, note: r.c[20]?.v, imgs: [r.c[14]?.v, r.c[15]?.v, r.c[16]?.v, r.c[17]?.v, r.c[18]?.v].filter(Boolean) }))
                 .filter(i => i.name && !["name", "အမည်"].includes(i.name.toString().toLowerCase().trim()));
-            setupFilters(dirData); renderDirectory(); 
+            updateFilters(); renderDirectory(); 
         }
 
         async function fetchKnowledge() { 
             const res = await fetch(`${BASE_URL}&gid=${GIDS.know}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
-            knowData = j.table.rows.slice(1).map((r, idx) => ({ id: 'kn-'+idx, date: r.c[1]?.v, author: r.c[2]?.v, title: r.c[3]?.v, content: r.c[4]?.v, cat: r.c[5]?.v || 'Knowledge', img: r.c[6]?.v, imgs: [r.c[6]?.v, r.c[7]?.v, r.c[8]?.v, r.c[9]?.v, r.c[10]?.v].filter(Boolean) }))
-                .filter(i => i.title && !["title", "ခေါင်းစဉ်", "unique id"].includes(i.title.toString().toLowerCase().trim()));
+            knowData = j.table.rows.slice(1).map((r, idx) => ({ id: 'kn-'+idx, date: r.c[1]?.v, author: r.c[2]?.v, title: r.c[3]?.v, content: r.c[4]?.v, cat: r.c[5]?.v || 'Info', img: r.c[6]?.v, imgs: [r.c[6]?.v, r.c[7]?.v, r.c[8]?.v, r.c[9]?.v, r.c[10]?.v].filter(Boolean) }))
+                .filter(i => i.title && !["title", "ခေါင်းစဉ်"].includes(i.title.toString().toLowerCase().trim()));
             renderKnowledge(); 
         }
 
         async function fetchAdmin() { 
             const res = await fetch(`${BASE_URL}&gid=${GIDS.admin}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
-            const rows = j.table.rows;
-            const p = rows.find(r => r.c[0]?.v && !["description", "အကြောင်းအရာ"].includes(r.c[0].v.toString().toLowerCase()));
-            if (p) {
-                document.getElementById('adminProfileArea').innerHTML = `<div class="bg-white p-5 rounded-[25px] shadow-sm border-t-4 border-[#37006a] mb-6 slide-up"><h3 class="font-bold text-center text-[10px] text-[#37006a] mb-4 uppercase">Admin Support</h3><div class="space-y-3">
-                    ${p.c[1]?.v ? `<a href="tel:${p.c[1].v}" class="flex items-center justify-between bg-green-500 text-white p-3 rounded-2xl text-[9px] font-bold"><span>Call: ${p.c[1].v}</span><i class="fa fa-phone-alt"></i></a>`:''}
-                    ${p.c[3]?.v ? `<a href="viber://chat?number=${p.c[3].v}" class="flex items-center justify-between bg-[#7360f2] text-white p-3 rounded-2xl text-[9px] font-bold"><span>Viber Message</span><i class="fab fa-viber"></i></a>`:''}
-                </div></div>`;
-            }
-            const notes = rows.slice(1).map(r => r.c[6]?.v).filter(Boolean);
-            if(notes.length > 0) {
-                document.getElementById('marqueeBar').classList.remove('hidden');
-                document.getElementById('ticker').innerText = "🚨 " + notes.join(" | 🚨 ");
-                document.getElementById('adminNotesArea').innerHTML = notes.map(n => `<div class="bg-yellow-400 border-l-4 border-[#B8860B] p-4 rounded-2xl shadow-sm mb-3 uppercase font-bold text-[10px] text-[#37006a]">${n}</div>`).join('');
-            }
+            const p = j.table.rows.find(r => r.c[0]?.v && !["description", "ခေါင်းစဉ်"].includes(r.c[0].v.toString().toLowerCase()));
+            if (p) document.getElementById('adminProfileArea').innerHTML = `<div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-[#37006a] mb-6 slide-up"><h3 class="font-bold text-center text-[10px] text-[#37006a] mb-4 uppercase">Admin Support</h3><div class="space-y-3">${p.c[1]?.v ? `<a href="tel:${p.c[1].v}" class="flex items-center justify-between bg-green-500 text-white p-3 rounded-2xl text-[9px] font-bold"><span>Call Support: ${p.c[1].v}</span><i class="fa fa-phone-alt"></i></a>`:''}${p.c[3]?.v ? `<a href="viber://chat?number=${p.c[3].v}" class="flex items-center justify-between bg-[#7360f2] text-white p-3 rounded-2xl text-[9px] font-bold"><span>Viber Message</span><i class="fab fa-viber"></i></a>`:''}</div></div>`;
+            const notes = j.table.rows.slice(1).map(r => r.c[6]?.v).filter(Boolean);
+            if(notes.length > 0) { document.getElementById('marqueeBar').classList.remove('hidden'); document.getElementById('ticker').innerText = "🚨 " + notes.join(" | 🚨 "); document.getElementById('adminNotesArea').innerHTML = notes.map(n => `<div class="bg-yellow-400 border-l-4 border-[#B8860B] p-4 rounded-2xl shadow-sm mb-3 uppercase font-bold text-[10px] text-[#37006a]">${n}</div>`).join(''); }
         }
 
-        // --- HIERARCHICAL GROUPING RENDERERS ---
-        function renderEvents() { 
-            const groups = [...new Set(eventsData.map(x => x.cat))];
-            document.getElementById('announcementList').innerHTML = groups.map(g => `<div><span class="group-cat">${g}</span><div class="grid grid-cols-2 gap-3 mt-3">${eventsData.filter(x=>x.cat===g).reverse().map(i => `<div onclick="openDetail('event', '${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 dir-card"><div class="flex flex-col items-center text-center flex-grow"><img src="${fixDriveLink(i.logo)}" class="dir-img" onerror="this.src='CDST_Logo.png'"><h4 class="font-bold text-[#37006a] text-[10px] leading-5 w-full uppercase mb-2 line-clamp-2">${i.title}</h4></div><div class="text-[7px] text-gray-400 border-t pt-2 w-full text-center font-bold uppercase">${i.from || 'DATE'}</div></div>`).join('')}</div></div>`).join('');
+        // --- FILTER & GROUPING LOGIC ---
+        function updateFilters() {
+            const btn = (l, a, v, target) => `<button onclick="${target}='${v}'; updateFilters(); renderDirectory();" class="flex-shrink-0 px-4 py-1.5 rounded-xl text-[10px] font-bold shadow-sm whitespace-nowrap ${a===v?'bg-[#37006a] text-white':'bg-white text-gray-500 border'}">${v}</button>`;
+            
+            // Cat Filters
+            const cats = ['All', ...new Set(dirData.map(i => i.cat))];
+            document.getElementById('catFilters').innerHTML = cats.map(c => btn(c, activeCat, c, 'activeCat')).join('');
+
+            // Type Filters (Depend on Cat)
+            const typeScope = activeCat==='All' ? dirData : dirData.filter(i=>i.cat===activeCat);
+            const types = ['All', ...new Set(typeScope.map(i => i.type))];
+            document.getElementById('typeFilters').innerHTML = types.map(t => btn(t, activeType, t, 'activeType')).join('');
+
+            // Ward Filters (Depend on Type)
+            const wardScope = activeType==='All' ? typeScope : typeScope.filter(i=>i.type===activeType);
+            const wards = ['All', ...new Set(wardScope.map(i => i.ward))];
+            document.getElementById('wardFilters').innerHTML = wards.map(w => btn(w, activeWard, w, 'activeWard')).join('');
         }
 
         function renderDirectory() { 
             const t = document.getElementById('searchInput').value.toLowerCase();
-            let filtered = dirData.filter(i => (activeDirCat === 'All' || i.cat === activeDirCat) && (i.name.toLowerCase().includes(t) || (i.ward && i.ward.toLowerCase().includes(t))));
-            const categories = [...new Set(filtered.map(x => x.cat))];
+            let filtered = dirData.filter(i => (activeCat === 'All' || i.cat === activeCat) && (activeType === 'All' || i.type === activeType) && (activeWard === 'All' || i.ward === activeWard) && (i.name.toLowerCase().includes(t) || i.ward.toLowerCase().includes(t)));
             
-            document.getElementById('directoryList').innerHTML = categories.map(cat => {
+            const cats = [...new Set(filtered.map(x => x.cat))];
+            document.getElementById('directoryList').innerHTML = cats.map(cat => {
                 const types = [...new Set(filtered.filter(x=>x.cat===cat).map(x=>x.type))];
                 return `<div><span class="group-cat">${cat}</span>` + types.map(type => {
                     const wards = [...new Set(filtered.filter(x=>x.cat===cat && x.type===type).map(x=>x.ward))];
@@ -230,16 +217,14 @@
             }).join('');
         }
 
-        function renderKnowledge() { 
-            const groups = [...new Set(knowData.map(x => x.cat))];
-            document.getElementById('knowledgeList').innerHTML = groups.map(g => `<div><span class="group-cat">${g}</span><div class="space-y-3 mt-3">${knowData.filter(x=>x.cat===g).reverse().map(i => `<div onclick="openDetail('know', '${i.id}')" class="bg-white rounded-[20px] p-3 shadow-sm border border-gray-100 flex gap-3 items-center active:bg-gray-50 transition"><img src="${fixDriveLink(i.img)}" class="w-14 h-14 rounded-xl object-cover bg-gray-50 flex-shrink-0" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><h4 class="font-bold text-[#37006a] text-[11px] leading-tight line-clamp-2">${i.title}</h4><p class="text-[8px] text-gray-400 mt-1">${i.date} | by ${i.author}</p></div></div>`).join('')}</div></div>`).join('');
-        }
+        function renderEvents() { const groups = [...new Set(eventsData.map(x => x.cat))]; document.getElementById('announcementList').innerHTML = groups.map(g => `<div><span class="group-cat">${g}</span><div class="grid grid-cols-2 gap-3 mt-3">${eventsData.filter(x=>x.cat===g).reverse().map(i => `<div onclick="openDetail('event', '${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 dir-card"><div class="flex flex-col items-center text-center flex-grow"><img src="${fixDriveLink(i.logo)}" class="dir-img" onerror="this.src='CDST_Logo.png'"><h4 class="font-bold text-[#37006a] text-[10px] leading-5 w-full uppercase mb-2 line-clamp-2">${i.title}</h4></div><div class="text-[7px] text-gray-400 border-t pt-2 w-full text-center uppercase font-bold">${i.from || 'DATE'}</div></div>`).join('')}</div></div>`).join(''); }
+        function renderKnowledge() { const groups = [...new Set(knowData.map(x => x.cat))]; document.getElementById('knowledgeList').innerHTML = groups.map(g => `<div><span class="group-cat">${g}</span><div class="space-y-3 mt-3">${knowData.filter(x=>x.cat===g).reverse().map(i => `<div onclick="openDetail('know', '${i.id}')" class="bg-white rounded-[20px] p-3 shadow-sm border border-gray-100 flex gap-3 items-center active:bg-gray-50 transition"><img src="${fixDriveLink(i.img)}" class="w-14 h-14 rounded-xl object-cover bg-gray-50 flex-shrink-0" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><h4 class="font-bold text-[#37006a] text-[11px] leading-tight line-clamp-2">${i.title}</h4><p class="text-[8px] text-gray-400 mt-1">${i.date} | by ${i.author}</p></div></div>`).join('')}</div></div>`).join(''); }
 
-        // --- PREMIUM DETAIL & SYSTEM ---
+        // --- PREMIUM CONTACT TEMPLATE (FULL ROW SHOW) ---
         function openDetail(type, uid) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
             const rR = (l, v) => `<div class="border-b border-gray-50 py-3"><p class="text-[8px] text-gray-400 mb-0.5 uppercase font-bold tracking-widest">${l}</p><div class="text-[#37006a] font-medium text-[11px] post-content">${v || '-'}</div></div>`;
-            const rP = (l, v) => `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div><p class="text-[8px] text-gray-400 font-bold uppercase">${l}</p><p class="text-[#37006a] font-bold text-xs font-mono">${v || '-'}</p></div>${v?`<a href="tel:${v}" class="bg-green-500 text-white w-8 h-8 rounded-xl flex items-center justify-center shadow-md"><i class="fa fa-phone"></i></a>`:''}</div>`;
+            const rP = (l, v) => `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div><p class="text-[8px] text-gray-400 font-bold uppercase">${l}</p><p class="text-[#37006a] font-bold text-xs font-mono">${v || '-'}</p></div>${v?`<a href="tel:${v}" class="bg-green-500 text-white w-8 h-8 rounded-xl flex items-center justify-center shadow-md active:scale-90"><i class="fa fa-phone"></i></a>`:''}</div>`;
             
             let i;
             if(type==='event') i = eventsData.find(x => x.uid === uid);
@@ -259,7 +244,7 @@
                     ${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Ward', i.ward)}${rR('Address', i.addr)}
                 </div>
                 <div class="bg-white p-6 rounded-3xl shadow-sm space-y-1">
-                    <h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase">Contact Detail</h3>
+                    <h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase">CONTACT DETAILS</h3>
                     ${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}
                     <div class="py-4 flex gap-4">
                         ${i.viber?`<a href="viber://chat?number=${i.viber}" class="flex-1 bg-[#7360f2] text-white p-3 rounded-2xl text-[9px] font-bold text-center shadow">VIBER</a>`:''}
@@ -269,44 +254,25 @@
                 ${i.note?`<div class="bg-yellow-50 p-6 rounded-3xl border-l-4 border-yellow-400 font-bold text-[#37006a] text-[10px] uppercase leading-relaxed">${i.note}</div>`:''}
                 <div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
             } else {
-                content.innerHTML = `<div class="space-y-4 slide-up"><img src="${fixDriveLink(i.logo||i.img)}" class="w-full h-52 rounded-[30px] object-cover border-4 border-white shadow-md" onerror="this.src='CDST_Logo.png'"><div class="bg-white p-6 rounded-3xl shadow-sm"><span class="group-type" style="margin:0 0 10px 0">${i.cat}</span><h2 class="text-sm font-bold text-[#37006a] mb-4 leading-relaxed">${i.title}</h2><div class="post-content">${i.desc||i.content}</div></div><div class="gallery-vertical">${i.imgs.slice(1).map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><img src="${fixDriveLink(i.logo||i.img)}" class="w-full h-52 rounded-[30px] object-cover border-4 border-white shadow-md" onerror="this.src='CDST_Logo.png'"><div class="bg-white p-6 rounded-3xl shadow-sm"><h2 class="text-sm font-bold text-[#37006a] mb-4 leading-relaxed">${i.title}</h2><div class="post-content">${i.desc||i.content}</div></div><div class="gallery-vertical">${i.imgs.slice(1).map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
             }
-
             document.getElementById('postCommentSection').className = (type === 'know') ? 'block' : 'hidden';
             currentPostID = uid; if(type==='know') loadPostComments(uid);
             modal.classList.remove('hidden'); document.body.style.overflow = 'hidden';
         }
 
-        function showPage(p) { 
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page')); 
-            document.getElementById(p + 'Page').classList.add('active-page');
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('text-[#FFD700]'));
-            document.getElementById('nav-' + p).classList.add('text-[#FFD700]');
-            document.getElementById('marqueeBar').classList.toggle('hidden', !(p === 'home' || p === 'knowledge'));
-            window.scrollTo(0,0);
-        }
+        // --- STANDARD FUNCTIONS ---
+        function showPage(p) { document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page')); document.getElementById(p + 'Page').classList.add('active-page'); document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('text-[#FFD700]')); document.getElementById('nav-' + p).classList.add('text-[#FFD700]'); document.getElementById('marqueeBar').classList.toggle('hidden', !(p === 'home' || p === 'knowledge')); window.scrollTo(0,0); }
         function closeDetail() { document.getElementById('detailPage').classList.add('hidden'); document.body.style.overflow = 'auto'; }
         function handleSearch() { renderDirectory(); }
-        function setupFilters(data) { const vals = ['All', ...new Set(data.map(i => i.cat).filter(Boolean))]; document.getElementById('dirFilters').innerHTML = vals.map(v => `<button onclick="activeDirCat='${v}'; renderDirectory()" class="flex-shrink-0 px-4 py-1.5 bg-white border rounded-xl text-[10px] font-bold shadow-sm whitespace-nowrap">${v}</button>`).join(''); }
         function fixDriveLink(u) { if (!u || u === "" || u === "-") return 'CDST_Logo.png'; const m = u.match(/(?:id=|\/d\/|folders\/)([a-zA-Z0-9_-]{25,})/); return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : u; }
         function getStars(r) { let h = ''; for(let i=1; i<=5; i++) h += (i <= r) ? '<i class="fa fa-star text-orange-400"></i>' : '<i class="far fa-star text-gray-200"></i>'; return h; }
-
-        function initChatSystem() {
-            db.ref('shoutbox').limitToLast(30).on('value', s => {
-                const data = s.val() || {};
-                document.getElementById('chatMessages').innerHTML = Object.entries(data).map(([key, m]) => `<div class="chat-bubble ${m.id===localStorage.getItem('my_chat_id')?'bg-[#37006a] text-white self-end rounded-br-none':'bg-white text-gray-800 self-start rounded-bl-none shadow-sm'} relative">
-                <div onclick="deleteChat('${key}')" class="admin-del" style="display:${chatAdminMode?'flex':'none'}">x</div>
-                <b class="block text-[7px] opacity-60 mb-1 uppercase tracking-widest">${m.name}</b>${m.text}</div>`).join('');
-                document.getElementById('chatMessages').scrollTop = 99999;
-            });
-        }
-        function sendGlobalChat() { const n = document.getElementById('chatName').value.trim(); const t = document.getElementById('chatInput').value.trim(); if(!n || !t) return; let id = localStorage.getItem('my_chat_id') || Date.now().toString(); localStorage.setItem('my_chat_id', id); db.ref('shoutbox').push({ name: n, text: t, id: id, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('chatInput').value = ''; }
+        function initChatSystem() { db.ref('shoutbox').limitToLast(30).on('value', s => { const d = s.val() || {}; document.getElementById('chatMessages').innerHTML = Object.entries(d).map(([k, m]) => `<div class="chat-bubble ${m.id===localStorage.getItem('my_chat_id')?'bg-[#37006a] text-white self-end':'bg-white text-gray-800 self-start shadow-sm'} relative"><div onclick="deleteChat('${k}')" class="admin-del" style="display:${chatAdminMode?'flex':'none'}">x</div><b class="block text-[7px] opacity-60 mb-1 uppercase">${m.name}</b>${m.text}</div>`).join(''); document.getElementById('chatMessages').scrollTop = 99999; }); }
+        function sendGlobalChat() { const n = document.getElementById('chatName').value; const t = document.getElementById('chatInput').value; if(!n||!t) return; let id = localStorage.getItem('my_chat_id')||Date.now().toString(); localStorage.setItem('my_chat_id', id); db.ref('shoutbox').push({ name: n, text: t, id: id, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('chatInput').value = ''; }
         function deleteChat(key) { if(confirm("Delete?")) db.ref(`shoutbox/${key}`).remove(); }
-        function toggleChatAdmin() { if(prompt("Pass:")==="166233") { chatAdminMode = !chatAdminMode; alert("Admin Mode: " + (chatAdminMode?"ON":"OFF")); initChatSystem(); } }
-        
-        function loadPostComments(pid) { db.ref('comments/' + pid).on('value', (s) => { if(!s.exists()) { document.getElementById('postCommentList').innerHTML = '<p class="text-[9px] text-center text-gray-400 font-bold uppercase">No comments yet</p>'; return; } document.getElementById('postCommentList').innerHTML = Object.values(s.val()).map(c => `<div class="bg-gray-50 p-3 rounded-2xl border text-[10px]"><b>${c.name}:</b> ${c.text}</div>`).join(''); }); }
-        function sendPostComment() { const n = document.getElementById('postComName').value.trim(); const t = document.getElementById('postComInput').value.trim(); if(!n||!t) return; db.ref('comments/' + currentPostID).push({ name: n, text: t, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('postComInput').value = ''; }
-
+        function toggleChatAdmin() { if(prompt("Pass:")==="166233") { chatAdminMode = !chatAdminMode; alert("Admin: "+(chatAdminMode?"ON":"OFF")); initChatSystem(); } }
+        function loadPostComments(pid) { db.ref('comments/'+pid).on('value', s => { if(!s.exists()) { document.getElementById('postCommentList').innerHTML = '<p class="text-[9px] text-center text-gray-400">No comments yet.</p>'; return; } document.getElementById('postCommentList').innerHTML = Object.values(s.val()).map(c => `<div class="bg-gray-50 p-3 rounded-2xl border text-[10px]"><b>${c.name}:</b> ${c.text}</div>`).join(''); }); }
+        function sendPostComment() { const n = document.getElementById('postComName').value; const t = document.getElementById('postComInput').value; if(!n||!t) return; db.ref('comments/'+currentPostID).push({ name: n, text: t, time: firebase.database.ServerValue.TIMESTAMP }); document.getElementById('postComInput').value = ''; }
         setInterval(() => { const now = new Date(); document.getElementById('timeClock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); document.getElementById('fullDate').innerText = now.toDateString(); }, 1000);
     </script>
 </body>
