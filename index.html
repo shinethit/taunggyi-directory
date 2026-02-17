@@ -21,12 +21,19 @@
         .active-page { display: block; opacity: 1; transition: opacity 0.3s; }
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
+        .viber-bg { background-color: #7360f2; }
+        .telegram-bg { background-color: #229ED9; }
         .post-content { white-space: pre-wrap; line-height: 1.8; word-break: break-word; }
         
-        /* Full Image Gallery - Fixed */
+        /* Gallery System */
         .gallery-scroll { display: flex; overflow-x: auto; gap: 12px; padding: 5px; scroll-snap-type: x mandatory; }
-        .gallery-item { flex: 0 0 100%; scroll-snap-align: center; height: 350px; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .gallery-item { flex: 0 0 100%; scroll-snap-align: center; height: 320px; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .gallery-item img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Marquee Ticker */
+        .marquee-container { background: #FFD700; color: #37006a; padding: 6px 0; font-weight: bold; overflow: hidden; border-bottom: 2px solid #D4AF37; }
+        .marquee-text { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; padding-left: 100%; }
+        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -36,8 +43,8 @@
 </head>
 <body>
 
-    <div id="offlineNotice" class="hidden bg-orange-500 text-white text-[10px] text-center py-1 font-bold">
-        <i class="fa fa-wifi-slash mr-1"></i> YOU ARE VIEWING OFFLINE DATA
+    <div id="marqueeBar" class="marquee-container hidden">
+        <div id="ticker" class="marquee-text text-sm">LOADING ANNOUNCEMENTS...</div>
     </div>
 
     <header class="purple-gradient text-white shadow-lg rounded-b-[20px] border-b-2 border-[#D4AF37] relative z-0">
@@ -75,7 +82,7 @@
         </section>
 
         <section id="contactPage" class="page space-y-4">
-            <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 relative overflow-hidden text-center">
+            <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 relative overflow-hidden text-center slide-up">
                 <h3 class="font-bold text-[#4B0082] text-md mb-1">လုပ်ငန်းရှင်များအတွက်</h3>
                 <p class="text-xs text-gray-600 mb-3">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
                 <a id="regBtn" target="_blank" class="inline-block gold-gradient text-white text-xs font-bold px-4 py-2 rounded-lg shadow cursor-pointer active:scale-95">စာရင်းသွင်းရန်</a>
@@ -100,19 +107,9 @@
     </nav>
 
     <script>
-        // SERVICE WORKER REGISTRATION
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
-                    console.log('SW Registered');
-                });
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW Registered')); });
         }
-
-        // Offline / Online Detection
-        window.addEventListener('online', () => document.getElementById('offlineNotice').classList.add('hidden'));
-        window.addEventListener('offline', () => document.getElementById('offlineNotice').classList.remove('hidden'));
-        if (!navigator.onLine) document.getElementById('offlineNotice').classList.remove('hidden');
 
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const GID_HOME = '0', GID_DIR = '1267218282', GID_CONTACT = '626044868';
@@ -120,15 +117,13 @@
         const REVIEW_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
         document.getElementById('regBtn').href = REG_URL;
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
-        let eventsData = [], dirData = [];
+        let eventsData = [], dirData = [], adminData = [];
         let activeDirCat = 'All', activeEventCat = 'All';
 
         function fixDriveLink(url) {
             if (!url || url === "" || url === "-") return 'CDST_Logo.png';
             const driveMatch = url.match(/(?:id=|\/d\/|folders\/)([a-zA-Z0-9_-]{25,})/);
-            if (driveMatch && driveMatch[1]) {
-                return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1000`;
-            }
+            if (driveMatch && driveMatch[1]) return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1000`;
             return url;
         }
 
@@ -152,14 +147,12 @@
         }
 
         async function loadAllData() {
-            // Restore from Cache
-            const cEvents = localStorage.getItem('cache_events');
-            const cDir = localStorage.getItem('cache_dir');
-            const cAdmin = localStorage.getItem('cache_admin');
-            if(cEvents) { eventsData = JSON.parse(cEvents); setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); }); renderEvents(); }
-            if(cDir) { dirData = JSON.parse(cDir); setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); renderDirectory(); }
-            if(cAdmin) { renderAdminArea(JSON.parse(cAdmin)); }
-            
+            // Priority: Load from local Storage first for speed and persistence
+            const cE = localStorage.getItem('c_events'), cD = localStorage.getItem('c_dir'), cA = localStorage.getItem('c_admin');
+            if(cE) { eventsData = JSON.parse(cE); renderEvents(); }
+            if(cD) { dirData = JSON.parse(cD); renderDirectory(); }
+            if(cA) { adminData = JSON.parse(cA); renderAdminArea(adminData); }
+
             fetchEvents(); fetchDirectory(); fetchAdmin();
         }
 
@@ -169,12 +162,11 @@
                 const text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 eventsData = json.table.rows.map(r => ({ 
-                    cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, 
-                    fromDate: r.c[3]?.v, toDate: r.c[4]?.v, time: r.c[5]?.v, 
-                    place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, 
-                    images: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) 
-                })).filter(i => i.title && i.title !== "Title").reverse(); 
-                localStorage.setItem('cache_events', JSON.stringify(eventsData));
+                    cat: r.c[0]?.v, title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v, toDate: r.c[4]?.v, 
+                    time: r.c[5]?.v, place: r.c[6]?.v, org: r.c[7]?.v, logo: r.c[8]?.v, 
+                    imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) 
+                })).filter(i => i.title && i.title !== "Title").reverse();
+                localStorage.setItem('c_events', JSON.stringify(eventsData));
                 setupFilters('eventFilters', eventsData, (c) => { activeEventCat = c; renderEvents(); });
                 renderEvents();
             } catch (e) {}
@@ -185,9 +177,14 @@
                 const res = await fetch(`${BASE_URL}&gid=${GID_DIR}`);
                 const text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
-                dirData = json.table.rows.map(r => ({ name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, ward: r.c[5]?.v, city: r.c[6]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v, viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v, img: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v }))
-                .filter(i => i.name && i.name !== "Name");
-                localStorage.setItem('cache_dir', JSON.stringify(dirData));
+                dirData = json.table.rows.map(r => ({ 
+                    name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, 
+                    ward: r.c[5]?.v, city: r.c[6]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, ph3: r.c[9]?.v, 
+                    viber: r.c[10]?.v, telegram: r.c[11]?.v, email: r.c[12]?.v, img: r.c[13]?.v, 
+                    rating: r.c[14]?.v, note: r.c[15]?.v,
+                    imgs: [r.c[13]?.v, r.c[16]?.v, r.c[17]?.v, r.c[18]?.v, r.c[19]?.v].filter(Boolean) 
+                })).filter(i => i.name && i.name !== "Name");
+                localStorage.setItem('c_dir', JSON.stringify(dirData));
                 setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); });
                 renderDirectory();
             } catch (e) {}
@@ -198,8 +195,9 @@
                 const res = await fetch(`${BASE_URL}&gid=${GID_CONTACT}`);
                 const text = await res.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
-                localStorage.setItem('cache_admin', JSON.stringify(json.table.rows));
-                renderAdminArea(json.table.rows);
+                adminData = json.table.rows;
+                localStorage.setItem('c_admin', JSON.stringify(adminData));
+                renderAdminArea(adminData);
             } catch (e) {}
         }
 
@@ -210,16 +208,18 @@
                 <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-[#4B0082] mb-6 slide-up">
                     <div class="mb-4 text-center border-b pb-4"><i class="fa fa-user-shield text-3xl text-[#4B0082] mb-2"></i><h3 class="font-bold text-lg text-[#4B0082]">Admin Profile</h3></div>
                     <div class="space-y-4">
-                        <div class="flex justify-between items-start border-b border-gray-50 pb-2"><span class="text-[10px] text-gray-400 uppercase font-bold">Description</span><span class="text-xs font-bold text-[#4B0082] text-right ml-4">${profile.c[0]?.v || '-'}</span></div>
+                        <div class="flex justify-between items-start border-b border-gray-50 pb-2"><span class="text-[10px] text-gray-400 font-bold uppercase">Description</span><span class="text-xs font-bold text-[#4B0082] text-right ml-4">${profile.c[0]?.v || '-'}</span></div>
                         ${renderAdminBtn('Phone 1', profile.c[1]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}
-                        ${renderAdminBtn('Phone 2', profile.c[2]?.v, 'tel:', 'fa-phone-alt', 'bg-green-500')}
                         ${renderAdminBtn('Viber Chat', profile.c[3]?.v, 'viber://chat?number=', 'fa-viber', 'viber-bg', true)}
                         ${renderAdminBtn('Telegram Chat', profile.c[4]?.v, 'https://t.me/', 'fa-telegram', 'telegram-bg', false, true)}
-                        ${renderAdminBtn('Email Admin', profile.c[5]?.v, 'mailto:', 'fa-envelope', 'bg-red-500')}
                     </div>
                 </div>`;
             }
             const notes = rows.slice(1).map(r => r.c[6]?.v).filter(Boolean);
+            if(notes.length > 0) {
+                document.getElementById('marqueeBar').classList.remove('hidden');
+                document.getElementById('ticker').innerText = "🚨 " + notes.join(" | 🚨 ");
+            }
             document.getElementById('adminNotesArea').innerHTML = notes.map(note => `
                 <div class="bg-yellow-400 border-l-8 border-[#B8860B] p-5 rounded-r-2xl shadow-lg slide-up">
                     <h4 class="font-bold text-sm text-[#37006a] uppercase flex items-center gap-2 mb-2 tracking-widest"><i class="fa fa-bullhorn animate-bounce"></i> ANNOUNCEMENT</h4>
@@ -227,46 +227,38 @@
                 </div>`).join('');
         }
 
-        function renderAdminBtn(lbl, val, pref, icon, cls, isFab=false, isTg=false) {
+        function renderAdminBtn(lbl, val, pref, icon, cls, isFab=false) {
             if(!val || val === "-" || val === "") return '';
-            let lnk = pref + (isTg ? val.toString().replace('@','') : val);
-            return `<a href="${lnk}" class="flex items-center justify-between ${cls} text-white p-3 rounded-xl shadow-md active:scale-90 transition"><span class="font-bold text-xs">${lbl}: ${val}</span><i class="${isFab?'fab':'fa'} ${icon}"></i></a>`;
+            return `<a href="${pref}${val}" class="flex items-center justify-between ${cls} text-white p-3 rounded-xl shadow-md active:scale-90 transition"><span class="font-bold text-xs">${lbl}: ${val}</span><i class="${isFab?'fab':'fa'} ${icon}"></i></a>`;
         }
 
         function setupFilters(cid, data, cb) {
             const cats = ['All', ...new Set(data.map(i => i.cat).filter(Boolean))];
             const cont = document.getElementById(cid);
             cont.innerHTML = cats.map(c => `<button class="filter-btn flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold border transition-all ${c===(cid==='eventFilters'?activeEventCat:activeDirCat)?'bg-[#D4AF37] text-white border-[#D4AF37]':'bg-white text-gray-600 border-gray-200'}">${c}</button>`).join('');
-            cont.querySelectorAll('button').forEach((btn, idx) => {
-                btn.onclick = () => {
-                    cont.querySelectorAll('button').forEach(b => { b.classList.remove('bg-[#D4AF37]','text-white','border-[#D4AF37]'); b.classList.add('bg-white','text-gray-600','border-gray-200'); });
-                    btn.classList.add('bg-[#D4AF37]','text-white','border-[#D4AF37]'); btn.classList.remove('bg-white','text-gray-600','border-gray-200');
-                    cb(cats[idx]);
-                };
-            });
+            cont.querySelectorAll('button').forEach((btn, idx) => { btn.onclick = () => { cb(cats[idx]); }; });
         }
 
         function renderEvents() {
             const list = document.getElementById('announcementList');
-            let data = activeEventCat === 'All' ? eventsData : eventsData.filter(e => e.cat === activeEventCat);
-            if(!data.length) { list.innerHTML = '<p class="text-center text-gray-400 py-10">No events found.</p>'; return; }
-            const groups = data.reduce((a, i) => { a[i.cat] = a[i.cat] || []; a[i.cat].push(i); return a; }, {});
-            list.innerHTML = Object.keys(groups).map(cat => `
-                <div class="mb-4"><h3 class="font-bold text-[#D4AF37] text-[10px] uppercase tracking-widest mb-2 border-l-4 border-[#D4AF37] pl-2">${cat}</h3>
-                <div class="space-y-3">${groups[cat].map(i => `
-                    <div onclick="openDetail('event', ${eventsData.indexOf(i)})" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 transition-transform"><img src="${fixDriveLink(i.logo)}" referrerpolicy="no-referrer" class="w-20 h-20 rounded-lg object-cover bg-gray-100" onerror="this.src='CDST_Logo.png'"><div class="flex-1 flex flex-col justify-center"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.title}</h4><p class="text-[10px] text-gray-500 mt-1 line-clamp-2">${i.desc || ''}</p><span class="text-[9px] text-[#D4AF37] font-bold mt-2 uppercase">View Details <i class="fa fa-arrow-right"></i></span></div></div>`).join('')}</div></div>`).join('');
+            let d = activeEventCat === 'All' ? eventsData : eventsData.filter(e => e.cat === activeEventCat);
+            list.innerHTML = d.map(i => `
+                <div onclick="openDetail('event', ${eventsData.indexOf(i)})" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 transition-transform slide-up">
+                    <img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-lg object-cover bg-gray-100" onerror="this.src='CDST_Logo.png'">
+                    <div class="flex-1"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.title}</h4><p class="text-[10px] text-gray-500 mt-1 line-clamp-2">${i.desc || ''}</p><span class="text-[9px] text-[#D4AF37] font-bold mt-2 uppercase">View Details <i class="fa fa-arrow-right"></i></span></div>
+                </div>`).join('');
         }
 
         function renderDirectory() {
             const list = document.getElementById('directoryList');
             const term = document.getElementById('searchInput').value.toLowerCase();
-            let data = dirData.filter(d => (activeDirCat === 'All' || d.cat === activeDirCat) && (d.name.toLowerCase().includes(term) || (d.ward && d.ward.toLowerCase().includes(term))));
-            if(!data.length) { list.innerHTML = '<p class="text-center text-gray-400 mt-10">No results found.</p>'; return; }
-            const groups = data.reduce((a, i) => { a[i.cat] = a[i.cat] || []; a[i.cat].push(i); return a; }, {});
-            list.innerHTML = Object.keys(groups).map(c => `
-                <div class="mb-5"><h3 class="font-bold text-[#4B0082] text-xs bg-gray-100 px-3 py-1 rounded-lg inline-block mb-3">${c}</h3><div class="grid grid-cols-1 gap-3">${groups[c].map(i => `
-                    <div onclick="openDetail('dir', ${dirData.indexOf(i)})" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex gap-3 items-start cursor-pointer active:scale-95 transition-transform"><img src="${fixDriveLink(i.img)}" referrerpolicy="no-referrer" class="w-14 h-14 rounded-lg object-cover bg-gray-50 border" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><div class="flex justify-between items-start mb-1"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.name}</h4><span class="text-[8px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 flex-shrink-0">${i.type || ''}</span></div>
-                    <div class="mb-1">${getStars(i.rating)}</div><p class="text-[10px] text-gray-500 leading-snug break-words line-clamp-1">${i.desc || '-'}</p><div class="flex items-center mt-2 text-[10px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || 'Taunggyi'}</div></div></div>`).join('')}</div></div>`).join('');
+            let d = dirData.filter(d => (activeDirCat === 'All' || d.cat === activeDirCat) && (d.name.toLowerCase().includes(term) || (d.ward && d.ward.toLowerCase().includes(term))));
+            list.innerHTML = d.map(i => `
+                <div onclick="openDetail('dir', ${dirData.indexOf(i)})" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex gap-3 items-start cursor-pointer active:scale-95 transition-transform slide-up">
+                    <img src="${fixDriveLink(i.img)}" class="w-14 h-14 rounded-lg object-cover bg-gray-50 border" onerror="this.src='CDST_Logo.png'">
+                    <div class="flex-1 overflow-hidden"><div class="flex justify-between items-start mb-1"><h4 class="font-bold text-[#4B0082] text-sm leading-tight break-words">${i.name}</h4><span class="text-[8px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100">${i.type || ''}</span></div>
+                    <div class="mb-1">${getStars(i.rating)}</div><div class="flex items-center mt-2 text-[10px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || 'Taunggyi'}</div></div>
+                </div>`).join('');
         }
 
         function handleSearch() { renderDirectory(); }
@@ -275,40 +267,28 @@
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
             const rR = (l, v) => `<div class="border-b border-gray-50 py-3"><p class="text-[10px] text-gray-400 mb-0.5 uppercase font-bold tracking-wider">${l}</p><div class="text-gray-800 font-medium text-sm post-content">${v || '-'}</div></div>`;
             const rP = (l, v) => v ? `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div><p class="text-[10px] text-gray-400 mb-0.5 uppercase font-bold">${l}</p><p class="text-[#4B0082] font-bold text-sm font-mono">${v}</p></div><a href="tel:${v}" class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm active:scale-90"><i class="fa fa-phone mr-1"></i> CALL</a></div>` : '';
-            const rC = (l, v, i, c, lp) => v ? `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i class="${i}"></i></div><div><p class="text-[10px] text-gray-400 uppercase font-bold">${l}</p><p class="text-xs font-bold text-gray-700">${v}</p></div></div><a href="${lp}${v.toString().replace('@','')}" target="_blank" class="${c} text-white px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm active:scale-90">CHAT</a></div>` : '';
+            const rC = (l, v, i, c, lp) => v ? `<div class="border-b border-gray-50 py-3 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i class="${i}"></i></div><div><p class="text-[10px] text-gray-400 uppercase font-bold">${l}</p><p class="text-xs font-bold text-gray-700">${v}</p></div></div><a href="${lp}${v}" target="_blank" class="${c} text-white px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm active:scale-90">CHAT</a></div>` : '';
 
             if(type === 'event') {
                 const i = eventsData[index]; document.getElementById('detailHeader').innerText = "Post Details";
-                const imgs = i.images.length > 0 ? i.images : [];
-                content.innerHTML = `
-                    <div class="space-y-4 slide-up">
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border-b-4 border-[#D4AF37] flex items-center gap-4">
-                            <img src="${fixDriveLink(i.logo)}" referrerpolicy="no-referrer" class="w-16 h-16 rounded-xl object-cover border" onerror="this.src='CDST_Logo.png'">
-                            <div class="flex-1"><h2 class="text-lg font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full uppercase mt-1 inline-block">${i.cat}</span></div>
-                        </div>
-                        ${imgs.length > 0 ? `<div class="bg-white p-2 rounded-2xl shadow-sm"><div class="gallery-scroll">${imgs.map(img => `<div class="gallery-item"><img src="${fixDriveLink(img)}" referrerpolicy="no-referrer" onclick="window.open(this.src)"></div>`).join('')}</div><p class="text-[9px] text-center text-gray-400 mt-2 italic"><i class="fa fa-arrow-left mr-1"></i> Swipe for more images <i class="fa fa-arrow-right ml-1"></i></p></div>` : ''}
-                        <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest">Information</h3>
-                        ${rR('Description', i.desc)}${rR('Organized by', i.org)}${rR('Location', i.place)}${rR('Date', (i.fromDate + ' to ' + i.toDate))}${rR('Time', i.time)}</div></div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white p-5 rounded-2xl shadow-sm border-b-4 border-[#D4AF37] flex items-center gap-4"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover border" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><h2 class="text-lg font-bold text-[#4B0082]">${i.title}</h2><span class="text-[9px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full mt-1 inline-block uppercase">${i.cat}</span></div></div>${i.imgs.length > 0 ? `<div class="bg-white p-2 rounded-2xl shadow-sm"><div class="gallery-scroll">${i.imgs.map(img => `<div class="gallery-item"><img src="${fixDriveLink(img)}" onclick="window.open(this.src)"></div>`).join('')}</div><p class="text-[9px] text-center text-gray-400 mt-2 italic">Swipe to see more</p></div>` : ''}<div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest">Information</h3>${rR('Description', i.desc)}${rR('Organized by', i.org)}${rR('Location', i.place)}${rR('Date', (i.fromDate + ' to ' + i.toDate))}${rR('Time', i.time)}</div></div>`;
             } else {
                 const i = dirData[index]; document.getElementById('detailHeader').innerText = i.name;
                 content.innerHTML = `<div class="space-y-4 slide-up">
-                    <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.img)}" referrerpolicy="no-referrer" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-xl font-bold text-[#4B0082]">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-4 py-1.5 rounded-full shadow-sm hover:bg-gray-200"><i class="fa fa-pen mr-1"></i> Write Review</a></div>
+                    <div class="bg-white rounded-3xl p-5 shadow-lg border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.img)}" class="w-28 h-28 rounded-xl object-cover mx-auto mb-3 border-2 shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-xl font-bold text-[#4B0082]">${i.name}</h2><div class="flex justify-center mt-1">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="inline-block mt-3 text-[10px] bg-gray-100 text-gray-500 px-4 py-1.5 rounded-full shadow-sm hover:bg-gray-200">Write Review</a></div>
+                    ${i.imgs.length > 1 ? `<div class="bg-white p-2 rounded-2xl shadow-sm"><div class="gallery-scroll">${i.imgs.map(img => `<div class="gallery-item"><img src="${fixDriveLink(img)}" onclick="window.open(this.src)"></div>`).join('')}</div><p class="text-[9px] text-center text-gray-400 mt-2 italic">Swipe to see business photos</p></div>` : ''}
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest">Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Address', i.addr)}${rR('Ward', i.ward)}</div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest">Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-xs uppercase tracking-widest">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${rC('Telegram', i.telegram, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>
-                    ${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400"><h3 class="font-bold text-[#4B0082] text-xs uppercase mb-2">Note</h3><p class="text-sm text-gray-600 post-content">${i.note}</p></div>` : ''}</div>`;
+                    ${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400"><h3 class="font-bold text-[#4B0082] text-xs uppercase tracking-widest mb-2">Note</h3><p class="text-sm text-gray-600 post-content">${i.note}</p></div>` : ''}</div>`;
             }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
 
         function closeDetail() { document.getElementById('detailPage').style.display = 'none'; document.body.style.overflow = 'auto'; document.getElementById('bottomNav').style.transform = 'translateY(0)'; }
-
         function showPage(p) {
             document.querySelectorAll('.page').forEach(page => { page.classList.remove('active-page'); setTimeout(() => { if(!page.classList.contains('active-page')) page.style.display = 'none'; }, 100); });
             const active = document.getElementById(p + 'Page'); active.style.display = 'block'; setTimeout(() => active.classList.add('active-page'), 10);
-            const navs = {'home': 'nav-home', 'directory': 'nav-directory', 'contact': 'nav-contact'};
-            Object.values(navs).forEach(id => { const btn = document.getElementById(id); btn.classList.remove('text-[#FFD700]', 'scale-110'); if(id !== 'nav-directory') btn.classList.add('text-gray-400'); else btn.querySelector('div').classList.remove('ring-4', 'ring-[#FFD700]/30'); });
-            const a = document.getElementById(navs[p]); if (p === 'directory') a.querySelector('div').classList.add('ring-4', 'ring-[#FFD700]/30'); else a.classList.add('text-[#FFD700]', 'scale-110');
             window.scrollTo(0,0);
         }
         loadAllData();
