@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cherry-v25';
+const CACHE_NAME = 'cherry-v26';
 const ASSETS = [
   './',
   './index.html',
@@ -19,7 +19,23 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = event.request.url;
+
+  // 🚨 CRITICAL FIX: Firebase & Google API တွေကို Service Worker က လုံးဝ မထိပါစေနဲ့
+  if (url.includes('firebaseio.com') || url.includes('googleapis.com')) {
+    return; // Network only (Let it pass through)
+  }
+
+  // ကျန်တာတွေကို Offline အတွက် သိမ်းမယ်
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.match(event.request).then((cachedRes) => {
+      // Cache ထဲမှာရှိရင် ယူသုံး၊ မရှိရင် Network ကဆွဲပြီး Cache ထဲထည့်
+      return cachedRes || fetch(event.request).then((networkRes) => {
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, networkRes.clone());
+          return networkRes;
+        });
+      });
+    })
   );
 });
