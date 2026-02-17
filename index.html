@@ -29,7 +29,7 @@
         .gallery-vertical img { width: 100%; border-radius: 12px; object-fit: contain; background: #000; border: 1px solid #eee; }
 
         .marquee-container { background: #FFD700; color: #37006a; padding: 7px 0; font-weight: bold; overflow: hidden; border-bottom: 2px solid #D4AF37; }
-        .marquee-text { display: inline-block; white-space: nowrap; animation: marquee 30s linear infinite; padding-left: 100%; }
+        .marquee-text { display: inline-block; white-space: nowrap; animation: marquee 35s linear infinite; padding-left: 100%; }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -84,8 +84,8 @@
 
         <section id="contactPage" class="page space-y-4">
             <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 text-center slide-up">
-                <h3 class="font-bold text-[#4B0082] text-sm mb-2 uppercase tracking-tighter">လုပ်ငန်းရှင်များအတွက်</h3>
-                <p class="text-[10px] text-gray-600 mb-4 leading-relaxed">မိမိတို့ လုပ်ငန်းအချက်အလက်များကို Cherry Directory တွင် အခမဲ့ ထည့်သွင်းလိုပါက အောက်ပါ Form ကို ဖြည့်စွက်ပေးပါ။</p>
+                <h3 class="font-bold text-[#4B0082] text-sm mb-2 uppercase tracking-tighter">Register Business</h3>
+                <p class="text-[10px] text-gray-600 mb-4">မိမိတို့ လုပ်ငန်းကို Cherry Directory တွင် ထည့်သွင်းလိုပါက Form ဖြည့်စွက်ပေးပါ။</p>
                 <a href="https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog" target="_blank" class="inline-block gold-gradient text-white text-[11px] font-bold px-8 py-3 rounded-2xl shadow-lg active:scale-95 transition uppercase">စာရင်းသွင်းရန်</a>
             </div>
             <div id="adminProfileArea"></div>
@@ -101,7 +101,7 @@
         </section>
     </div>
 
-    <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50">
+    <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50 transition-all duration-300">
         <button onclick="showPage('home')" class="nav-item flex flex-col items-center p-2 w-16 text-[#FFD700]" id="nav-home"><i class="fa fa-home text-lg mb-0.5"></i><span class="text-[9px] font-bold">Home</span></button>
         <button onclick="showPage('directory')" class="nav-item flex flex-col items-center p-2 w-16 relative" id="nav-directory"><div class="bg-[#D4AF37] text-[#37006a] w-10 h-10 rounded-full flex items-center justify-center -mt-6 shadow border-4 border-[#f8f5ff]"><i class="fa fa-search text-lg font-bold"></i></div><span class="text-[9px] font-bold mt-1">Search</span></button>
         <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact"><i class="fa fa-info-circle text-lg mb-0.5"></i><span class="text-[9px] font-bold">Admin</span></button>
@@ -171,8 +171,8 @@
                 dirData = j.table.rows.map((r,idx) => ({ 
                     uid: 'dir-'+idx, name: r.c[0]?.v, cat: r.c[1]?.v, type: r.c[2]?.v, desc: r.c[3]?.v, addr: r.c[4]?.v, 
                     ward: r.c[5]?.v, city: r.c[6]?.v, ph1: r.c[7]?.v, ph2: r.c[8]?.v, viber: r.c[10]?.v, tg: r.c[11]?.v, 
-                    email: r.c[12]?.v, logo: r.c[13]?.v, rating: r.c[14]?.v, note: r.c[15]?.v, 
-                    imgs: [r.c[16]?.v, r.c[17]?.v, r.c[18]?.v, r.c[19]?.v, r.c[20]?.v].filter(Boolean)
+                    email: r.c[12]?.v, logo: r.c[13]?.v, rating: r.c[19]?.v, note: r.c[15]?.v, 
+                    imgs: [r.c[14]?.v, r.c[15]?.v, r.c[16]?.v, r.c[17]?.v, r.c[18]?.v].filter(Boolean)
                 })).filter(i => i.name && i.name !== "Name");
                 localStorage.setItem('c_dir', JSON.stringify(dirData));
                 setupFilters('dirFilters', dirData, (c) => { activeDirCat = c; handleSearch(); }); renderDirectory();
@@ -248,7 +248,7 @@
             } else {
                 const i = dirData.find(x => x.uid === uid); document.getElementById('detailHeader').innerText = i.name;
                 content.innerHTML = `<div class="space-y-4 slide-up">
-                    <div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-xl object-cover mx-auto mb-3 border shadow-sm" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-4 py-2 rounded-full font-bold shadow-sm active:scale-95 transition flex items-center justify-center gap-2 max-w-[150px] mx-auto"><i class="fa fa-pen-nib"></i> Write Review</a></div>
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-xl object-cover mx-auto mb-3 border shadow-sm bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-4 py-2 rounded-full font-bold shadow-sm active:scale-95 transition flex items-center justify-center gap-2 max-w-[150px] mx-auto"><i class="fa fa-pen-nib"></i> Write Review</a></div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Ward', i.ward)}${rR('Address', i.addr)}</div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${rC('Telegram', i.tg, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>
