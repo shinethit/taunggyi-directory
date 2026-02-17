@@ -51,8 +51,7 @@
         .gallery-vertical img { width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid #eee; }
         .reaction-btn { padding: 8px 15px; border-radius: 12px; background: #f0f2f5; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         
-        /* Chart Scoped Styling */
-        .chart-container { position: relative; margin: auto; height: 220px; width: 100%; max-width: 320px; }
+        .chart-wrapper { position: relative; margin: auto; height: 230px; width: 100%; max-width: 320px; }
     </style>
 </head>
 <body>
@@ -69,7 +68,7 @@
             <div class="text-left leading-tight">
                 <div class="flex flex-col">
                     <h1 class="text-md font-bold tracking-widest uppercase">Cherry Directory</h1>
-                    <span id="headerSyncStatus" class="text-[7px] text-green-400 font-bold uppercase tracking-tighter mt-0.5">READY | 100% SYNC</span>
+                    <span id="headerSyncStatus" class="text-[6px] text-green-400 font-bold uppercase tracking-tighter mt-0.5 whitespace-nowrap">BOOTING...</span>
                 </div>
                 <div class="flex gap-3 text-[8px] text-gray-300 mt-1">
                     <span><i class="fa fa-eye mr-1"></i> <b id="viewCounter">...</b></span>
@@ -120,19 +119,19 @@
         <section id="contactPage" class="page space-y-4">
             <div class="bg-white p-5 rounded-[25px] shadow-sm border">
                 <h3 class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-widest">Database Sync Engine</h3>
-                <div class="flex justify-between text-[10px] font-bold mb-1"><span>Status: Connected</span><span id="loadPercent">100% Sync</span></div>
+                <div class="flex justify-between text-[10px] font-bold mb-1"><span>Database Status</span><span id="loadPercent">100% Sync</span></div>
                 <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden mb-4"><div class="gold-gradient h-full w-full"></div></div>
                 <div class="grid grid-cols-1 gap-2 text-[8px] font-bold">
                     <div class="bg-purple-50 p-2 rounded-lg border">Home Events Count: <span id="admin-home-count" class="text-[#37006a]">0</span></div>
                     <div class="bg-purple-50 p-2 rounded-lg border">Knowledge Library Count: <span id="admin-know-count" class="text-[#37006a]">0</span></div>
-                    <div class="bg-purple-50 p-2 rounded-lg border">Directory Business Records: <span id="admin-dir-count" class="text-[#37006a]">0</span></div>
+                    <div class="bg-purple-50 p-2 rounded-lg border">Directory Records Count: <span id="admin-dir-count" class="text-[#37006a]">0</span></div>
                 </div>
             </div>
 
-            <div class="bg-white p-5 rounded-[25px] shadow-sm border space-y-10">
-                <div><h3 class="text-[9px] font-bold text-[#37006a] mb-4 uppercase text-center border-b pb-1">City Wise Business (Column)</h3><div class="chart-container"><canvas id="cityColumnChart"></canvas></div></div>
-                <div><h3 class="text-[9px] font-bold text-[#37006a] mb-4 uppercase text-center border-b pb-1">City vs Category (Stacked)</h3><div class="chart-container"><canvas id="stackedChart"></canvas></div></div>
-                <div><h3 class="text-[9px] font-bold text-[#37006a] mb-4 uppercase text-center border-b pb-1">Taunggyi Distribution (Pie)</h3><div class="chart-container"><canvas id="tgPieChart"></canvas></div></div>
+            <div class="bg-white p-5 rounded-[25px] shadow-sm border space-y-12">
+                <div><h3 class="text-[9px] font-bold text-[#37006a] mb-4 uppercase text-center border-b pb-1">City Wise Volume (Bar)</h3><div class="chart-wrapper"><canvas id="cityColumnChart"></canvas></div></div>
+                <div><h3 class="text-[9px] font-bold text-[#37006a] mb-4 uppercase text-center border-b pb-1">Work Type Stacked Chart</h3><div class="chart-wrapper"><canvas id="stackedChart"></canvas></div></div>
+                <div><h3 class="text-[9px] font-bold text-[#37006a] mb-4 uppercase text-center border-b pb-1">Taunggyi Distribution (Pie)</h3><div class="chart-wrapper"><canvas id="tgPieChart"></canvas></div></div>
             </div>
             
             <div class="bg-white p-7 rounded-[35px] shadow-sm border-l-4 border-[#D4AF37] text-center">
@@ -183,20 +182,20 @@
 
         function updateAllSyncStatus() {
             const h = eventsData.length, k = knowData.length, d = dirData.length;
-            document.getElementById('headerSyncStatus').innerText = `Home Events: ${h} | Knowledge: ${k} | Directory: ${d} | 100% Sync`;
+            document.getElementById('headerSyncStatus').innerText = `Home Events: ${h} | Knowledge Library: ${k} | Directory Records: ${d} | 100% SYNC`;
             document.getElementById('admin-home-count').innerText = h;
             document.getElementById('admin-know-count').innerText = k;
             document.getElementById('admin-dir-count').innerText = d;
-            renderAnalyticsCharts();
+            renderAnalyticsDashboard();
         }
 
-        // --- DASHBOARD ANALYTICS ENGINE ---
-        function renderAnalyticsCharts() {
+        // --- ENHANCED CHART ENGINE ---
+        function renderAnalyticsDashboard() {
             if (!dirData.length) return;
             Chart.register(ChartDataLabels);
 
             const cityCounts = {}; const categories = [...new Set(dirData.map(i => i.cat))];
-            const cityCatMatrix = {}; // For Stacked Chart
+            const cityCatMatrix = {}; 
             dirData.forEach(i => { 
                 cityCounts[i.city] = (cityCounts[i.city] || 0) + 1; 
                 if(!cityCatMatrix[i.city]) cityCatMatrix[i.city] = {};
@@ -205,15 +204,15 @@
 
             const cities = Object.keys(cityCounts);
 
-            // 1. City Column Chart
+            // Chart 1: City Wise Column (Bar)
             const ctx1 = document.getElementById('cityColumnChart').getContext('2d');
             if(activeCharts.city) activeCharts.city.destroy();
             activeCharts.city = new Chart(ctx1, {
-                type: 'bar', data: { labels: cities, datasets: [{ label: 'Businesses', data: Object.values(cityCounts), backgroundColor: '#37006a', borderRadius: 5 }] },
-                options: { responsive: true, plugins: { datalabels: { color: '#fff', font: { weight: 'bold', size: 10 } }, legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+                type: 'bar', data: { labels: cities, datasets: [{ data: Object.values(cityCounts), backgroundColor: '#37006a', borderRadius: 4 }] },
+                options: { responsive: true, plugins: { datalabels: { color: '#fff', font: { weight: 'bold', size: 9 }, formatter: v => v }, legend: { display: false } }, scales: { y: { beginAtZero: true, display: false }, x: { ticks: { font: { size: 7 } } } } }
             });
 
-            // 2. City vs Cat Stacked Column Chart
+            // Chart 2: Stacked City vs Category
             const ctx2 = document.getElementById('stackedChart').getContext('2d');
             const stackedDatasets = categories.map((cat, idx) => ({
                 label: cat, data: cities.map(city => cityCatMatrix[city][cat] || 0),
@@ -222,18 +221,20 @@
             if(activeCharts.stacked) activeCharts.stacked.destroy();
             activeCharts.stacked = new Chart(ctx2, {
                 type: 'bar', data: { labels: cities, datasets: stackedDatasets },
-                options: { responsive: true, plugins: { datalabels: { display: false }, legend: { position: 'bottom', labels: { font: { size: 7 } } } }, scales: { x: { stacked: true }, y: { stacked: true } } }
+                options: { responsive: true, plugins: { datalabels: { display: false }, legend: { position: 'bottom', labels: { font: { size: 6 } } } }, scales: { x: { stacked: true, ticks: { font: { size: 7 } } }, y: { stacked: true, display: false } } }
             });
 
-            // 3. Taunggyi Special Pie Chart
-            const tgData = dirData.filter(i => i.city.toLowerCase().includes('taunggyi'));
+            // Chart 3: Taunggyi Distribution (Pie)
+            const tgData = dirData.filter(i => (i.city || "").toLowerCase().includes('taunggyi') || (i.city || "").includes('တောင်ကြီး'));
             const tgCatCounts = {}; tgData.forEach(i => tgCatCounts[i.cat] = (tgCatCounts[i.cat] || 0) + 1);
             const ctx3 = document.getElementById('tgPieChart').getContext('2d');
             if(activeCharts.tg) activeCharts.tg.destroy();
-            activeCharts.tg = new Chart(ctx3, {
-                type: 'pie', data: { labels: Object.keys(tgCatCounts), datasets: [{ data: Object.values(tgCatCounts), backgroundColor: ['#37006a', '#D4AF37', '#9333ea', '#fbbf24', '#7c3aed'] }] },
-                options: { responsive: true, plugins: { datalabels: { color: '#fff', font: { weight: 'bold', size: 10 } }, legend: { position: 'bottom', labels: { font: { size: 7 } } } } }
-            });
+            if(Object.keys(tgCatCounts).length > 0) {
+                activeCharts.tg = new Chart(ctx3, {
+                    type: 'pie', data: { labels: Object.keys(tgCatCounts), datasets: [{ data: Object.values(tgCatCounts), backgroundColor: ['#37006a', '#D4AF37', '#9333ea', '#fbbf24', '#7c3aed'] }] },
+                    options: { responsive: true, plugins: { datalabels: { color: '#fff', font: { weight: 'bold', size: 9 }, formatter: v => v }, legend: { position: 'bottom', labels: { font: { size: 7 } } } } }
+                });
+            }
         }
 
         window.onload = async function() {
@@ -255,7 +256,6 @@
             updateAllSyncStatus();
         }
 
-        // --- FETCHERS ---
         async function fetchEvents() { 
             const res = await fetch(`${BASE_URL}&gid=${GIDS.events}`); const t = await res.text(); const j = JSON.parse(t.substr(47).slice(0, -2)); 
             eventsData = j.table.rows.map((r,idx) => ({ uid: 'ev-'+idx, cat: r.c[0]?.v || 'News', title: r.c[1]?.v, desc: r.c[2]?.v, fromDate: r.c[3]?.v || '-', toDate: r.c[4]?.v || '-', time: r.c[5]?.v || '-', place: r.c[6]?.v || '-', org: r.c[7]?.v || '-', logo: r.c[8]?.v, imgs: [r.c[9]?.v, r.c[10]?.v, r.c[11]?.v, r.c[12]?.v, r.c[13]?.v].filter(Boolean) }))
@@ -290,13 +290,11 @@
             if(notes.length > 0) { document.getElementById('marqueeBar').classList.remove('hidden'); document.getElementById('ticker').innerText = "🚨 " + notes.join(" | 🚨 "); document.getElementById('adminNotesArea').innerHTML = notes.map(n => `<div class="bg-yellow-400 border-l-4 border-[#B8860B] p-5 rounded-2xl shadow-sm mb-3 uppercase font-bold text-[10px] text-[#37006a] tracking-tight leading-relaxed">${n}</div>`).join(''); }
         }
 
-        // --- FILTER ENGINE ---
         function initDropdowns() {
             const fill = (id, vals, key) => { const el = document.getElementById(id); if(!el) return; el.innerHTML = `<option value="All">${key}: ALL</option>` + vals.map(v => `<option value="${v}">${v}</option>`).join(''); };
             fill('citySelect', [...new Set(dirData.map(x => x.city))], 'CITY'); fill('catSelect', [...new Set(dirData.map(x => x.cat))], 'CAT'); fill('typeSelect', [...new Set(dirData.map(x => x.type))], 'TYPE'); fill('wardSelect', [...new Set(dirData.map(x => x.ward))], 'WARD');
         }
         function updateFilters(type) { filters[type] = document.getElementById(type + 'Select').value; renderDirectory(); }
-        
         function renderDirectory() { 
             const t = document.getElementById('searchInput').value.toLowerCase();
             let f = dirData.filter(i => (filters.city === 'All' || i.city === filters.city) && (filters.cat === 'All' || i.cat === filters.cat) && (filters.type === 'All' || i.type === filters.type) && (filters.ward === 'All' || i.ward === filters.ward) && (i.name.toLowerCase().includes(t) || (i.desc && i.desc.toLowerCase().includes(t))));
@@ -304,7 +302,6 @@
             document.getElementById('directoryList').innerHTML = groups.map(g => `<div><span class="group-header">${g}</span><div class="grid grid-cols-2 gap-4 mt-3">${f.filter(x=>x.cat===g).map(i => `<div onclick="openDetail('dir', '${i.uid}')" class="dir-card p-4"><div class="flex flex-col items-center text-center flex-grow"><div class="logo-box"><img src="${fixDriveLink(i.logo)}" onerror="this.src='CDST_Logo.png'"></div><h4 class="font-bold text-[#37006a] text-[11px] leading-tight w-full uppercase mb-2 line-clamp-2 mt-2">${i.name}</h4><div class="flex text-orange-400 text-[8px] gap-0.5">${getStars(i.rating)}</div></div><div class="text-[8px] text-[#D4AF37] border-t pt-2.5 w-full text-center font-bold uppercase"><i class="fa fa-map-pin mr-1"></i> ${i.city} | ${i.ward}</div></div>`).join('')}</div></div>`).join('');
         }
 
-        // Home Rendering with Filter
         function renderEvents() { 
             const cat = document.getElementById('homeCatSelect').value;
             let f = eventsData.filter(i => (cat === 'All' || i.cat === cat));
@@ -319,7 +316,7 @@
             document.getElementById('knowledgeList').innerHTML = groups.map(g => `<div><span class="group-header">${g}</span><div class="grid grid-cols-2 gap-3 mt-3">${f.filter(x=>x.cat===g).reverse().map(i => `<div onclick="openDetail('know', '${i.id}')" class="bg-white rounded-[25px] p-4 shadow-sm border flex flex-col items-center text-center h-full"><img src="${fixDriveLink(i.img)}" class="w-16 h-16 rounded-xl object-cover border mb-3" onerror="this.src='CDST_Logo.png'"><h4 class="font-bold text-[#37006a] text-[11px] leading-tight line-clamp-2 uppercase">${i.title}</h4><p class="text-[7px] text-gray-400 mt-2 border-t pt-2 w-full uppercase font-bold">${i.date}</p></div>`).join('')}</div></div>`).join('');
         }
 
-        // --- PREMIUM DETAIL ENGINE ---
+        // --- DETAIL MODAL LOGO FIX & PREMIUM ENGINE ---
         function openDetail(type, uid) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
             document.getElementById('bottomNav').style.display = 'none'; 
@@ -333,9 +330,10 @@
             currentPostID = uid; document.getElementById('detailHeader').innerText = i.title || i.name;
 
             if(type==='dir') {
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-[45px] p-8 shadow-sm border-b-4 border-[#D4AF37] text-center"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo)}" onerror="this.src='CDST_Logo.png'"></div><h2 class="text-sm font-bold text-[#37006a] uppercase tracking-wider">${i.name}</h2><div class="flex justify-center mt-3 scale-125">${getStars(i.rating)}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm">${rR('Detail Description', i.desc, 'fa-info-circle')}${rR('Location', i.city + ' | ' + i.ward, 'fa-map-marker-alt')}${rR('Category', i.cat, 'fa-tag')}${rR('Type', i.type, 'fa-list')}${rR('Full Address', i.addr, 'fa-home')}</div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase tracking-widest">Connect</h3>${rP('Phone Line 1', i.ph1)}${rP('Phone Line 2', i.ph2)}<div class="py-6 flex gap-4">${i.viber?`<a href="viber://chat?number=${i.viber}" class="flex-1 bg-[#7360f2] text-white p-4 rounded-2xl text-[10px] font-bold text-center">VIBER</a>`:''}${i.tg?`<a href="https://t.me/${i.tg}" class="flex-1 bg-[#0088cc] text-white p-4 rounded-2xl text-[10px] font-bold text-center">TELEGRAM</a>`:''}</div></div>${i.note?`<div class="bg-yellow-50 p-8 rounded-[35px] border-l-4 border-yellow-400 font-bold text-[#37006a] text-[11px] uppercase">${i.note}</div>`:''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-[45px] p-8 shadow-sm border-b-4 border-[#D4AF37] text-center"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo)}" onerror="this.src='CDST_Logo.png'"></div><h2 class="text-sm font-bold text-[#37006a] uppercase tracking-wider">${i.name}</h2><div class="flex justify-center mt-3 scale-125">${getStars(i.rating)}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm">${rR('Detail', i.desc, 'fa-info-circle')}${rR('Location', i.city + ' | ' + i.ward, 'fa-map-marker-alt')}${rR('Category', i.cat, 'fa-tag')}${rR('Type', i.type, 'fa-list')}${rR('Address', i.addr, 'fa-home')}</div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase tracking-widest">Connect</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}<div class="py-6 flex gap-4">${i.viber?`<a href="viber://chat?number=${i.viber}" class="flex-1 bg-[#7360f2] text-white p-4 rounded-2xl text-[10px] font-bold text-center">VIBER</a>`:''}${i.tg?`<a href="https://t.me/${i.tg}" class="flex-1 bg-[#0088cc] text-white p-4 rounded-2xl text-[10px] font-bold text-center">TELEGRAM</a>`:''}</div></div>${i.note?`<div class="bg-yellow-50 p-8 rounded-[35px] border-l-4 border-yellow-400 font-bold text-[#37006a] text-[11px] uppercase">${i.note}</div>`:''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`;
             } else if(type==='event') {
-                content.innerHTML = `<div class="space-y-4 slide-up"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo || 'CDST_Logo.png')}" onerror="this.src='CDST_Logo.png'"></div><div class="bg-white p-8 rounded-[35px] shadow-sm"><h2 class="text-sm font-bold text-[#37006a] mb-5 uppercase leading-relaxed">${i.title}</h2><div class="post-content">${i.desc||'-'}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase tracking-widest">Event Info</h3>${rR('Start Date', i.fromDate, 'fa-calendar')}${rR('End Date', i.toDate, 'fa-calendar-check')}${rR('Schedule', i.time, 'fa-clock')}${rR('Venue', i.place, 'fa-map-pin')}${rR('Organized By', i.org, 'fa-user-tie')}</div><div class="gallery-vertical">${i.imgs ? i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('') : ''}</div></div>`;
+                // PREMIUM EVENT DETAIL
+                content.innerHTML = `<div class="space-y-4 slide-up"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo || 'CDST_Logo.png')}" onerror="this.src='CDST_Logo.png'"></div><div class="bg-white p-8 rounded-[35px] shadow-sm"><h2 class="text-sm font-bold text-[#37006a] mb-5 uppercase leading-relaxed">${i.title}</h2><div class="post-content">${i.desc||'-'}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase tracking-widest">Event Info</h3>${rR('Start Date', i.fromDate, 'fa-calendar')}${rR('End Date', i.toDate, 'fa-calendar-check')}${rR('Time', i.time, 'fa-clock')}${rR('Venue', i.place, 'fa-map-pin')}${rR('Organized By', i.org, 'fa-user-tie')}</div><div class="gallery-vertical">${i.imgs ? i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('') : ''}</div></div>`;
             } else {
                 content.innerHTML = `<div class="space-y-4 slide-up"><div class="detail-logo-large"><img src="${fixDriveLink(i.logo || i.img)}" onerror="this.src='CDST_Logo.png'"></div><div class="bg-white p-8 rounded-[35px] shadow-sm"><h2 class="text-sm font-bold text-[#37006a] mb-5 leading-relaxed uppercase">${i.title}</h2><div class="post-content">${i.content}</div></div><div class="bg-white p-7 rounded-[35px] shadow-sm"><h3 class="font-bold text-[#37006a] text-[10px] border-b pb-2 mb-2 uppercase tracking-widest">Sharing Info</h3>${rR('Posted Date', i.date, 'fa-calendar')}${rR('Author', i.author, 'fa-user-edit')}${rR('Category', i.cat, 'fa-tag')}</div><div class="gallery-vertical">${i.imgs ? i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('') : ''}</div></div>`;
             }
