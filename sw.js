@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cherry-v17';
+const CACHE_NAME = 'cherry-v18';
 const ASSETS = [
   './',
   './index.html',
@@ -16,17 +16,16 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))));
 });
 
-// Stale-while-revalidate strategy (အမြဲတမ်း Cache ကဟာကို အရင်ပြမယ်)
+// Cache First Strategy (အင်တာနက်ထက် ဖုန်းထဲကဟာကို ဦးစားပေးဖတ်မယ်)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, networkResponse.clone());
+    caches.match(event.request).then((res) => {
+      return res || fetch(event.request).then((networkRes) => {
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, networkRes.clone());
+          return networkRes;
         });
-        return networkResponse;
       });
-      return cachedResponse || fetchPromise;
     })
   );
 });
