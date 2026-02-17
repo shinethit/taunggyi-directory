@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cherry Directory</title>
 
-    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="CDST_Logo.png">
@@ -14,6 +13,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
         body { font-family: 'Pyidaungsu', sans-serif; padding-bottom: 110px; background-color: #f8f5ff; }
@@ -21,8 +23,6 @@
         .active-page { display: block; opacity: 1; transition: opacity 0.3s; }
         .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%); }
         .purple-gradient { background: linear-gradient(135deg, #37006a 0%, #5e0a9e 100%); }
-        .viber-bg { background-color: #7360f2; }
-        .telegram-bg { background-color: #229ED9; }
         .post-content { white-space: pre-wrap; line-height: 1.7; word-break: break-word; }
         .gallery-vertical { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         .gallery-vertical img { width: 100%; border-radius: 12px; object-fit: contain; background: #000; border: 1px solid #eee; }
@@ -57,7 +57,7 @@
         <section id="homePage" class="page active-page space-y-3"><div class="flex overflow-x-auto gap-2 pb-2 no-scrollbar" id="eventFilters"></div><div id="announcementList" class="space-y-4 pb-4"></div></section>
         <section id="directoryPage" class="page">
             <div class="sticky top-0 z-30 bg-[#f8f5ff]/95 backdrop-blur-sm py-2 space-y-3">
-                <div class="relative"><input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="ဆိုင်အမည်၊ ရပ်ကွက် ရှာရန်..." class="w-full p-2 pl-9 rounded-xl shadow-sm border border-[#D4AF37] outline-none text-xs h-10"><i class="fa fa-search absolute left-3 top-3 text-[#D4AF37]"></i></div>
+                <div class="relative"><input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="ရှာရန်..." class="w-full p-2 pl-9 rounded-xl shadow-sm border border-[#D4AF37] outline-none text-xs h-10"><i class="fa fa-search absolute left-3 top-3 text-[#D4AF37]"></i></div>
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                     <button onclick="setGrouping('cat')" id="btnGroup-cat" class="bg-[#37006a] text-white px-3 py-1.5 rounded-lg text-[9px] font-bold border">Category</button>
                     <button onclick="setGrouping('type')" id="btnGroup-type" class="bg-white text-gray-500 px-3 py-1.5 rounded-lg text-[9px] font-bold border border-gray-200">Type</button>
@@ -69,11 +69,11 @@
         </section>
         <section id="contactPage" class="page space-y-4">
             <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-[#D4AF37] mb-2 text-center slide-up">
-                <h3 class="font-bold text-[#4B0082] text-sm mb-2">လုပ်ငန်းရှင်များအတွက်</h3>
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog" target="_blank" class="inline-block gold-gradient text-white text-[11px] font-bold px-8 py-3 rounded-2xl shadow-lg uppercase">စာရင်းသွင်းရန်</a>
+                <h3 class="font-bold text-[#4B0082] text-sm mb-2 uppercase">လုပ်ငန်းရှင်များအတွက်</h3>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdFGRd57WIpOOJDnZI4U9vrtZAsJCW6pRiP1WvQDrXZeRy5xA/viewform?usp=dialog" target="_blank" class="inline-block gold-gradient text-white text-[11px] font-bold px-8 py-3 rounded-2xl shadow-lg">စာရင်းသွင်းရန်</a>
             </div>
             <div id="adminProfileArea"></div><div id="adminNotesArea" class="space-y-3"></div>
-            <button onclick="forceCleanReset()" class="w-full py-4 bg-red-600 text-white text-[10px] font-bold rounded-2xl mt-10 uppercase shadow-lg"><i class="fa fa-sync-alt mr-1"></i> FIX APP & VIEW COUNTS (ANDROID ONLY)</button>
+            <button onclick="localStorage.clear(); sessionStorage.clear(); window.location.reload(true);" class="w-full py-3 bg-gray-200 text-gray-500 text-[10px] font-bold rounded-xl mt-10 uppercase tracking-widest">Update View Counts (Fix Sync)</button>
         </section>
         <section id="detailPage" class="fixed inset-0 bg-[#f8f5ff] z-[100] overflow-y-auto hidden">
             <div class="sticky top-0 bg-white/95 backdrop-blur-md p-3 shadow-sm z-50 flex items-center border-b border-gray-200"><button onclick="closeDetail()" class="w-9 h-9 rounded-full bg-gray-100 text-[#4B0082] flex items-center justify-center hover:bg-[#D4AF37]"><i class="fa fa-arrow-left"></i></button><span class="ml-3 font-bold text-[#4B0082] truncate text-xs uppercase" id="detailHeader">Details</span></div>
@@ -81,48 +81,47 @@
         </section>
     </div>
 
-    <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50 transition-all duration-300">
+    <nav id="bottomNav" class="fixed bottom-4 left-4 right-4 bg-[#37006a] text-gray-400 flex justify-around items-center p-2 shadow-2xl z-[50] rounded-2xl border border-[#D4AF37]/50">
         <button onclick="showPage('home')" class="nav-item flex flex-col items-center p-2 w-16 text-[#FFD700]" id="nav-home"><i class="fa fa-home text-lg mb-0.5"></i><span class="text-[9px] font-bold">Home</span></button>
         <button onclick="showPage('directory')" class="nav-item flex flex-col items-center p-2 w-16 relative" id="nav-directory"><div class="bg-[#D4AF37] text-[#37006a] w-10 h-10 rounded-full flex items-center justify-center -mt-6 shadow border-4 border-[#f8f5ff]"><i class="fa fa-search text-lg font-bold"></i></div><span class="text-[9px] font-bold mt-1">Search</span></button>
         <button onclick="showPage('contact')" class="nav-item flex flex-col items-center p-2 w-16 hover:text-gray-200" id="nav-contact"><i class="fa fa-info-circle text-lg mb-0.5"></i><span class="text-[9px] font-bold">Admin</span></button>
     </nav>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, increment, onDisconnect, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        
-        const firebaseConfig = { apiKey: "AIzaSyBNcYd3ggUFzI9IX3dzwcpF3a2OvR9_Li4", authDomain: "cherry-directory.firebaseapp.com", databaseURL: "https://cherry-directory-default-rtdb.firebaseio.com", projectId: "cherry-directory", storageBucket: "cherry-directory.firebasestorage.app", messagingSenderId: "61677443166", appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf", measurementId: "G-923Y0E16K7" };
-        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNcYd3ggUFzI9IX3dzwcpF3a2OvR9_Li4",
+            authDomain: "cherry-directory.firebaseapp.com",
+            databaseURL: "https://cherry-directory-default-rtdb.firebaseio.com",
+            projectId: "cherry-directory",
+            storageBucket: "cherry-directory.firebasestorage.app",
+            messagingSenderId: "61677443166",
+            appId: "1:61677443166:web:11f75ba5c5fbcd53643ccf"
+        };
 
-        // SYNC VIEW COUNTS FOR ANDROID
-        const vRef = ref(db, 'stats/total_views');
-        if(!sessionStorage.getItem('counted_v22')) { set(vRef, increment(1)); sessionStorage.setItem('counted_v22', 'true'); }
-        onValue(vRef, (s) => { document.getElementById('viewCounter').innerText = (s.val() || 0).toLocaleString(); });
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        const oRef = ref(db, 'stats/online_users'); const myP = push(oRef); set(myP, Date.now()); onDisconnect(myP).remove();
-        onValue(oRef, (s) => { document.getElementById('onlineCounter').innerText = s.size || 1; });
+        // View Counter Fix
+        const vRef = db.ref('stats/total_views');
+        if(!sessionStorage.getItem('vCount')) {
+            vRef.transaction((current) => (current || 0) + 1);
+            sessionStorage.setItem('vCount', 'true');
+        }
+        vRef.on('value', (s) => { document.getElementById('viewCounter').innerText = (s.val() || 0).toLocaleString(); });
+
+        // Online Counter Fix
+        const onlineRef = db.ref('stats/online_users');
+        const myPresence = onlineRef.push();
+        myPresence.set(firebase.database.ServerValue.TIMESTAMP);
+        myPresence.onDisconnect().remove();
+        onlineRef.on('value', (s) => { document.getElementById('onlineCounter').innerText = s.numChildren() || 1; });
     </script>
 
     <script>
-        // SERVICE WORKER REGISTRATION WITH FORCE UPDATE TRIGGER
-        if ('serviceWorker' in navigator) { 
-            window.addEventListener('load', () => { 
-                navigator.serviceWorker.register('./sw.js?v=v22').then(reg => {
-                    reg.onupdatefound = () => {
-                        const installingWorker = reg.installing;
-                        installingWorker.onstatechange = () => {
-                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                window.location.reload();
-                            }
-                        };
-                    };
-                });
-            }); 
-        }
-
+        // Main Application Logic
         const SHEET_ID = '1rMGmfDW5AsBZGJJw5H8HyavOQiIuMr-pPvXpShktYxQ';
         const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
-        const REVIEW_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog";
+
         let eventsData = [], dirData = [], adminData = [];
         let activeDirCat = 'All', activeEventCat = 'All', groupByKey = 'cat';
 
@@ -133,7 +132,6 @@
         function getStars(r) { if(!r || isNaN(r)) return '<div class="h-3"></div>'; let h = '<div class="flex text-orange-400 text-[8px] gap-0.5 justify-center">'; for(let i=1; i<=5; i++) h += (i <= r) ? '<i class="fa fa-star"></i>' : (i-0.5 <= r) ? '<i class="fa fa-star-half-alt"></i>' : '<i class="far fa-star text-gray-200"></i>'; return h + `<span class="text-gray-400 ml-1 text-[7px]">(${r})</span></div>`; }
 
         async function loadAllData() {
-            // STEP 1: LOAD FROM LOCAL STORAGE IMMEDIATELY
             const cE = localStorage.getItem('c_events'), cD = localStorage.getItem('c_dir'), cA = localStorage.getItem('c_admin');
             if(cE) { eventsData = JSON.parse(cE); renderEvents(); }
             if(cD) { dirData = JSON.parse(cD); renderDirectory(); }
@@ -156,7 +154,7 @@
         function setupFilters(cid, data, cb) { const vals = ['All', ...new Set(data.map(i => i[groupByKey]).filter(Boolean))]; const cont = document.getElementById(cid); cont.innerHTML = vals.map(v => `<button class="filter-btn flex-shrink-0 px-3 py-1 rounded-lg text-[9px] font-bold border transition-all ${v===(cid==='dirFilters'?activeDirCat:activeEventCat)?'bg-[#D4AF37] text-white':'bg-white text-gray-400 border-gray-100'}">${v}</button>`).join(''); cont.querySelectorAll('button').forEach((btn, idx) => { btn.onclick = () => { cb(vals[idx]); cont.querySelectorAll('button').forEach(b => { b.className = "filter-btn flex-shrink-0 px-3 py-1 rounded-lg text-[9px] font-bold border bg-white text-gray-400 border-gray-100"; }); btn.className = "filter-btn flex-shrink-0 px-3 py-1 rounded-lg text-[9px] font-bold border bg-[#D4AF37] text-white"; }; }); }
         function renderEvents() { const l = document.getElementById('announcementList'); let d = activeEventCat === 'All' ? eventsData : eventsData.filter(e => e.cat === activeEventCat); l.innerHTML = d.map(i => `<div onclick="openDetail('event', '${i.uid}')" class="bg-white rounded-xl shadow-sm p-3 flex gap-3 cursor-pointer active:scale-95 border border-gray-50 h-full"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-gray-50 border shadow-sm" onerror="this.src='CDST_Logo.png'"><div class="flex-1 overflow-hidden"><h4 class="font-bold text-[#4B0082] text-xs leading-tight mb-1 line-clamp-1">${i.title}</h4><p class="text-[9px] text-gray-500 line-clamp-2">${i.desc || ''}</p></div></div>`).join(''); }
         function renderDirectory() { const l = document.getElementById('directoryList'); const t = document.getElementById('searchInput').value.toLowerCase(); let filtered = dirData.filter(i => (activeDirCat === 'All' || i[groupByKey] === activeDirCat) && (i.name.toLowerCase().includes(t) || (i.ward && i.ward.toLowerCase().includes(t)))); const groups = filtered.reduce((a, i) => { a[i[groupByKey]] = a[i[groupByKey]] || []; a[i[groupByKey]].push(i); return a; }, {}); l.innerHTML = Object.keys(groups).map(g => `<div class="mb-5"><h3 class="font-bold text-[#4B0082] text-[8px] bg-purple-100/50 px-2 py-1 rounded-md inline-block mb-3 uppercase tracking-widest">${g}</h3><div class="grid grid-cols-2 gap-3">${groups[g].map(i => `
-            <div onclick="openDetail('dir', '${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col items-center text-center cursor-pointer active:scale-95 h-full"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-white mb-3 shadow-sm border border-gray-100" onerror="this.src='CDST_Logo.png'"><h4 class="font-bold text-[#4B0082] text-[10px] leading-tight mb-1.5 line-clamp-2 h-7 w-full uppercase">${i.name}</h4><div class="mb-2">${getStars(i.rating)}</div><div class="flex items-center text-[7px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || '-'}</div></div>`).join('')}</div></div>`).join(''); }
+            <div onclick="openDetail('dir', '${i.uid}')" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col items-center text-center cursor-pointer active:scale-95 h-full h-full h-full h-full"><img src="${fixDriveLink(i.logo)}" class="w-16 h-16 rounded-xl object-cover bg-white mb-3 shadow-sm border border-gray-200" onerror="this.src='CDST_Logo.png'"><h4 class="font-bold text-[#4B0082] text-[10px] leading-tight mb-1.5 line-clamp-2 h-7 w-full uppercase">${i.name}</h4><div class="mb-2 h-full">${getStars(i.rating)}</div><div class="flex items-center text-[7px] text-[#D4AF37] font-bold"><i class="fa fa-map-pin mr-1"></i> ${i.ward || '-'}</div></div>`).join('')}</div></div>`).join(''); }
         function handleSearch() { renderDirectory(); }
         function openDetail(type, uid) {
             const modal = document.getElementById('detailPage'); const content = document.getElementById('detailContent');
@@ -164,23 +162,11 @@
             const rP = (l, v) => v ? `<div class="border-b border-gray-50 py-2.5 flex justify-between items-center"><div><p class="text-[9px] text-gray-400 font-bold uppercase">${l}</p><p class="text-[#4B0082] font-bold text-xs font-mono">${v}</p></div><a href="tel:${v}" class="bg-green-500 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow active:scale-90"><i class="fa fa-phone"></i></a></div>` : '';
             const rC = (l, v, i, c, lp) => v ? `<div class="border-b border-gray-50 py-2.5 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i class="${i}"></i></div><div><p class="text-[9px] text-gray-400 font-bold uppercase">${l}</p><p class="text-xs font-bold text-gray-700">${v}</p></div></div><a href="${lp}${v}" target="_blank" class="${c} text-white px-3 py-1.5 rounded-lg text-[9px] font-bold shadow active:scale-90">CHAT</a></div>` : '';
             if(type === 'event') { const i = eventsData.find(x => x.uid === uid); if(!i) return; document.getElementById('detailHeader').innerText = "Event Details"; content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white p-5 rounded-2xl shadow-sm border-b-4 border-[#D4AF37] flex items-center gap-4"><img src="${fixDriveLink(i.logo)}" class="w-14 h-14 rounded-xl object-cover border shadow-sm" onerror="this.src='CDST_Logo.png'"><div class="flex-1"><h2 class="text-sm font-bold text-[#4B0082] leading-tight">${i.title}</h2><span class="text-[8px] bg-[#D4AF37] text-white px-2 py-0.5 rounded-full mt-1 inline-block uppercase">${i.cat}</span></div></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-2 mb-2 text-[10px] uppercase">Information</h3>${rR('Description', i.desc)}${rR('Organizer', i.org)}${rR('Location', i.place)}${rR('Date', i.from + ' to ' + i.to)}</div><div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`; }
-            else { const i = dirData.find(x => x.uid === uid); if(!i) return; document.getElementById('detailHeader').innerText = i.name; content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-xl object-cover mx-auto mb-3 border border-gray-100 bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125">${getStars(i.rating)}</div><a href="${REVIEW_URL}" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-5 py-2 rounded-full font-bold shadow-sm transition inline-flex items-center gap-2"><i class="fa fa-pen-nib"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Ward', i.ward)}${rR('Address', i.addr)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${rC('Telegram', i.tg, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400"><h3 class="font-bold text-[#4B0082] text-[10px] uppercase mb-2">Note</h3><p class="text-xs text-gray-600 post-content uppercase">${i.note}</p></div>` : ''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`; }
+            else { const i = dirData.find(x => x.uid === uid); if(!i) return; document.getElementById('detailHeader').innerText = i.name; content.innerHTML = `<div class="space-y-4 slide-up"><div class="bg-white rounded-3xl p-6 shadow-sm border-b-4 border-[#D4AF37] text-center"><img src="${fixDriveLink(i.logo)}" class="w-20 h-20 rounded-xl object-cover mx-auto mb-3 border border-gray-100 bg-white" onerror="this.src='CDST_Logo.png'"><h2 class="text-sm font-bold text-[#4B0082] uppercase">${i.name}</h2><div class="flex justify-center mt-2 mb-4 scale-125 h-full h-full h-full">${getStars(i.rating)}</div><a href="https://docs.google.com/forms/d/e/1FAIpQLSce4TGjXal4s0wmeNyGBdO3cg8ymNgXlilu1o_8R3-Q9LMYyw/viewform?usp=dialog" target="_blank" class="text-[9px] bg-gray-100 text-gray-500 px-5 py-2 rounded-full font-bold shadow-sm transition inline-flex items-center gap-2"><i class="fa fa-pen-nib"></i> Write Review</a></div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Basic Info</h3>${rR('Description', i.desc)}${rR('Category', i.cat)}${rR('Type', i.type)}${rR('Ward', i.ward)}${rR('Address', i.addr)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Contact</h3>${rP('Phone 1', i.ph1)}${rP('Phone 2', i.ph2)}</div><div class="bg-white p-5 rounded-2xl shadow-sm"><h3 class="font-bold text-[#4B0082] border-b pb-1 mb-2 text-[10px] uppercase tracking-widest">Digital Contact</h3>${rC('Viber', i.viber, 'fab fa-viber', 'viber-bg', 'viber://chat?number=')}${rC('Telegram', i.tg, 'fab fa-telegram', 'telegram-bg', 'https://t.me/')}</div>${i.note ? `<div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400"><h3 class="font-bold text-[#4B0082] text-[10px] uppercase mb-2">Note</h3><p class="text-xs text-gray-600 post-content uppercase">${i.note}</p></div>` : ''}<div class="gallery-vertical">${i.imgs.map(img => `<img src="${fixDriveLink(img)}">`).join('')}</div></div>`; }
             modal.style.display = 'block'; document.body.style.overflow = 'hidden'; document.getElementById('bottomNav').style.transform = 'translateY(150%)';
         }
         function closeDetail() { document.getElementById('detailPage').style.display = 'none'; document.body.style.overflow = 'auto'; document.getElementById('bottomNav').style.transform = 'translateY(0)'; }
         function showPage(p) { document.querySelectorAll('.page').forEach(page => { page.classList.remove('active-page'); setTimeout(() => { if(!page.classList.contains('active-page')) page.style.display = 'none'; }, 100); }); const active = document.getElementById(p + 'Page'); active.style.display = 'block'; setTimeout(() => active.classList.add('active-page'), 10); window.scrollTo(0,0); }
-
-        function forceCleanReset() {
-            if (confirm("Clean cache and update view counts? (Fix Android issues)")) {
-                localStorage.clear(); sessionStorage.clear();
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(regs => {
-                        for(let reg of regs) reg.unregister();
-                        window.location.reload(true);
-                    });
-                } else { window.location.reload(true); }
-            }
-        }
         loadAllData();
     </script>
 </body>
