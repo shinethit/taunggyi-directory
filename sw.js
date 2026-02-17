@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cherry-v18';
+const CACHE_NAME = 'cherry-v19';
 const ASSETS = [
   './',
   './index.html',
@@ -16,16 +16,8 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))));
 });
 
-// Cache First Strategy (အင်တာနက်ထက် ဖုန်းထဲကဟာကို ဦးစားပေးဖတ်မယ်)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((res) => {
-      return res || fetch(event.request).then((networkRes) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, networkRes.clone());
-          return networkRes;
-        });
-      });
-    })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
