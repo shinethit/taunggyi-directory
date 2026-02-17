@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cherry-v26';
+const CACHE_NAME = 'cherry-v27-rest';
 const ASSETS = [
   './',
   './index.html',
@@ -8,34 +8,31 @@ const ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
+// Install & Cache Assets
 self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
 });
 
+// Clean old caches
 self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))));
+  e.waitUntil(caches.keys().then(keys => Promise.all(
+    keys.map(k => { if (k !== CACHE_NAME) return caches.delete(k); })
+  )));
   return self.clients.claim();
 });
 
+// Network First Strategy (အင်တာနက်ရှိရင် အသစ်ယူ၊ မရှိမှ Cache ယူ)
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
-
-  // 🚨 CRITICAL FIX: Firebase & Google API တွေကို Service Worker က လုံးဝ မထိပါစေနဲ့
-  if (url.includes('firebaseio.com') || url.includes('googleapis.com')) {
-    return; // Network only (Let it pass through)
+  
+  // Firebase Database ကို Cache လုံးဝ မမှတ်စေရ (Direct Pass)
+  if (url.includes('firebaseio.com')) {
+    return; 
   }
 
-  // ကျန်တာတွေကို Offline အတွက် သိမ်းမယ်
   event.respondWith(
-    caches.match(event.request).then((cachedRes) => {
-      // Cache ထဲမှာရှိရင် ယူသုံး၊ မရှိရင် Network ကဆွဲပြီး Cache ထဲထည့်
-      return cachedRes || fetch(event.request).then((networkRes) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, networkRes.clone());
-          return networkRes;
-        });
-      });
-    })
+    fetch(event.request)
+      .catch(() => caches.match(event.request))
   );
 });
